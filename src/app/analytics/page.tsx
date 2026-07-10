@@ -1,6 +1,8 @@
 import { getChannelAnalytics } from "@/lib/analytics";
+import { getHealthScore } from "@/lib/health-score";
 import AnalyticsCharts from "./AnalyticsCharts";
 import ScenarioSwitcher from "./ScenarioSwitcher";
+import HealthScoreCard from "./HealthScoreCard";
 
 export default async function AnalyticsPage({
   searchParams,
@@ -12,12 +14,15 @@ export default async function AnalyticsPage({
     scenario === "declining" || scenario === "new" ? scenario : "growing";
 
   const data = await getChannelAnalytics(validScenario);
+  const healthScore = await getHealthScore(data);
 
   return (
     <div style={{ padding: 40 }}>
       <ScenarioSwitcher current={validScenario} />
 
       <h1>{data.channelTitle}</h1>
+
+      <HealthScoreCard healthScore={healthScore} />
 
       <div
         style={{ display: "flex", gap: 20, marginTop: 20, marginBottom: 40 }}
