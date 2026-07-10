@@ -1,11 +1,22 @@
 import { getChannelAnalytics } from "@/lib/analytics";
 import AnalyticsCharts from "./AnalyticsCharts";
+import ScenarioSwitcher from "./ScenarioSwitcher";
 
-export default async function AnalyticsPage() {
-  const data = await getChannelAnalytics("growing");
+export default async function AnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ scenario?: string }>;
+}) {
+  const { scenario } = await searchParams;
+  const validScenario =
+    scenario === "declining" || scenario === "new" ? scenario : "growing";
+
+  const data = await getChannelAnalytics(validScenario);
 
   return (
     <div style={{ padding: 40 }}>
+      <ScenarioSwitcher current={validScenario} />
+
       <h1>{data.channelTitle}</h1>
 
       <div
