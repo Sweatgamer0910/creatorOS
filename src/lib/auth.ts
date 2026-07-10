@@ -11,4 +11,18 @@ export const auth = betterAuth({
   },
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          await prisma.workspace.create({
+            data: {
+              name: `${user.name}'s Workspace`,
+              ownerId: user.id,
+            },
+          });
+        },
+      },
+    },
+  },
 });
