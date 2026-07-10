@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import ConnectYouTubeButton from "./ConnectYouTubeButton";
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({
@@ -21,6 +22,7 @@ export default async function DashboardPage() {
       <h1>Welcome, {session.user.name}</h1>
       <p>Email: {session.user.email}</p>
       <p>Workspace: {workspace ? workspace.name : "No workspace found"}</p>
+      <ConnectYouTubeButton />
     </div>
   );
 }
