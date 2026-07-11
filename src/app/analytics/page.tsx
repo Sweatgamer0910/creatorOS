@@ -34,67 +34,45 @@ export default async function AnalyticsPage({
   }
 
   return (
-    <div style={{ padding: "20px 40px 40px", maxWidth: 800, margin: "0 auto" }}>
-      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
-        Analytics
-      </p>
-      <h1
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: 32,
-          marginTop: 4,
-          marginBottom: 20,
-        }}
-      >
+    <div style={{ padding: "20px 40px 60px", maxWidth: 1100, margin: "0 auto" }}>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>Analytics</p>
+      <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32, marginTop: 4, marginBottom: 20 }}>
         {data?.channelTitle ?? "Loading..."}
       </h1>
 
-      <SourceSwitcher current={useReal ? "real" : "mock"} />
-      {!useReal && <ScenarioSwitcher current={validScenario} />}
+      <div className="flex items-center gap-3 flex-wrap">
+        <SourceSwitcher current={useReal ? "real" : "mock"} />
+        {!useReal && <ScenarioSwitcher current={validScenario} />}
+      </div>
 
       {error && (
-        <div style={{ color: "#e35d5d", marginBottom: 20 }}>
+        <div style={{ color: "#e35d5d", marginTop: 16 }}>
           Error loading real data: {error}
         </div>
       )}
 
       {data && (
         <>
-          <HealthScoreCardWrapper data={data} />
+          <div className="mt-6">
+            <HealthScoreCardWrapper data={data} />
+          </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: 20,
-              marginTop: 20,
-              marginBottom: 40,
-              flexWrap: "wrap",
-            }}
-          >
-            <StatCard
-              label="Subscribers"
-              value={data.currentStats.subscriberCount.toLocaleString()}
-            />
-            <StatCard
-              label="Total Views"
-              value={data.currentStats.viewCount.toLocaleString()}
-            />
-            <StatCard
-              label="Videos"
-              value={data.currentStats.videoCount.toLocaleString()}
-            />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+            <StatCard label="Subscribers" value={data.currentStats.subscriberCount.toLocaleString()} />
+            <StatCard label="Total Views" value={data.currentStats.viewCount.toLocaleString()} />
+            <StatCard label="Videos" value={data.currentStats.videoCount.toLocaleString()} />
             <StatCard
               label="Watch Time (hrs)"
-              value={Math.round(
-                data.currentStats.watchTimeMinutes / 60,
-              ).toLocaleString()}
+              value={Math.round(data.currentStats.watchTimeMinutes / 60).toLocaleString()}
             />
           </div>
 
           {data.last30Days.length > 0 ? (
-            <AnalyticsCharts data={data.last30Days} />
+            <div className="mt-8">
+              <AnalyticsCharts data={data.last30Days} />
+            </div>
           ) : (
-            <p style={{ color: "var(--color-text-muted)" }}>
+            <p style={{ color: "var(--color-text-muted)", marginTop: 40 }}>
               No historical data yet for this channel.
             </p>
           )}
@@ -121,20 +99,10 @@ function StatCard({ label, value }: { label: string; value: string }) {
         backgroundColor: "var(--color-surface)",
         borderRadius: 12,
         padding: 16,
-        minWidth: 140,
       }}
     >
-      <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
-        {label}
-      </div>
-      <div
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 24,
-          fontWeight: 700,
-          marginTop: 4,
-        }}
-      >
+      <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>{label}</div>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 24, fontWeight: 700, marginTop: 4 }}>
         {value}
       </div>
     </div>

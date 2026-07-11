@@ -8,10 +8,10 @@ const typeLabels: Record<CoachInsight["type"], string> = {
 };
 
 const typeColors: Record<CoachInsight["type"], string> = {
-  fact: "#374151",
-  pattern: "#2563eb",
-  recommendation: "#16a34a",
-  hypothesis: "#d97706",
+  fact: "var(--color-text-muted)",
+  pattern: "var(--color-accent-teal)",
+  recommendation: "var(--color-accent)",
+  hypothesis: "#e0a020",
 };
 
 const confidenceLabels: Record<CoachInsight["confidence"], string> = {
@@ -23,36 +23,34 @@ const confidenceLabels: Record<CoachInsight["confidence"], string> = {
 export default function InsightCard({ insight }: { insight: CoachInsight }) {
   return (
     <div
+      className="p-4 rounded-xl"
       style={{
-        border: `1px solid ${typeColors[insight.type]}`,
-        borderRadius: 8,
-        padding: 16,
+        backgroundColor: "var(--color-surface)",
+        border: `1px solid var(--color-border)`,
+        borderLeft: `3px solid ${typeColors[insight.type]}`,
       }}
     >
-      <div style={{ display: "flex", gap: 10, marginBottom: 8, fontSize: 12 }}>
+      <div className="flex items-center gap-3 mb-2">
         <span
           style={{
             color: typeColors[insight.type],
             fontWeight: 700,
+            fontSize: 11,
             textTransform: "uppercase",
+            letterSpacing: 0.5,
           }}
         >
           {typeLabels[insight.type]}
         </span>
-        <span style={{ color: "#888" }}>
+        <span style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
           {confidenceLabels[insight.confidence]}
         </span>
       </div>
-      <p style={{ margin: 0 }}>{insight.message}</p>
+      <p style={{ margin: 0, color: "var(--color-text)", fontSize: 14, lineHeight: 1.6 }}>
+        {insight.message}
+      </p>
       {insight.evidence && (
-        <p
-          style={{
-            marginTop: 8,
-            fontSize: 12,
-            color: "#888",
-            fontStyle: "italic",
-          }}
-        >
+        <p style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-muted)", fontStyle: "italic" }}>
           {insight.evidence}
         </p>
       )}

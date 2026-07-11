@@ -1,13 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useTransform,
-  useSpring,
-} from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -30,6 +24,38 @@ const navItems = [
   { href: "/pipeline", label: "Pipeline", icon: Kanban },
 ];
 
+function Tooltip({ label, show }: { label: string; show: boolean }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.12 }}
+          style={{
+            position: "absolute",
+            top: "calc(100% + 10px)",
+            left: "50%",
+            transform: "translateX(-50%)",
+            padding: "5px 10px",
+            borderRadius: 6,
+            backgroundColor: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            fontSize: 12,
+            color: "var(--color-text)",
+            whiteSpace: "nowrap",
+            zIndex: 20,
+            pointerEvents: "none",
+          }}
+        >
+          {label}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function NavIcon({
   item,
   mouseX,
@@ -44,6 +70,7 @@ function NavIcon({
   isPending: boolean;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
+  const [hovered, setHovered] = useState(false);
 
   const distance = useTransform(mouseX, (val) => {
     const bounds = ref.current?.getBoundingClientRect();
@@ -52,32 +79,28 @@ function NavIcon({
   });
 
   const widthSync = useTransform(distance, [-150, 0, 150], [36, 56, 36]);
-  const width = useSpring(widthSync, {
-    mass: 0.1,
-    stiffness: 200,
-    damping: 15,
-  });
+  const width = useSpring(widthSync, { mass: 0.1, stiffness: 200, damping: 15 });
 
   const Icon = item.icon;
 
   return (
     <motion.button
       ref={ref}
-      style={{ width, height: width }}
+      style={{ width, height: width, position: "relative" }}
       onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       initial={{ opacity: 0, scale: 0.6 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.6 }}
       transition={{ duration: 0.15 }}
       className="flex items-center justify-center rounded-full"
-      title={item.label}
     >
+      <Tooltip label={item.label} show={hovered} />
       <div
         className="flex items-center justify-center rounded-full w-full h-full"
         style={{
-          backgroundColor: isActive
-            ? "var(--color-accent)"
-            : "var(--color-surface-hover)",
+          backgroundColor: isActive ? "var(--color-accent)" : "var(--color-surface-hover)",
         }}
       >
         {isActive && isPending ? (
@@ -93,6 +116,7 @@ function NavIcon({
 export default function NotchNav() {
   const [expanded, setExpanded] = useState(false);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [logoutHovered, setLogoutHovered] = useState(false);
   const mouseX = useMotionValue(Infinity);
   const pathname = usePathname();
   const router = useRouter();
@@ -130,7 +154,7 @@ export default function NotchNav() {
           paddingRight: expanded ? 12 : 0,
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="flex items-center gap-2 h-12 rounded-full overflow-hidden"
+        className="flex items-center gap-2 h-12 rounded-full overflow-visible"
         style={{
           backgroundColor: "var(--color-surface)",
           border: "1px solid var(--color-border)",
@@ -147,10 +171,7 @@ export default function NotchNav() {
               className="w-full h-full rounded-full flex items-center justify-center"
               style={{ backgroundColor: "var(--color-accent)" }}
             >
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: "#0e1116" }}
-              />
+              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#0e1116" }} />
             </motion.div>
           ) : (
             <motion.div key="items" className="flex items-center gap-2">
@@ -164,22 +185,25 @@ export default function NotchNav() {
                   onClick={() => handleNavigate(item.href)}
                 />
               ))}
+              <div className="w-px h-6 mx-1" style={{ backgroundColor: "var(--color-border)" }} />
               <div
-                className="w-px h-6 mx-1"
-                style={{ backgroundColor: "var(--color-border)" }}
-              />
-              <button
-                onClick={handleLogout}
-                title="Log out"
-                className="flex items-center justify-center rounded-full w-9 h-9"
-                style={{ backgroundColor: "var(--color-surface-hover)" }}
+                style={{ position: "relative" }}
+                onMouseEnter={() => setLogoutHovered(true)}
+                onMouseLeave={() => setLogoutHovered(false)}
               >
-                {isPending && pendingKey === "logout" ? (
-                  <Spinner size={14} />
-                ) : (
-                  <LogOut size={16} color="var(--color-text-muted)" />
-                )}
-              </button>
+                <Tooltip label="Log out" show={logoutHovered} />
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center justify-center rounded-full w-9 h-9"
+                  style={{ backgroundColor: "var(--color-surface-hover)" }}
+                >
+                  {isPending && pendingKey === "logout" ? (
+                    <Spinner size={14} />
+                  ) : (
+                    <LogOut size={16} color="var(--color-text-muted)" />
+                  )}
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

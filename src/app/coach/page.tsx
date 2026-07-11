@@ -17,20 +17,16 @@ export default async function CoachPage({
   const coachResponse = await getCoachResponse(data, healthScore);
 
   return (
-    <div style={{ padding: 40, maxWidth: 700 }}>
-      <h1>AI Growth Coach</h1>
-      <p style={{ color: "#666" }}>
-        Insights for: <strong>{data.channelTitle}</strong>
+    <div style={{ padding: "20px 40px 40px", maxWidth: 700, margin: "0 auto" }}>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>Growth Coach</p>
+      <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32, marginTop: 4 }}>
+        Insights for {data.channelTitle}
+      </h1>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 14, marginTop: 8 }}>
+        Based on your recent analytics and Health Score.
       </p>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 16,
-          marginTop: 30,
-        }}
-      >
+      <div className="flex flex-col gap-4 mt-8">
         {coachResponse.insights.map((insight, i) => (
           <InsightCard key={i} insight={insight} />
         ))}
