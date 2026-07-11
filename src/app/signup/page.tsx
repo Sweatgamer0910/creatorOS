@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signUp } from "@/lib/auth-client";
 
 export default function SignupPage() {
@@ -8,21 +9,18 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMessage("Creating account...");
 
-    const { error } = await signUp.email({
-      name,
-      email,
-      password,
-    });
+    const { error } = await signUp.email({ name, email, password });
 
     if (error) {
       setMessage(`Error: ${error.message}`);
     } else {
-      setMessage("Account created! You're signed in.");
+      router.push("/dashboard");
     }
   }
 

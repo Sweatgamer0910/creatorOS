@@ -1,26 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMessage("Signing in...");
 
-    const { error } = await signIn.email({
-      email,
-      password,
-    });
+    const { error } = await signIn.email({ email, password });
 
     if (error) {
       setMessage(`Error: ${error.message}`);
     } else {
-      setMessage("Signed in successfully!");
+      router.push("/dashboard");
     }
   }
 
