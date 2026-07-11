@@ -1,9 +1,7 @@
 import { auth } from "@/lib/auth";
-import { ChannelAnalytics } from "./types";
+import { ChannelAnalytics, DailyDataPoint } from "./types";
 
-export async function getYouTubeAnalytics(
-  userId: string,
-): Promise<ChannelAnalytics> {
+async function getAccessToken(userId: string): Promise<string> {
   const { accessToken } = await auth.api.getAccessToken({
     body: {
       providerId: "google",
@@ -15,18 +13,21 @@ export async function getYouTubeAnalytics(
     throw new Error("No YouTube access token found for this user");
   }
 
+  return accessToken;
+}
+
+async function getChannelSnapshot(accessToken: string) {
   const response = await fetch(
     "https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true",
     {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: { Authorization: `Bearer ${accessToken}` },
     },
   );
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`YouTube API error: ${response.status} - ${errorText}`);
+    throw new Error(
+      `YouTube Data API error: ${response.status} - ${await response.text()}`,
+    );
   }
 
   const data = await response.json();
@@ -36,14 +37,67 @@ export async function getYouTubeAnalytics(
     throw new Error("No YouTube channel found on this account");
   }
 
+  return channel;
+}
+
+async function getHistoricalData(
+  accessToken: string,
+): Promise<DailyDataPoint[]> {
+  const endDate = new Date().toISOString().split("T")[0];
+  const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0];
+
+  const params = new URLSearchParams({
+    ids: "channel==MINE",
+    startDate,
+    endDate,
+    metrics: "views,subscribersGained,estimatedMinutesWatched",
+    dimensions: "day",
+    sort: "day",
+  });
+
+  const response = await fetch(
+    `https://youtubeanalytics.googleapis.com/v2/reports?${params}`,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `YouTube Analytics API error: ${response.status} - ${await response.text()}`,
+    );
+  }
+
+  const data = await response.json();
+
+  return (data.rows || []).map((row: [string, number, number, number]) => ({
+    date: row[0],
+    views: row[1],
+    subscribersGained: row[2],
+    watchTimeMinutes: row[3],
+  }));
+}
+
+export async function getYouTubeAnalytics(
+  userId: string,
+): Promise<ChannelAnalytics> {
+  const accessToken = await getAccessToken(userId);
+  const channel = await getChannelSnapshot(accessToken);
+  const last30Days = await getHistoricalData(accessToken);
+
   return {
     channelTitle: channel.snippet.title,
     currentStats: {
       subscriberCount: Number(channel.statistics.subscriberCount || 0),
       viewCount: Number(channel.statistics.viewCount || 0),
       videoCount: Number(channel.statistics.videoCount || 0),
-      watchTimeMinutes: 0, // Requires YouTube Analytics API, separate call - later
+      watchTimeMinutes: last30Days.reduce(
+        (sum, d) => sum + d.watchTimeMinutes,
+        0,
+      ),
     },
-    last30Days: [], // Requires YouTube Analytics API, separate call - later
+    last30Days,
   };
 }

@@ -13,7 +13,10 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      scope: ["https://www.googleapis.com/auth/youtube.readonly"],
+      scope: [
+        "https://www.googleapis.com/auth/youtube.readonly",
+        "https://www.googleapis.com/auth/yt-analytics.readonly",
+      ],
       accessType: "offline",
       prompt: "consent",
     },
