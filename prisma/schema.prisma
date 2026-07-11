@@ -90,11 +90,11 @@ model Workspace {
 }
 
 model Channel {
-  id                String   @id @default(cuid())
-  youtubeChannelId  String   @unique
-  title             String
-  thumbnailUrl      String?
-  connectedAt       DateTime @default(now())
+  id               String   @id @default(cuid())
+  youtubeChannelId String   @unique
+  title            String
+  thumbnailUrl     String?
+  connectedAt      DateTime @default(now())
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -105,11 +105,11 @@ model Channel {
 }
 
 model ChannelSnapshot {
-  id             String   @id @default(cuid())
-  capturedAt     DateTime @default(now())
-  subscriberCount Int
-  viewCount       Int
-  videoCount      Int
+  id               String   @id @default(cuid())
+  capturedAt       DateTime @default(now())
+  subscriberCount  Int
+  viewCount        Int
+  videoCount       Int
   watchTimeMinutes Int?
 
   channelId String
@@ -136,7 +136,10 @@ model Idea {
 model Script {
   id        String   @id @default(cuid())
   title     String
-  content   String   @db.Text
+  hook      String   @default("") @db.Text
+  intro     String   @default("") @db.Text
+  body      String   @default("") @db.Text
+  outro     String   @default("") @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -150,12 +153,12 @@ model Script {
 }
 
 model ContentItem {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   title     String
-  status    String   @default("idea") // idea | filming | editing | published
+  status    String    @default("idea") // idea | filming | editing | published
   dueDate   DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)

@@ -81,7 +81,7 @@ function NavIcon({
         }}
       >
         {isActive && isPending ? (
-          <Spinner size={16} />
+          <Spinner size={16} variant="dark" />
         ) : (
           <Icon size={18} color={isActive ? "#0e1116" : "var(--color-text)"} />
         )}

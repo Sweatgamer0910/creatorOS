@@ -1,51 +1,47 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Play } from "lucide-react";
 
-export default function Spinner({ size = 24 }: { size?: number }) {
-  const rings = 3;
+export default function Spinner({
+  size = 24,
+  variant = "accent",
+}: {
+  size?: number;
+  variant?: "accent" | "dark";
+}) {
+  const color = variant === "dark" ? "#0e1116" : "var(--color-accent)";
 
   return (
-    <div
-      style={{
-        position: "relative",
-        width: size,
-        height: size,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {Array.from({ length: rings }).map((_, i) => (
-        <motion.div
-          key={i}
-          style={{
-            position: "absolute",
-            borderRadius: "50%",
-            border: "1.5px solid var(--color-accent)",
-          }}
-          initial={{ width: size * 0.25, height: size * 0.25, opacity: 0.8 }}
-          animate={{
-            width: size,
-            height: size,
-            opacity: 0,
-          }}
-          transition={{
-            duration: 1.2,
-            repeat: Infinity,
-            delay: i * 0.4,
-            ease: "easeOut",
-          }}
-        />
-      ))}
+    <div style={{ position: "relative", width: size, height: size }}>
+      <motion.div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: "50%",
+          border: "2px solid transparent",
+          borderTopColor: color,
+          borderRightColor: color,
+        }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+      />
       <div
         style={{
-          width: size * 0.22,
-          height: size * 0.22,
-          borderRadius: "50%",
-          backgroundColor: "var(--color-accent)",
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
-      />
+      >
+        <Play
+          size={size * 0.38}
+          fill={color}
+          color={color}
+          style={{ marginLeft: size * 0.03 }}
+        />
+      </div>
     </div>
   );
 }

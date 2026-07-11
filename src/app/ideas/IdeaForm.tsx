@@ -6,6 +6,12 @@ import { createIdea } from "@/lib/ideas/actions";
 import Spinner from "@/components/Spinner";
 import LockedFeature from "@/components/LockedFeature";
 
+function minDelay<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.all([promise, new Promise((r) => setTimeout(r, ms))]).then(
+    ([result]) => result,
+  );
+}
+
 export default function IdeaForm() {
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
@@ -16,7 +22,7 @@ export default function IdeaForm() {
     if (!title.trim()) return;
 
     startTransition(async () => {
-      await createIdea(title, notes);
+      await minDelay(createIdea(title, notes), 500);
       setTitle("");
       setNotes("");
     });
@@ -81,7 +87,7 @@ export default function IdeaForm() {
       >
         {isPending ? (
           <>
-            <Spinner size={16} />
+            <Spinner size={16} variant="dark" />
             Saving...
           </>
         ) : (

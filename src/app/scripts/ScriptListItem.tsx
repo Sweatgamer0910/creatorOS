@@ -1,0 +1,68 @@
+"use client";
+
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
+import { deleteScript } from "@/lib/scripts/actions";
+import Spinner from "@/components/Spinner";
+
+interface Script {
+  id: string;
+  title: string;
+  updatedAt: Date;
+}
+
+export default function ScriptListItem({ script }: { script: Script }) {
+  const [isDeleting, startDelete] = useTransition();
+  const [isNavigating, startNavigate] = useTransition();
+  const router = useRouter();
+
+  function handleOpen() {
+    startNavigate(() => {
+      router.push(`/scripts/${script.id}`);
+    });
+  }
+
+  function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation();
+    startDelete(async () => {
+      await deleteScript(script.id);
+    });
+  }
+
+  return (
+    <div
+      onClick={handleOpen}
+      className="flex items-center justify-between p-4 rounded-xl cursor-pointer"
+      style={{
+        backgroundColor: "var(--color-surface)",
+        border: "1px solid var(--color-border)",
+      }}
+    >
+      <div className="flex items-center gap-3">
+        {isNavigating && <Spinner size={16} />}
+        <div>
+          <div style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
+            {script.title}
+          </div>
+          <div
+            style={{
+              fontSize: 12,
+              color: "var(--color-text-muted)",
+              marginTop: 2,
+            }}
+          >
+            Updated {new Date(script.updatedAt).toLocaleDateString()}
+          </div>
+        </div>
+      </div>
+      <button
+        onClick={handleDelete}
+        disabled={isDeleting}
+        style={{ color: "var(--color-text-muted)" }}
+      >
+        {isDeleting ? <Spinner size={14} /> : <Trash2 size={16} />}
+      </button>
+    </div>
+  );
+}
