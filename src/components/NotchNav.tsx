@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import {
   motion,
   AnimatePresence,
@@ -19,6 +19,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
+import Spinner from "./Spinner";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -34,11 +35,13 @@ function NavIcon({
   mouseX,
   isActive,
   onClick,
+  isPending,
 }: {
   item: (typeof navItems)[number];
   mouseX: ReturnType<typeof useMotionValue<number>>;
   isActive: boolean;
   onClick: () => void;
+  isPending: boolean;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
 
@@ -77,7 +80,11 @@ function NavIcon({
             : "var(--color-surface-hover)",
         }}
       >
-        <Icon size={18} color={isActive ? "#0e1116" : "var(--color-text)"} />
+        {isActive && isPending ? (
+          <Spinner size={16} />
+        ) : (
+          <Icon size={18} color={isActive ? "#0e1116" : "var(--color-text)"} />
+        )}
       </div>
     </motion.button>
   );
@@ -85,13 +92,25 @@ function NavIcon({
 
 export default function NotchNav() {
   const [expanded, setExpanded] = useState(false);
+  const [pendingKey, setPendingKey] = useState<string | null>(null);
   const mouseX = useMotionValue(Infinity);
   const pathname = usePathname();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
-  async function handleLogout() {
-    await signOut();
-    router.push("/login");
+  function handleNavigate(href: string) {
+    setPendingKey(href);
+    startTransition(() => {
+      router.push(href);
+    });
+  }
+
+  function handleLogout() {
+    setPendingKey("logout");
+    startTransition(async () => {
+      await signOut();
+      router.push("/login");
+    });
   }
 
   if (pathname === "/login" || pathname === "/signup") return null;
@@ -141,7 +160,8 @@ export default function NotchNav() {
                   item={item}
                   mouseX={mouseX}
                   isActive={pathname === item.href}
-                  onClick={() => router.push(item.href)}
+                  isPending={isPending && pendingKey === item.href}
+                  onClick={() => handleNavigate(item.href)}
                 />
               ))}
               <div
@@ -154,7 +174,11 @@ export default function NotchNav() {
                 className="flex items-center justify-center rounded-full w-9 h-9"
                 style={{ backgroundColor: "var(--color-surface-hover)" }}
               >
-                <LogOut size={16} color="var(--color-text-muted)" />
+                {isPending && pendingKey === "logout" ? (
+                  <Spinner size={14} />
+                ) : (
+                  <LogOut size={16} color="var(--color-text-muted)" />
+                )}
               </button>
             </motion.div>
           )}

@@ -4,36 +4,42 @@ import { useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Spinner from "@/components/Spinner";
 
-export default function ScenarioSwitcher({ current }: { current: string }) {
+export default function SourceSwitcher({ current }: { current: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const scenarios = ["growing", "declining", "new"];
 
-  function handleClick(s: string) {
+  function handleClick(source: string) {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("scenario", s);
+    params.set("source", source);
     startTransition(() => {
       router.push(`/analytics?${params.toString()}`);
     });
   }
 
+  const options = [
+    { value: "mock", label: "Mock Data" },
+    { value: "real", label: "Real YouTube Data" },
+  ];
+
   return (
     <div className="flex items-center gap-2 mb-3">
-      {scenarios.map((s) => (
+      {options.map((opt) => (
         <button
-          key={s}
-          onClick={() => handleClick(s)}
+          key={opt.value}
+          onClick={() => handleClick(opt.value)}
           className="px-3 py-1.5 rounded-lg text-sm flex items-center gap-2"
           style={{
             backgroundColor:
-              current === s ? "var(--color-accent)" : "var(--color-surface)",
-            color: current === s ? "#0e1116" : "var(--color-text)",
+              current === opt.value
+                ? "var(--color-accent)"
+                : "var(--color-surface)",
+            color: current === opt.value ? "#0e1116" : "var(--color-text)",
             border: "1px solid var(--color-border)",
           }}
         >
-          {isPending && current !== s ? <Spinner size={12} /> : null}
-          {s}
+          {isPending && current !== opt.value ? <Spinner size={12} /> : null}
+          {opt.label}
         </button>
       ))}
     </div>

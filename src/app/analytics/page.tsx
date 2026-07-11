@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import AnalyticsCharts from "./AnalyticsCharts";
 import ScenarioSwitcher from "./ScenarioSwitcher";
+import SourceSwitcher from "./SourceSwitcher";
 import HealthScoreCard from "./HealthScoreCard";
 
 export default async function AnalyticsPage({
@@ -33,22 +34,32 @@ export default async function AnalyticsPage({
   }
 
   return (
-    <div style={{ padding: 40 }}>
-      <div style={{ marginBottom: 10 }}>
-        <SourceSwitcher current={useReal ? "real" : "mock"} />
-      </div>
+    <div style={{ padding: "20px 40px 40px", maxWidth: 800, margin: "0 auto" }}>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
+        Analytics
+      </p>
+      <h1
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: 32,
+          marginTop: 4,
+          marginBottom: 20,
+        }}
+      >
+        {data?.channelTitle ?? "Loading..."}
+      </h1>
 
+      <SourceSwitcher current={useReal ? "real" : "mock"} />
       {!useReal && <ScenarioSwitcher current={validScenario} />}
 
       {error && (
-        <div style={{ color: "red", marginBottom: 20 }}>
+        <div style={{ color: "#e35d5d", marginBottom: 20 }}>
           Error loading real data: {error}
         </div>
       )}
 
       {data && (
         <>
-          <h1>{data.channelTitle}</h1>
           <HealthScoreCardWrapper data={data} />
 
           <div
@@ -57,6 +68,7 @@ export default async function AnalyticsPage({
               gap: 20,
               marginTop: 20,
               marginBottom: 40,
+              flexWrap: "wrap",
             }}
           >
             <StatCard
@@ -82,7 +94,7 @@ export default async function AnalyticsPage({
           {data.last30Days.length > 0 ? (
             <AnalyticsCharts data={data.last30Days} />
           ) : (
-            <p style={{ color: "#888" }}>
+            <p style={{ color: "var(--color-text-muted)" }}>
               No historical data yet for this channel.
             </p>
           )}
@@ -105,35 +117,26 @@ function StatCard({ label, value }: { label: string; value: string }) {
   return (
     <div
       style={{
-        border: "1px solid #ccc",
-        borderRadius: 8,
-        padding: 20,
-        minWidth: 150,
+        border: "1px solid var(--color-border)",
+        backgroundColor: "var(--color-surface)",
+        borderRadius: 12,
+        padding: 16,
+        minWidth: 140,
       }}
     >
-      <div style={{ fontSize: 14, color: "#666" }}>{label}</div>
-      <div style={{ fontSize: 28, fontWeight: 600 }}>{value}</div>
-    </div>
-  );
-}
-
-function SourceSwitcher({ current }: { current: string }) {
-  const linkStyle = (active: boolean) => ({
-    marginRight: 10,
-    padding: "6px 12px",
-    fontWeight: active ? 700 : 400,
-    border: active ? "2px solid black" : "1px solid #ccc",
-    display: "inline-block",
-  });
-
-  return (
-    <div>
-      <a href="/analytics?source=mock" style={linkStyle(current === "mock")}>
-        Mock Data
-      </a>
-      <a href="/analytics?source=real" style={linkStyle(current === "real")}>
-        Real YouTube Data
-      </a>
+      <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        {label}
+      </div>
+      <div
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: 24,
+          fontWeight: 700,
+          marginTop: 4,
+        }}
+      >
+        {value}
+      </div>
     </div>
   );
 }

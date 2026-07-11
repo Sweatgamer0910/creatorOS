@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Sparkles } from "lucide-react";
 import { createIdea } from "@/lib/ideas/actions";
+import Spinner from "@/components/Spinner";
+import LockedFeature from "@/components/LockedFeature";
 
 export default function IdeaForm() {
   const [title, setTitle] = useState("");
@@ -28,6 +31,25 @@ export default function IdeaForm() {
         border: "1px solid var(--color-border)",
       }}
     >
+      <div className="flex items-center justify-between">
+        <span style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+          New idea
+        </span>
+        <LockedFeature label="AI-suggested ideas">
+          <button
+            type="button"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm"
+            style={{
+              backgroundColor: "var(--color-surface-hover)",
+              color: "var(--color-text)",
+            }}
+          >
+            <Sparkles size={14} />
+            Suggest ideas with AI
+          </button>
+        </LockedFeature>
+      </div>
+
       <input
         placeholder="Idea title"
         value={title}
@@ -54,10 +76,17 @@ export default function IdeaForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="self-start px-4 py-2 rounded-lg font-medium"
+        className="self-start px-4 py-2 rounded-lg font-medium flex items-center gap-2"
         style={{ backgroundColor: "var(--color-accent)", color: "#0e1116" }}
       >
-        {isPending ? "Saving..." : "Add idea"}
+        {isPending ? (
+          <>
+            <Spinner size={16} />
+            Saving...
+          </>
+        ) : (
+          "Add idea"
+        )}
       </button>
     </form>
   );
