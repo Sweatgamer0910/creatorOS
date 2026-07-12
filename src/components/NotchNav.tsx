@@ -1,7 +1,13 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useTransform,
+  useSpring,
+} from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -79,7 +85,11 @@ function NavIcon({
   });
 
   const widthSync = useTransform(distance, [-150, 0, 150], [36, 56, 36]);
-  const width = useSpring(widthSync, { mass: 0.1, stiffness: 200, damping: 15 });
+  const width = useSpring(widthSync, {
+    mass: 0.1,
+    stiffness: 200,
+    damping: 15,
+  });
 
   const Icon = item.icon;
 
@@ -100,7 +110,9 @@ function NavIcon({
       <div
         className="flex items-center justify-center rounded-full w-full h-full"
         style={{
-          backgroundColor: isActive ? "var(--color-accent)" : "var(--color-surface-hover)",
+          backgroundColor: isActive
+            ? "var(--color-accent)"
+            : "var(--color-surface-hover)",
         }}
       >
         {isActive && isPending ? (
@@ -137,7 +149,8 @@ export default function NotchNav() {
     });
   }
 
-  if (pathname === "/login" || pathname === "/signup") return null;
+  if (pathname === "/login" || pathname === "/signup" || pathname === "/")
+    return null;
 
   return (
     <div className="fixed top-4 left-0 right-0 flex justify-center z-50">
@@ -171,7 +184,10 @@ export default function NotchNav() {
               className="w-full h-full rounded-full flex items-center justify-center"
               style={{ backgroundColor: "var(--color-accent)" }}
             >
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#0e1116" }} />
+              <div
+                className="w-2 h-2 rounded-full"
+                style={{ backgroundColor: "#0e1116" }}
+              />
             </motion.div>
           ) : (
             <motion.div key="items" className="flex items-center gap-2">
@@ -185,7 +201,10 @@ export default function NotchNav() {
                   onClick={() => handleNavigate(item.href)}
                 />
               ))}
-              <div className="w-px h-6 mx-1" style={{ backgroundColor: "var(--color-border)" }} />
+              <div
+                className="w-px h-6 mx-1"
+                style={{ backgroundColor: "var(--color-border)" }}
+              />
               <div
                 style={{ position: "relative" }}
                 onMouseEnter={() => setLogoutHovered(true)}
