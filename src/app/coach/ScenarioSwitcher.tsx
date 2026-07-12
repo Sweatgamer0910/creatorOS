@@ -16,13 +16,13 @@ export default function ScenarioSwitcher({ current }: { current: string }) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("scenario", s);
     startTransition(() => {
-      router.push(`/analytics?${params.toString()}`);
+      router.push(`/coach?${params.toString()}`);
     });
     setTimeout(() => setPendingScenario(null), 400);
   }
 
   return (
-    <div className="flex items-center gap-2 mb-3">
+    <div className="flex items-center gap-2 mt-4">
       {scenarios.map((s) => (
         <button
           key={s}

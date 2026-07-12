@@ -1,8 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Play } from "lucide-react";
-
 export default function Spinner({
   size = 24,
   variant = "accent",
@@ -14,7 +11,7 @@ export default function Spinner({
 
   return (
     <div style={{ position: "relative", width: size, height: size }}>
-      <motion.div
+      <div
         style={{
           position: "absolute",
           inset: 0,
@@ -22,9 +19,8 @@ export default function Spinner({
           border: "2px solid transparent",
           borderTopColor: color,
           borderRightColor: color,
+          animation: "creatoros-spin 0.7s linear infinite",
         }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
       />
       <div
         style={{
@@ -35,13 +31,23 @@ export default function Spinner({
           justifyContent: "center",
         }}
       >
-        <Play
-          size={size * 0.38}
-          fill={color}
-          color={color}
-          style={{ marginLeft: size * 0.03 }}
+        <div
+          style={{
+            width: 0,
+            height: 0,
+            marginLeft: size * 0.04,
+            borderTop: `${size * 0.16}px solid transparent`,
+            borderBottom: `${size * 0.16}px solid transparent`,
+            borderLeft: `${size * 0.26}px solid ${color}`,
+          }}
         />
       </div>
+      <style>{`
+        @keyframes creatoros-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,20 +1,23 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Spinner from "@/components/Spinner";
 
 export default function SourceSwitcher({ current }: { current: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
+  const [pendingSource, setPendingSource] = useState<string | null>(null);
 
   function handleClick(source: string) {
+    setPendingSource(source);
     const params = new URLSearchParams(searchParams.toString());
     params.set("source", source);
     startTransition(() => {
       router.push(`/analytics?${params.toString()}`);
     });
+    setTimeout(() => setPendingSource(null), 400);
   }
 
   const options = [
@@ -38,7 +41,9 @@ export default function SourceSwitcher({ current }: { current: string }) {
             border: "1px solid var(--color-border)",
           }}
         >
-          {isPending && current !== opt.value ? <Spinner size={12} /> : null}
+          {pendingSource === opt.value ? (
+            <Spinner size={12} variant="dark" />
+          ) : null}
           {opt.label}
         </button>
       ))}
