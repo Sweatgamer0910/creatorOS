@@ -8,6 +8,7 @@ import AnalyticsCharts from "./AnalyticsCharts";
 import ScenarioSwitcher from "./ScenarioSwitcher";
 import SourceSwitcher from "./SourceSwitcher";
 import HealthScoreCard from "./HealthScoreCard";
+import InteractiveCard from "@/components/ui/InteractiveCard";
 
 export default async function AnalyticsPage({
   searchParams,
@@ -34,9 +35,20 @@ export default async function AnalyticsPage({
   }
 
   return (
-    <div style={{ padding: "20px 40px 60px", maxWidth: 1100, margin: "0 auto" }}>
-      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>Analytics</p>
-      <h1 style={{ fontFamily: "var(--font-display)", fontSize: 32, marginTop: 4, marginBottom: 20 }}>
+    <div
+      style={{ padding: "20px 40px 60px", maxWidth: 1100, margin: "0 auto" }}
+    >
+      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
+        Analytics
+      </p>
+      <h1
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: 32,
+          marginTop: 4,
+          marginBottom: 20,
+        }}
+      >
         {data?.channelTitle ?? "Loading..."}
       </h1>
 
@@ -58,12 +70,23 @@ export default async function AnalyticsPage({
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-            <StatCard label="Subscribers" value={data.currentStats.subscriberCount.toLocaleString()} />
-            <StatCard label="Total Views" value={data.currentStats.viewCount.toLocaleString()} />
-            <StatCard label="Videos" value={data.currentStats.videoCount.toLocaleString()} />
+            <StatCard
+              label="Subscribers"
+              value={data.currentStats.subscriberCount.toLocaleString()}
+            />
+            <StatCard
+              label="Total Views"
+              value={data.currentStats.viewCount.toLocaleString()}
+            />
+            <StatCard
+              label="Videos"
+              value={data.currentStats.videoCount.toLocaleString()}
+            />
             <StatCard
               label="Watch Time (hrs)"
-              value={Math.round(data.currentStats.watchTimeMinutes / 60).toLocaleString()}
+              value={Math.round(
+                data.currentStats.watchTimeMinutes / 60,
+              ).toLocaleString()}
             />
           </div>
 
@@ -93,18 +116,20 @@ async function HealthScoreCardWrapper({
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div
-      style={{
-        border: "1px solid var(--color-border)",
-        backgroundColor: "var(--color-surface)",
-        borderRadius: 12,
-        padding: 16,
-      }}
-    >
-      <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>{label}</div>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 24, fontWeight: 700, marginTop: 4 }}>
+    <InteractiveCard className="p-4">
+      <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+        {label}
+      </div>
+      <div
+        style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: 24,
+          fontWeight: 700,
+          marginTop: 4,
+        }}
+      >
         {value}
       </div>
-    </div>
+    </InteractiveCard>
   );
 }

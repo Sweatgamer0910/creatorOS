@@ -2,8 +2,14 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { Trash2 } from "lucide-react";
-import { updateContentItemStatus, deleteContentItem, PipelineStatus } from "@/lib/pipeline/actions";
+import {
+  updateContentItemStatus,
+  deleteContentItem,
+  PipelineStatus,
+} from "@/lib/pipeline/actions";
 import Spinner from "@/components/Spinner";
+import Card from "@/components/ui/Card";
+import { radius } from "@/lib/design-tokens";
 
 interface ContentItem {
   id: string;
@@ -19,7 +25,7 @@ const columns: { status: PipelineStatus; label: string }[] = [
   { status: "published", label: "Published" },
 ];
 
-function Card({ item }: { item: ContentItem }) {
+function ItemCard({ item }: { item: ContentItem }) {
   const [isDeleting, startDelete] = useTransition();
 
   function handleDragStart(e: React.DragEvent) {
@@ -36,23 +42,40 @@ function Card({ item }: { item: ContentItem }) {
     <div
       draggable
       onDragStart={handleDragStart}
-      className="flex items-center justify-between p-3 rounded-lg cursor-grab active:cursor-grabbing"
-      style={{ backgroundColor: "var(--color-background)", border: "1px solid var(--color-border)" }}
+      className="cursor-grab active:cursor-grabbing"
     >
-      <span style={{ fontSize: 14 }}>{item.title}</span>
-      <button onClick={handleDelete} disabled={isDeleting} style={{ color: "var(--color-text-muted)" }}>
-        {isDeleting ? <Spinner size={12} /> : <Trash2 size={14} />}
-      </button>
+      <Card padding="sm" style={{ backgroundColor: "var(--color-background)" }}>
+        <div className="flex items-center justify-between">
+          <span style={{ fontSize: 14 }}>{item.title}</span>
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            style={{
+              color: "var(--color-text-muted)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            {isDeleting ? <Spinner size={12} /> : <Trash2 size={14} />}
+          </button>
+        </div>
+      </Card>
     </div>
   );
 }
 
-export default function PipelineBoard({ items: initialItems }: { items: ContentItem[] }) {
+export default function PipelineBoard({
+  items: initialItems,
+}: {
+  items: ContentItem[];
+}) {
   const [items, setItems] = useState(initialItems);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems(initialItems);
   }, [initialItems]);
 
@@ -82,15 +105,25 @@ export default function PipelineBoard({ items: initialItems }: { items: ContentI
             }}
             onDragLeave={() => setDragOverCol(null)}
             onDrop={(e) => handleDrop(e, col.status)}
-            className="p-3 rounded-2xl min-h-[300px] flex flex-col gap-2"
+            className="p-3 flex flex-col gap-2"
             style={{
               backgroundColor: "var(--color-surface)",
-              border: isOver ? "1px solid var(--color-accent)" : "1px solid var(--color-border)",
+              border: isOver
+                ? "1px solid var(--color-accent)"
+                : "1px solid var(--color-border)",
+              borderRadius: radius.xl,
+              minHeight: 300,
               transition: "border-color 0.15s",
             }}
           >
             <div className="flex items-center justify-between mb-2">
-              <span style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 14 }}>
+              <span
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 600,
+                  fontSize: 14,
+                }}
+              >
                 {col.label}
               </span>
               <span
@@ -104,7 +137,7 @@ export default function PipelineBoard({ items: initialItems }: { items: ContentI
               </span>
             </div>
             {colItems.map((item) => (
-              <Card key={item.id} item={item} />
+              <ItemCard key={item.id} item={item} />
             ))}
           </div>
         );
