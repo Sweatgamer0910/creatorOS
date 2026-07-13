@@ -1,9 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { signIn } from "@/lib/auth-client";
+import Button from "@/components/ui/button";
 
 export default function ConnectYouTubeButton() {
+  const [loading, setLoading] = useState(false);
+
   async function handleConnect() {
+    setLoading(true);
     await signIn.social({
       provider: "google",
       callbackURL: "/dashboard",
@@ -11,11 +16,8 @@ export default function ConnectYouTubeButton() {
   }
 
   return (
-    <button
-      onClick={handleConnect}
-      style={{ marginTop: 20, padding: "10px 20px" }}
-    >
+    <Button variant="secondary" onClick={handleConnect} loading={loading}>
       Connect YouTube
-    </button>
+    </Button>
   );
 }
