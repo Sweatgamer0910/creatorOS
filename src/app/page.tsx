@@ -4,6 +4,7 @@ import Starfield from "@/components/landing/Starfield";
 import GridHorizon from "@/components/landing/GridHorizon";
 import TiltCard from "@/components/landing/TiltCard";
 import GlassPanel from "@/components/landing/GlassPanel";
+import ScrollScene from "@/components/landing/ScrollScene";
 
 export default function LandingPage() {
   return (
@@ -11,7 +12,6 @@ export default function LandingPage() {
       style={{
         position: "relative",
         minHeight: "100vh",
-        overflow: "hidden",
         backgroundColor: "#000000",
       }}
     >
@@ -25,7 +25,7 @@ export default function LandingPage() {
           zIndex: 1,
           maxWidth: 1000,
           margin: "0 auto",
-          padding: "120px 40px 80px",
+          padding: "120px 40px 0",
         }}
       >
         <div style={{ textAlign: "center" }}>
@@ -111,8 +111,20 @@ export default function LandingPage() {
             </Link>
           </div>
         </div>
+      </div>
 
-        <div style={{ position: "relative", marginTop: 96, paddingTop: 40 }}>
+      <ScrollScene />
+
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          maxWidth: 1000,
+          margin: "0 auto",
+          padding: "40px 40px 80px",
+        }}
+      >
+        <div style={{ position: "relative", paddingTop: 40 }}>
           <div style={{ position: "absolute", inset: 0 }}>
             <GridHorizon />
           </div>
