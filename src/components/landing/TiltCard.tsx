@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 export default function TiltCard({
   children,
@@ -11,6 +12,7 @@ export default function TiltCard({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -36,6 +38,7 @@ export default function TiltCard({
   );
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (prefersReducedMotion) return;
     const bounds = ref.current?.getBoundingClientRect();
     if (!bounds) return;
     x.set((e.clientX - bounds.left) / bounds.width - 0.5);

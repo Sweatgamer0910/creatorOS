@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git stash *)",
+      "Bash(npx eslint *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(xxd)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/creatoros-page.html -w \"%{http_code}\\\\n\")",
+      "Read(//tmp/**)"
+    ]
+  }
+}

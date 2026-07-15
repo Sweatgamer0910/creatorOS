@@ -3,6 +3,8 @@ import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import NotchNav from "@/components/NotchNav";
 import BodyBackgroundSync from "@/components/BodyBackgroundSync";
+import LenisProvider from "@/components/providers/LenisProvider";
+import MainShell from "@/components/MainShell";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -35,9 +37,11 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} ${manrope.variable} ${jetbrainsMono.variable}`}
         style={{ fontFamily: "var(--font-body)" }}
       >
-        <BodyBackgroundSync />
-        <NotchNav />
-        <main style={{ paddingTop: 100 }}>{children}</main>
+        <LenisProvider>
+          <BodyBackgroundSync />
+          <NotchNav />
+          <MainShell>{children}</MainShell>
+        </LenisProvider>
       </body>
     </html>
   );

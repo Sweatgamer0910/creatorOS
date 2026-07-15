@@ -4,7 +4,7 @@ import Starfield from "@/components/landing/Starfield";
 import GridHorizon from "@/components/landing/GridHorizon";
 import TiltCard from "@/components/landing/TiltCard";
 import GlassPanel from "@/components/landing/GlassPanel";
-import ScrollScene from "@/components/landing/ScrollScene";
+import Hero3D from "@/components/landing/Hero3D";
 
 export default function LandingPage() {
   return (
@@ -113,7 +113,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <ScrollScene />
+      <Hero3D />
 
       <div
         style={{

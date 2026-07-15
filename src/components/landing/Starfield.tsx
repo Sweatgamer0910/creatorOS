@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 interface Star {
   x: number;
@@ -13,6 +14,7 @@ interface Star {
 
 export default function Starfield() {
   const [stars, setStars] = useState<Star[]>([]);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     const generated = Array.from({ length: 120 }).map(() => ({
@@ -39,8 +41,11 @@ export default function Starfield() {
             height: star.size,
             borderRadius: "50%",
             backgroundColor: "#fff",
+            opacity: prefersReducedMotion ? 0.6 : undefined,
           }}
-          animate={{ opacity: [0.2, 1, 0.2] }}
+          animate={
+            prefersReducedMotion ? undefined : { opacity: [0.2, 1, 0.2] }
+          }
           transition={{
             duration: star.duration,
             delay: star.delay,
