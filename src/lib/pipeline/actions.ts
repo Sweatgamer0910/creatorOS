@@ -27,16 +27,29 @@ export async function createContentItem(title: string) {
   revalidatePath("/pipeline");
 }
 
-export async function updateContentItemStatus(id: string, status: PipelineStatus) {
-  await prisma.contentItem.update({
-    where: { id },
+export async function updateContentItemStatus(
+  id: string,
+  status: PipelineStatus,
+) {
+  const workspaceId = await getWorkspaceId();
+  // Scoped to the caller's own workspace via updateMany (Prisma's `update`
+  // only accepts unique-field where clauses, so ownership can't be part of
+  // it) — without this, any authenticated user could update any other
+  // workspace's content item just by knowing/guessing its id.
+  const { count } = await prisma.contentItem.updateMany({
+    where: { id, workspaceId },
     data: { status },
   });
+  if (count === 0) throw new Error("Not found");
   revalidatePath("/pipeline");
 }
 
 export async function deleteContentItem(id: string) {
-  await prisma.contentItem.delete({ where: { id } });
+  const workspaceId = await getWorkspaceId();
+  const { count } = await prisma.contentItem.deleteMany({
+    where: { id, workspaceId },
+  });
+  if (count === 0) throw new Error("Not found");
   revalidatePath("/pipeline");
 }
 

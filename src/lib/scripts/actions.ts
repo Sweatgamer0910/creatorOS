@@ -36,16 +36,26 @@ export async function updateScript(
     outro: string;
   }>,
 ) {
-  await prisma.script.update({
-    where: { id },
+  const workspaceId = await getWorkspaceId();
+  // updateMany (not update) so ownership can be part of the where clause —
+  // otherwise any authenticated user could edit any other workspace's
+  // script by id, since script ids are otherwise unauthenticated-readable
+  // strings, not a secret.
+  const { count } = await prisma.script.updateMany({
+    where: { id, workspaceId },
     data: fields,
   });
+  if (count === 0) throw new Error("Not found");
   revalidatePath("/scripts");
   revalidatePath(`/scripts/${id}`);
 }
 
 export async function deleteScript(id: string) {
-  await prisma.script.delete({ where: { id } });
+  const workspaceId = await getWorkspaceId();
+  const { count } = await prisma.script.deleteMany({
+    where: { id, workspaceId },
+  });
+  if (count === 0) throw new Error("Not found");
   revalidatePath("/scripts");
 }
 
@@ -58,5 +68,8 @@ export async function getScripts() {
 }
 
 export async function getScript(id: string) {
-  return prisma.script.findUnique({ where: { id } });
+  const workspaceId = await getWorkspaceId();
+  // findFirst + workspaceId, not findUnique(id) — this was previously
+  // readable by anyone who knew/guessed a script id, logged in or not.
+  return prisma.script.findFirst({ where: { id, workspaceId } });
 }

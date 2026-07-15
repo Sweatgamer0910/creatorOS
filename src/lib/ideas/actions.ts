@@ -26,7 +26,11 @@ export async function createIdea(title: string, notes: string) {
 }
 
 export async function deleteIdea(id: string) {
-  await prisma.idea.delete({ where: { id } });
+  const workspaceId = await getWorkspaceId();
+  const { count } = await prisma.idea.deleteMany({
+    where: { id, workspaceId },
+  });
+  if (count === 0) throw new Error("Not found");
   revalidatePath("/ideas");
 }
 

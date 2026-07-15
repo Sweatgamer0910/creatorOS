@@ -1,3 +1,6 @@
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { getScripts } from "@/lib/scripts/actions";
 import NewScriptForm from "./NewScriptForm";
 import ScriptListItem from "./ScriptListItem";
@@ -7,6 +10,9 @@ import Button from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 
 export default async function ScriptsPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect("/login");
+
   const scripts = await getScripts();
 
   return (

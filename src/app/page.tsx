@@ -3,7 +3,7 @@ import Starfield from "@/components/landing/Starfield";
 import GridHorizon from "@/components/landing/GridHorizon";
 import TiltCard from "@/components/landing/TiltCard";
 import GlassPanel from "@/components/landing/GlassPanel";
-import HeroFilm from "@/components/landing/HeroFilm";
+import Hero from "@/components/landing/Hero";
 import LandingFooter from "@/components/landing/LandingFooter";
 
 export default function LandingPage() {
@@ -13,16 +13,14 @@ export default function LandingPage() {
         position: "relative",
         minHeight: "100vh",
         backgroundColor: "#000000",
+        overflowX: "hidden",
       }}
     >
       <div style={{ position: "fixed", inset: 0, zIndex: 0 }}>
         <Starfield />
       </div>
 
-      {/* HeroFilm now owns the headline/CTA content — it renders in the same
-          pinned first frame as Nova, so there's no dead zone before the
-          scene appears. */}
-      <HeroFilm />
+      <Hero />
 
       <div
         style={{

@@ -1,9 +1,15 @@
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { getIdeas } from "@/lib/ideas/actions";
 import IdeaForm from "./IdeaForm";
 import IdeaCard from "./IdeaCard";
 import EmptyIdeas from "./EmptyIdeas";
 
 export default async function IdeasPage() {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect("/login");
+
   const ideas = await getIdeas();
 
   return (

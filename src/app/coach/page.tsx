@@ -1,3 +1,6 @@
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { getChannelAnalytics } from "@/lib/analytics";
 import { getHealthScore } from "@/lib/health-score";
 import { getCoachResponse } from "@/lib/growth-coach";
@@ -9,6 +12,9 @@ export default async function CoachPage({
 }: {
   searchParams: Promise<{ scenario?: string }>;
 }) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect("/login");
+
   const { scenario } = await searchParams;
   const validScenario =
     scenario === "declining" || scenario === "new" ? scenario : "growing";
