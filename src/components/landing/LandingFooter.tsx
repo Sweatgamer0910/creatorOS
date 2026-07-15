@@ -15,24 +15,7 @@ export default function LandingFooter() {
           color: "rgba(255,255,255,0.35)",
         }}
       >
-        &ldquo;Solar System Model (Orrery)&rdquo; by{" "}
-        <a
-          href="https://sketchfab.com/Smoggybeard"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "rgba(255,255,255,0.5)", textDecoration: "underline" }}
-        >
-          Smoggybeard
-        </a>{" "}
-        — licensed under{" "}
-        <a
-          href="https://creativecommons.org/licenses/by/4.0/"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: "rgba(255,255,255,0.5)", textDecoration: "underline" }}
-        >
-          CC BY 4.0
-        </a>
+        © {new Date().getFullYear()} CreatorOS. All rights reserved.
       </p>
     </footer>
   );

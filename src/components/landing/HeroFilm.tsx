@@ -1,31 +1,44 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
+import { useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useMotionValue } from "framer-motion";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { BarChart3, Sparkles, Lightbulb, ArrowRight } from "lucide-react";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
-import { useDeviceTier } from "@/hooks/useDeviceTier";
-import Preloader from "./hero3d/Preloader";
-import CapabilityFallback from "./hero3d/CapabilityFallback";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const Scene = dynamic(() => import("./hero3d/Scene"), { ssr: false });
 
 // Fraction of the pinned scroll range where the intro (headline + CTAs)
 // hands off to chapter 0's copy — kept small so the reveal engages almost
 // immediately, not after a long dead zone.
 const INTRO_EXIT = 0.05;
 
+// Nova, the CreatorOS companion bot — hyperrealistic collectible-figure
+// style, amber lens-eye, matte charcoal body. Consistent identity locked
+// across all four stills via reference-image generation (Higgsfield Soul
+// Cinema). Chosen deliberately over the previous WebGL orrery: guaranteed
+// smooth on every device (plain image crossfade + transform, no GPU-bound
+// mesh/shader work), while still reading as a "real object" for the brand.
+const NOVA = {
+  analytics:
+    "https://d8j0ntlcm91z4.cloudfront.net/user_3GFglOuPtqzOK0CmLg5l0FpCuUM/hf_20260715_183902_c20f7f9c-2dd2-4a55-835f-6b9476e2fe39.png",
+  coach:
+    "https://d8j0ntlcm91z4.cloudfront.net/user_3GFglOuPtqzOK0CmLg5l0FpCuUM/hf_20260715_182916_0c442a84-21db-415a-94ea-9b30d5843db7.png",
+  pipeline:
+    "https://d8j0ntlcm91z4.cloudfront.net/user_3GFglOuPtqzOK0CmLg5l0FpCuUM/hf_20260715_184146_f654dc37-562a-4c58-9b70-6dc887c505a0.png",
+  finale:
+    "https://d8j0ntlcm91z4.cloudfront.net/user_3GFglOuPtqzOK0CmLg5l0FpCuUM/hf_20260715_184329_2cc04de2-d4ca-468d-b06d-d828b777954c.png",
+};
+
 const chapters = [
   {
     icon: BarChart3,
     title: "Real analytics",
     body: "Views, subscribers, and watch time — pulled directly from YouTube, not guessed at.",
+    image: NOVA.analytics,
+    alt: "Nova, the CreatorOS companion bot, with a holographic analytics ring projected above it",
     glow: "245, 166, 35",
     backdrop:
       "radial-gradient(ellipse 90% 70% at 30% 45%, rgba(245,166,35,0.22) 0%, transparent 65%), linear-gradient(160deg, #120a02 0%, #050505 55%)",
@@ -34,6 +47,8 @@ const chapters = [
     icon: Sparkles,
     title: "AI Growth Coach",
     body: "Honest, evidence-backed insights — labeled by confidence, never fabricated.",
+    image: NOVA.coach,
+    alt: "Nova, the CreatorOS companion bot, with its amber lens-eye opening wide",
     glow: "45, 212, 191",
     backdrop:
       "radial-gradient(ellipse 90% 70% at 65% 40%, rgba(45,212,191,0.2) 0%, transparent 65%), linear-gradient(160deg, #021210 0%, #050505 55%)",
@@ -42,13 +57,15 @@ const chapters = [
     icon: Lightbulb,
     title: "Full content pipeline",
     body: "Ideas, scripts, and your upload schedule — all in one place, start to finish.",
+    image: NOVA.pipeline,
+    alt: "Nova, the CreatorOS companion bot, orbited by small glowing content tiles",
     glow: "168, 132, 250",
     backdrop:
       "radial-gradient(ellipse 90% 70% at 40% 60%, rgba(168,132,250,0.2) 0%, transparent 65%), linear-gradient(160deg, #0d0818 0%, #050505 55%)",
   },
 ];
 
-export default function Hero3D() {
+export default function HeroFilm() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const cinematicRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
@@ -58,24 +75,14 @@ export default function Hero3D() {
   const activeIndexRef = useRef(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollProgress = useMotionValue(0);
-  const isVisibleRef = useRef(true);
-  const [canvasReady, setCanvasReady] = useState(false);
 
   const prefersReducedMotion = usePrefersReducedMotion();
-  const tierBudget = useDeviceTier();
 
-  useEffect(() => {
-    const node = cinematicRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        isVisibleRef.current = entry.isIntersecting;
-      },
-      { threshold: 0 },
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
+  // Subtle parallax/settle on Nova as the user scrubs through the pinned
+  // range — opacity/transform only (GPU-composited), never layout or
+  // canvas/video work, which is what made the previous version choppy.
+  const novaScale = useTransform(scrollProgress, [0, 1], [1.05, 1]);
+  const novaY = useTransform(scrollProgress, [0, 1], [10, -10]);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -84,8 +91,8 @@ export default function Hero3D() {
       let introExited = false;
 
       // Intro (headline + CTAs) is visible from scroll=0, in the same pinned
-      // frame as the 3D object — not a separate section the user has to
-      // scroll past before the scene appears.
+      // frame as Nova — not a separate section the user has to scroll past
+      // before the scene appears.
       gsap.set(introRef.current, { autoAlpha: 1, filter: "blur(0px)", y: 0 });
       gsap.set(panels, {
         autoAlpha: 0,
@@ -224,13 +231,10 @@ export default function Hero3D() {
     return () => ctx.revert();
   }, [prefersReducedMotion, scrollProgress]);
 
-  const showFallback = tierBudget.isProbed && tierBudget.tier === "unsupported";
-  const showCanvas = !tierBudget.isProbed || tierBudget.tier !== "unsupported";
-
   return (
     <div ref={wrapperRef}>
-      {/* Cinematic pinned sequence — headline/CTAs + 3D object are both
-          visible from scroll=0, no dead zone before the scene appears. */}
+      {/* Cinematic pinned sequence — headline/CTAs + Nova are both visible
+          from scroll=0, no dead zone before the scene appears. */}
       <div
         ref={cinematicRef}
         style={{
@@ -242,7 +246,7 @@ export default function Hero3D() {
       >
         {chapters.map((chapter, i) => (
           <div
-            key={i}
+            key={chapter.title}
             aria-hidden="true"
             style={{
               position: "absolute",
@@ -257,38 +261,37 @@ export default function Hero3D() {
           />
         ))}
 
+        {/* Nova — crossfading image stack, GPU-composited opacity/transform
+            only. No canvas, no WebGL, no per-frame mesh work: this is what
+            guarantees it can't reproduce the old scene's choppiness. */}
         <div
           className="creatoros-hero-canvas"
           style={{ position: "absolute", inset: 0, zIndex: 0 }}
         >
-          {showFallback && (
-            <CapabilityFallback reducedMotion={prefersReducedMotion} />
-          )}
-          {showCanvas && !showFallback && (
-            <Scene
-              scrollProgress={scrollProgress}
-              reducedMotion={prefersReducedMotion}
-              isVisibleRef={isVisibleRef}
-              particleCount={tierBudget.particleCount || 5000}
-              bloom={tierBudget.bloom}
-              dprCap={tierBudget.dprCap}
-              onCreated={() => setCanvasReady(true)}
+          {chapters.map((chapter, i) => (
+            <motion.img
+              key={chapter.image}
+              src={chapter.image}
+              alt={chapter.alt}
+              decoding="async"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                padding: "8vh 4vw",
+                opacity: i === activeIndex ? 1 : 0,
+                transition: prefersReducedMotion
+                  ? "opacity 0.2s linear"
+                  : "opacity 1.1s ease",
+                scale: prefersReducedMotion ? 1 : novaScale,
+                y: prefersReducedMotion ? 0 : novaY,
+                filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.55))",
+              }}
             />
-          )}
-          {showCanvas && !showFallback && (
-            <Preloader
-              canvasReady={canvasReady}
-              reducedMotion={prefersReducedMotion}
-            />
-          )}
+          ))}
         </div>
-        <style>{`
-          @media (max-width: 640px) {
-            .creatoros-hero-canvas {
-              transform: translateX(42%) scale(0.6);
-            }
-          }
-        `}</style>
 
         <div
           style={{
@@ -480,7 +483,7 @@ export default function Hero3D() {
 
                 {chapters.map((chapter, i) => (
                   <div
-                    key={i}
+                    key={chapter.title}
                     ref={(el) => {
                       panelsRef.current[i] = el;
                     }}
@@ -525,9 +528,9 @@ export default function Hero3D() {
                 style={{ marginTop: 40 }}
                 aria-hidden="true"
               >
-                {chapters.map((_, i) => (
+                {chapters.map((chapter, i) => (
                   <div
-                    key={i}
+                    key={chapter.title}
                     style={{
                       width: i === activeIndex ? 24 : 8,
                       height: 4,
@@ -558,10 +561,35 @@ export default function Hero3D() {
           backgroundColor: "#050505",
           textAlign: "center",
           padding: "0 24px",
+          overflow: "hidden",
         }}
       >
+        <img
+          src={NOVA.finale}
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center 30%",
+            opacity: 0.18,
+            filter: "saturate(0.9)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(ellipse 70% 60% at 50% 40%, transparent 0%, #050505 75%)",
+          }}
+        />
         <h2
           style={{
+            position: "relative",
             fontFamily: "var(--font-display)",
             fontSize: "clamp(32px, 5vw, 56px)",
             color: "#fff",
@@ -573,6 +601,7 @@ export default function Hero3D() {
         <Link
           href="/signup"
           style={{
+            position: "relative",
             marginTop: 40,
             display: "inline-flex",
             alignItems: "center",
