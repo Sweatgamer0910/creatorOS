@@ -16,6 +16,11 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Scene = dynamic(() => import("./hero3d/Scene"), { ssr: false });
 
+// Fraction of the pinned scroll range where the intro (headline + CTAs)
+// hands off to chapter 0's copy — kept small so the reveal engages almost
+// immediately, not after a long dead zone.
+const INTRO_EXIT = 0.05;
+
 const chapters = [
   {
     icon: BarChart3,
@@ -76,26 +81,18 @@ export default function Hero3D() {
     const ctx = gsap.context(() => {
       const panels = panelsRef.current.filter(Boolean) as HTMLDivElement[];
       const reduceMotion = prefersReducedMotion;
+      let introExited = false;
 
+      // Intro (headline + CTAs) is visible from scroll=0, in the same pinned
+      // frame as the 3D object — not a separate section the user has to
+      // scroll past before the scene appears.
+      gsap.set(introRef.current, { autoAlpha: 1, filter: "blur(0px)", y: 0 });
       gsap.set(panels, {
         autoAlpha: 0,
         filter: reduceMotion ? "blur(0px)" : "blur(14px)",
         y: reduceMotion ? 0 : 16,
       });
-      gsap.set(panels[0], { autoAlpha: 1, filter: "blur(0px)", y: 0 });
       gsap.set([barTopRef.current, barBottomRef.current], { height: 0 });
-
-      gsap.fromTo(
-        introRef.current,
-        { autoAlpha: 0, y: reduceMotion ? 0 : 20 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: reduceMotion ? 0 : 1.2,
-          ease: "power2.out",
-          delay: reduceMotion ? 0 : 0.2,
-        },
-      );
 
       function openLetterbox() {
         gsap.to([barTopRef.current, barBottomRef.current], {
@@ -112,6 +109,56 @@ export default function Hero3D() {
         });
       }
 
+      function showIntro() {
+        gsap.to(panels[0], {
+          autoAlpha: 0,
+          filter: reduceMotion ? "blur(0px)" : "blur(8px)",
+          y: reduceMotion ? 0 : -12,
+          duration: reduceMotion ? 0 : 0.4,
+          ease: "power2.in",
+        });
+        gsap.fromTo(
+          introRef.current,
+          {
+            autoAlpha: 0,
+            filter: reduceMotion ? "blur(0px)" : "blur(14px)",
+            y: reduceMotion ? 0 : 16,
+          },
+          {
+            autoAlpha: 1,
+            filter: "blur(0px)",
+            y: 0,
+            duration: reduceMotion ? 0 : 0.5,
+            ease: "power2.out",
+          },
+        );
+      }
+
+      function hideIntro() {
+        gsap.to(introRef.current, {
+          autoAlpha: 0,
+          filter: reduceMotion ? "blur(0px)" : "blur(8px)",
+          y: reduceMotion ? 0 : -12,
+          duration: reduceMotion ? 0 : 0.5,
+          ease: "power2.in",
+        });
+        gsap.fromTo(
+          panels[0],
+          {
+            autoAlpha: 0,
+            filter: reduceMotion ? "blur(0px)" : "blur(14px)",
+            y: reduceMotion ? 0 : 16,
+          },
+          {
+            autoAlpha: 1,
+            filter: "blur(0px)",
+            y: 0,
+            duration: reduceMotion ? 0 : 0.6,
+            ease: "power2.out",
+          },
+        );
+      }
+
       ScrollTrigger.create({
         trigger: cinematicRef.current,
         start: "top top",
@@ -124,6 +171,14 @@ export default function Hero3D() {
         onLeaveBack: closeLetterbox,
         onUpdate: (self) => {
           scrollProgress.set(self.progress);
+
+          if (!introExited && self.progress > INTRO_EXIT) {
+            introExited = true;
+            hideIntro();
+          } else if (introExited && self.progress <= INTRO_EXIT) {
+            introExited = false;
+            showIntro();
+          }
 
           const rawIndex = self.progress * (chapters.length - 1);
           const nearestIndex = Math.round(rawIndex);
@@ -174,67 +229,8 @@ export default function Hero3D() {
 
   return (
     <div ref={wrapperRef}>
-      {/* Cold open / title card */}
-      <section
-        style={{
-          position: "relative",
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#050505",
-          overflow: "hidden",
-        }}
-      >
-        <div ref={introRef} style={{ textAlign: "center", opacity: 0 }}>
-          <h1
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(40px, 7vw, 84px)",
-              color: "#fff",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            CreatorOS
-          </h1>
-          <p
-            style={{
-              color: "rgba(255,255,255,0.55)",
-              fontSize: 18,
-              marginTop: 16,
-            }}
-          >
-            The operating system for YouTube creators.
-          </p>
-          <p
-            className="creatoros-scroll-hint"
-            style={{
-              color: "rgba(255,255,255,0.6)",
-              fontSize: 13,
-              marginTop: 48,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              animation: prefersReducedMotion
-                ? "none"
-                : "creatoros-pulse 2s ease-in-out infinite",
-            }}
-          >
-            Scroll to explore ↓
-          </p>
-        </div>
-        <style>{`
-          @keyframes creatoros-pulse {
-            0%, 100% { opacity: 0.55; }
-            50% { opacity: 0.85; }
-          }
-          @media (prefers-reduced-motion: reduce) {
-            .creatoros-scroll-hint { animation: none !important; }
-          }
-        `}</style>
-      </section>
-
-      {/* Cinematic pinned sequence */}
+      {/* Cinematic pinned sequence — headline/CTAs + 3D object are both
+          visible from scroll=0, no dead zone before the scene appears. */}
       <div
         ref={cinematicRef}
         style={{
@@ -261,7 +257,10 @@ export default function Hero3D() {
           />
         ))}
 
-        <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+        <div
+          className="creatoros-hero-canvas"
+          style={{ position: "absolute", inset: 0, zIndex: 0 }}
+        >
           {showFallback && (
             <CapabilityFallback reducedMotion={prefersReducedMotion} />
           )}
@@ -283,6 +282,13 @@ export default function Hero3D() {
             />
           )}
         </div>
+        <style>{`
+          @media (max-width: 640px) {
+            .creatoros-hero-canvas {
+              transform: translateX(42%) scale(0.6);
+            }
+          }
+        `}</style>
 
         <div
           style={{
@@ -351,8 +357,127 @@ export default function Hero3D() {
               padding: "0 40px",
             }}
           >
-            <div style={{ maxWidth: 440 }}>
-              <div style={{ position: "relative", height: 240 }}>
+            <div style={{ maxWidth: 620 }}>
+              <div style={{ position: "relative", height: 340 }}>
+                <div
+                  ref={introRef}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    opacity: 0,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "6px 14px",
+                      borderRadius: 999,
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      fontSize: 13,
+                      color: "rgba(255,255,255,0.6)",
+                      backgroundColor: "rgba(0,0,0,0.4)",
+                      backdropFilter: "blur(8px)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: "50%",
+                        backgroundColor: "var(--color-accent)",
+                      }}
+                    />
+                    Mission control for YouTube creators
+                  </div>
+                  <h1
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontSize: "clamp(36px, 5vw, 56px)",
+                      lineHeight: 1.1,
+                      fontWeight: 700,
+                      color: "#fff",
+                      marginTop: 20,
+                    }}
+                  >
+                    Grow your channel
+                    <br />
+                    with real signal, not noise.
+                  </h1>
+                  <p
+                    style={{
+                      color: "rgba(255,255,255,0.6)",
+                      fontSize: 17,
+                      maxWidth: 480,
+                      marginTop: 16,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    Analytics, AI-backed insights, and your entire content
+                    pipeline — in one command center built for creators, not
+                    spreadsheets.
+                  </p>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 12,
+                      marginTop: 28,
+                    }}
+                  >
+                    <Link
+                      href="/signup"
+                      className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium"
+                      style={{
+                        backgroundColor: "var(--color-accent)",
+                        color: "#000",
+                        textDecoration: "none",
+                      }}
+                    >
+                      Get started
+                      <ArrowRight size={16} />
+                    </Link>
+                    <Link
+                      href="/login"
+                      className="flex items-center px-6 py-3 rounded-xl font-medium"
+                      style={{
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        color: "#fff",
+                        backgroundColor: "rgba(0,0,0,0.3)",
+                        textDecoration: "none",
+                      }}
+                    >
+                      Log in
+                    </Link>
+                  </div>
+                  <p
+                    className="creatoros-scroll-hint"
+                    style={{
+                      color: "rgba(255,255,255,0.6)",
+                      fontSize: 13,
+                      marginTop: 32,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      animation: prefersReducedMotion
+                        ? "none"
+                        : "creatoros-pulse 2s ease-in-out infinite",
+                    }}
+                  >
+                    Scroll to explore ↓
+                  </p>
+                  <style>{`
+                    @keyframes creatoros-pulse {
+                      0%, 100% { opacity: 0.55; }
+                      50% { opacity: 0.85; }
+                    }
+                    @media (prefers-reduced-motion: reduce) {
+                      .creatoros-scroll-hint { animation: none !important; }
+                    }
+                  `}</style>
+                </div>
+
                 {chapters.map((chapter, i) => (
                   <div
                     key={i}

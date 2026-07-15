@@ -1,10 +1,10 @@
-import Link from "next/link";
-import { ArrowRight, BarChart3, Sparkles, Lightbulb } from "lucide-react";
+import { BarChart3, Sparkles, Lightbulb } from "lucide-react";
 import Starfield from "@/components/landing/Starfield";
 import GridHorizon from "@/components/landing/GridHorizon";
 import TiltCard from "@/components/landing/TiltCard";
 import GlassPanel from "@/components/landing/GlassPanel";
 import Hero3D from "@/components/landing/Hero3D";
+import LandingFooter from "@/components/landing/LandingFooter";
 
 export default function LandingPage() {
   return (
@@ -19,100 +19,9 @@ export default function LandingPage() {
         <Starfield />
       </div>
 
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          maxWidth: 1000,
-          margin: "0 auto",
-          padding: "120px 40px 0",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "6px 14px",
-              borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.1)",
-              fontSize: 13,
-              color: "rgba(255,255,255,0.6)",
-              marginBottom: 24,
-              backgroundColor: "rgba(0,0,0,0.4)",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            <div
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: "50%",
-                backgroundColor: "var(--color-accent)",
-              }}
-            />
-            Mission control for YouTube creators
-          </div>
-
-          <h1
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(40px, 6vw, 68px)",
-              lineHeight: 1.1,
-              fontWeight: 700,
-              color: "#fff",
-            }}
-          >
-            Grow your channel
-            <br />
-            with real signal, not noise.
-          </h1>
-
-          <p
-            style={{
-              color: "rgba(255,255,255,0.6)",
-              fontSize: 18,
-              maxWidth: 560,
-              margin: "24px auto 0",
-              lineHeight: 1.6,
-            }}
-          >
-            Analytics, AI-backed insights, and your entire content pipeline — in
-            one command center built for creators, not spreadsheets.
-          </p>
-
-          <div
-            style={{
-              display: "flex",
-              gap: 12,
-              justifyContent: "center",
-              marginTop: 36,
-            }}
-          >
-            <Link
-              href="/signup"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium"
-              style={{ backgroundColor: "var(--color-accent)", color: "#000" }}
-            >
-              Get started
-              <ArrowRight size={16} />
-            </Link>
-            <Link
-              href="/login"
-              className="flex items-center px-6 py-3 rounded-xl font-medium"
-              style={{
-                border: "1px solid rgba(255,255,255,0.15)",
-                color: "#fff",
-                backgroundColor: "rgba(0,0,0,0.3)",
-              }}
-            >
-              Log in
-            </Link>
-          </div>
-        </div>
-      </div>
-
+      {/* Hero3D now owns the headline/CTA content — it renders in the same
+          pinned first frame as the 3D object, so there's no dead zone
+          before the scene appears. */}
       <Hero3D />
 
       <div
@@ -213,6 +122,8 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+
+      <LandingFooter />
     </div>
   );
 }

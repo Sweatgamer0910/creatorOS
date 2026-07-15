@@ -123,11 +123,15 @@ export default function ContentField({
         uProgress: { value: 0 },
         uTime: { value: 0 },
         uPixelRatio: { value: dpr },
-        uSize: { value: 6.5 },
+        uSize: { value: 3.8 },
         uIdle: { value: reducedMotion ? 0 : 1 },
-        uColorA: { value: new THREE.Color("#f5a623") },
-        uColorB: { value: new THREE.Color("#2dd4bf") },
-        uColorC: { value: new THREE.Color("#a884fa") },
+        // Desaturated versions of the chapter accent colors — this field is
+        // now ambient starfield dust around the orrery, not a competing
+        // centerpiece, so it reads as background depth rather than a bright
+        // colored halo.
+        uColorA: { value: new THREE.Color("#8a6a45") },
+        uColorB: { value: new THREE.Color("#4a8a83") },
+        uColorC: { value: new THREE.Color("#6f5f8a") },
       },
     });
 

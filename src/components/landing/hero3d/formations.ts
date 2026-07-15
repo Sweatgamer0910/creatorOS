@@ -46,6 +46,11 @@ function ribbonPoint(t: number, lane: number): [number, number, number] {
   return [x, y, z];
 }
 
+// Pushes the formations out to surround the orrery as background depth
+// rather than a tight halo overlapping it — the field's job now is ambient
+// starfield dust, not a competing centerpiece.
+const SPREAD = 2.6;
+
 export function buildFormations(count: number) {
   const posA = new Float32Array(count * 3); // Real analytics — channel core
   const posB = new Float32Array(count * 3); // AI Growth Coach — helix energy
@@ -56,27 +61,27 @@ export function buildFormations(count: number) {
   for (let i = 0; i < count; i++) {
     const ix = i * 3;
 
-    const jitter = 0.06;
-    const [ax, ay, az] = fibonacciSpherePoint(i, count, 1.35);
+    const jitter = 0.06 * SPREAD;
+    const [ax, ay, az] = fibonacciSpherePoint(i, count, 1.35 * SPREAD);
     posA[ix] = ax + (Math.random() - 0.5) * jitter;
     posA[ix + 1] = ay + (Math.random() - 0.5) * jitter;
     posA[ix + 2] = az + (Math.random() - 0.5) * jitter;
 
     const strand = i % 2 === 0 ? 0 : Math.PI;
     const [bx, by, bz] = helixPoint(i, count, strand);
-    posB[ix] = bx + (Math.random() - 0.5) * jitter;
-    posB[ix + 1] = by + (Math.random() - 0.5) * jitter;
-    posB[ix + 2] = bz + (Math.random() - 0.5) * jitter;
+    posB[ix] = bx * SPREAD + (Math.random() - 0.5) * jitter;
+    posB[ix + 1] = by * SPREAD + (Math.random() - 0.5) * jitter;
+    posB[ix + 2] = bz * SPREAD + (Math.random() - 0.5) * jitter;
 
     const t = Math.random();
     const lane = (Math.random() - 0.5) * 0.5;
     const [cx, cy, cz] = ribbonPoint(t, lane);
-    posC[ix] = cx + (Math.random() - 0.5) * jitter;
-    posC[ix + 1] = cy + (Math.random() - 0.5) * jitter;
-    posC[ix + 2] = cz + (Math.random() - 0.5) * jitter;
+    posC[ix] = cx * SPREAD + (Math.random() - 0.5) * jitter;
+    posC[ix + 1] = cy * SPREAD + (Math.random() - 0.5) * jitter;
+    posC[ix + 2] = cz * SPREAD + (Math.random() - 0.5) * jitter;
 
     seed[i] = Math.random() * Math.PI * 2;
-    size[i] = 0.5 + Math.random() * 1;
+    size[i] = 0.35 + Math.random() * 0.65;
   }
 
   return { posA, posB, posC, seed, size };

@@ -48,6 +48,15 @@ function probeDeviceTier(): DeviceTier {
   const looksLikeSoftwareRenderer =
     rendererHint.includes("swiftshader") || rendererHint.includes("llvmpipe");
 
+  // This probe canvas is throwaway — never attached to the DOM, never
+  // rendered again. Without explicitly releasing its WebGL context, it
+  // sits alive until garbage collection gets around to it. Each Fast
+  // Refresh reload re-runs this probe (the cached result lives in module
+  // scope, which HMR resets), so repeated edits during development can
+  // leak enough contexts to hit the browser's live-context ceiling —
+  // forcing it to kill an older context out from under the hero canvas.
+  gl.getExtension("WEBGL_lose_context")?.loseContext();
+
   if (looksLikeSoftwareRenderer) return "low";
   if (isCoarsePointer && (memory ?? 4) <= 4) return "low";
   if (isCoarsePointer) return "medium";
