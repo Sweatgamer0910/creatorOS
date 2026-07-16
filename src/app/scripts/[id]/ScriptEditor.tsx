@@ -6,6 +6,7 @@ import { ArrowLeft, Sparkles } from "lucide-react";
 import { updateScript } from "@/lib/scripts/actions";
 import Spinner from "@/components/Spinner";
 import LockedFeature from "@/components/LockedFeature";
+import Button from "@/components/ui/button";
 
 interface Script {
   id: string;
@@ -65,37 +66,25 @@ export default function ScriptEditor({ script }: { script: Script }) {
 
   return (
     <div>
-      <button
+      <Button
+        variant="text"
         onClick={handleBack}
         className="inline-flex items-center gap-2 mb-4"
-        style={{
-          color: "var(--color-text-muted)",
-          fontSize: 14,
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-        }}
+        style={{ fontSize: 14 }}
       >
         {isNavigatingBack ? <Spinner size={14} /> : <ArrowLeft size={14} />}
         Back to scripts
-      </button>
+      </Button>
 
       <div className="flex items-center justify-between">
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: 28 }}>
           {script.title}
         </h1>
         <LockedFeature label="AI-assisted writing">
-          <button
-            type="button"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm"
-            style={{
-              backgroundColor: "var(--color-surface-hover)",
-              color: "var(--color-text)",
-            }}
-          >
+          <Button type="button" variant="secondary" size="sm" disabled>
             <Sparkles size={14} />
             Write with AI
-          </button>
+          </Button>
         </LockedFeature>
       </div>
 

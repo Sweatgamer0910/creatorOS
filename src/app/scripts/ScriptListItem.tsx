@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { deleteScript } from "@/lib/scripts/actions";
 import InteractiveCard from "@/components/ui/InteractiveCard";
+import Button from "@/components/ui/button";
 import Spinner from "@/components/Spinner";
 
 interface Script {
@@ -51,18 +52,21 @@ export default function ScriptListItem({ script }: { script: Script }) {
             </div>
           </div>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          iconOnly
+          size="sm"
           onClick={handleDelete}
           disabled={isDeleting}
+          aria-label="Delete script"
           style={{
-            color: "var(--color-text-muted)",
-            background: "none",
             border: "none",
-            cursor: "pointer",
+            backgroundColor: "transparent",
+            color: "var(--color-text-muted)",
           }}
         >
           {isDeleting ? <Spinner size={14} /> : <Trash2 size={16} />}
-        </button>
+        </Button>
       </div>
     </InteractiveCard>
   );

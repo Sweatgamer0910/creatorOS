@@ -26,25 +26,25 @@ export default function LandingPage() {
         style={{
           position: "relative",
           zIndex: 1,
-          maxWidth: 1000,
+          maxWidth: 1100,
           margin: "0 auto",
-          padding: "40px 40px 80px",
+          padding: "0 40px 96px",
         }}
       >
-        <div style={{ position: "relative", paddingTop: 40 }}>
+        <div style={{ position: "relative", paddingTop: 16 }}>
           <div style={{ position: "absolute", inset: 0 }}>
             <GridHorizon />
           </div>
 
-          <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-8">
             <TiltCard>
-              <GlassPanel className="p-6 h-full">
-                <BarChart3 size={22} color="var(--color-accent)" />
+              <GlassPanel className="p-8 h-full">
+                <BarChart3 size={30} color="var(--color-accent)" />
                 <h3
                   style={{
                     fontFamily: "var(--font-display)",
-                    fontSize: 18,
-                    marginTop: 16,
+                    fontSize: 23,
+                    marginTop: 20,
                     color: "#fff",
                   }}
                 >
@@ -52,9 +52,9 @@ export default function LandingPage() {
                 </h3>
                 <p
                   style={{
-                    fontSize: 14,
+                    fontSize: 16,
                     color: "rgba(255,255,255,0.55)",
-                    marginTop: 8,
+                    marginTop: 10,
                     lineHeight: 1.6,
                   }}
                 >
@@ -65,13 +65,13 @@ export default function LandingPage() {
             </TiltCard>
 
             <TiltCard>
-              <GlassPanel className="p-6 h-full">
-                <Sparkles size={22} color="var(--color-accent)" />
+              <GlassPanel className="p-8 h-full">
+                <Sparkles size={30} color="var(--color-accent)" />
                 <h3
                   style={{
                     fontFamily: "var(--font-display)",
-                    fontSize: 18,
-                    marginTop: 16,
+                    fontSize: 23,
+                    marginTop: 20,
                     color: "#fff",
                   }}
                 >
@@ -79,9 +79,9 @@ export default function LandingPage() {
                 </h3>
                 <p
                   style={{
-                    fontSize: 14,
+                    fontSize: 16,
                     color: "rgba(255,255,255,0.55)",
-                    marginTop: 8,
+                    marginTop: 10,
                     lineHeight: 1.6,
                   }}
                 >
@@ -92,13 +92,13 @@ export default function LandingPage() {
             </TiltCard>
 
             <TiltCard>
-              <GlassPanel className="p-6 h-full">
-                <Lightbulb size={22} color="var(--color-accent)" />
+              <GlassPanel className="p-8 h-full">
+                <Lightbulb size={30} color="var(--color-accent)" />
                 <h3
                   style={{
                     fontFamily: "var(--font-display)",
-                    fontSize: 18,
-                    marginTop: 16,
+                    fontSize: 23,
+                    marginTop: 20,
                     color: "#fff",
                   }}
                 >
@@ -106,9 +106,9 @@ export default function LandingPage() {
                 </h3>
                 <p
                   style={{
-                    fontSize: 14,
+                    fontSize: 16,
                     color: "rgba(255,255,255,0.55)",
-                    marginTop: 8,
+                    marginTop: 10,
                     lineHeight: 1.6,
                   }}
                 >

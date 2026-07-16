@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button";
 
 export default function SourceSwitcher({ current }: { current: string }) {
   const router = useRouter();
@@ -28,24 +29,17 @@ export default function SourceSwitcher({ current }: { current: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
       {options.map((opt) => (
-        <button
+        <Button
           key={opt.value}
+          size="sm"
+          variant={current === opt.value ? "primary" : "secondary"}
           onClick={() => handleClick(opt.value)}
-          className="px-3 py-1.5 rounded-lg text-sm flex items-center gap-2"
-          style={{
-            backgroundColor:
-              current === opt.value
-                ? "var(--color-accent)"
-                : "var(--color-surface)",
-            color: current === opt.value ? "#0e1116" : "var(--color-text)",
-            border: "1px solid var(--color-border)",
-          }}
         >
           {pendingSource === opt.value ? (
             <Spinner size={12} variant="dark" />
           ) : null}
           {opt.label}
-        </button>
+        </Button>
       ))}
     </div>
   );

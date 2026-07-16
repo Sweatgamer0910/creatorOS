@@ -12,23 +12,23 @@ export default function Hero() {
     <section
       style={{
         position: "relative",
-        minHeight: "90vh",
+        minHeight: "74vh",
         display: "flex",
         alignItems: "center",
         padding: "0 40px",
       }}
     >
-      <div style={{ maxWidth: 1000, width: "100%", margin: "0 auto" }}>
-        <div style={{ maxWidth: 620 }}>
+      <div style={{ maxWidth: 1100, width: "100%", margin: "0 auto" }}>
+        <div style={{ maxWidth: 760 }}>
           <div
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 8,
-              padding: "6px 14px",
+              gap: 9,
+              padding: "8px 16px",
               borderRadius: 999,
               border: "1px solid rgba(255,255,255,0.1)",
-              fontSize: 13,
+              fontSize: 14,
               color: "rgba(255,255,255,0.6)",
               backgroundColor: "rgba(0,0,0,0.4)",
               backdropFilter: "blur(8px)",
@@ -36,8 +36,8 @@ export default function Hero() {
           >
             <div
               style={{
-                width: 6,
-                height: 6,
+                width: 7,
+                height: 7,
                 borderRadius: "50%",
                 backgroundColor: "var(--color-accent)",
               }}
@@ -47,11 +47,11 @@ export default function Hero() {
           <h1
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "clamp(40px, 6vw, 64px)",
-              lineHeight: 1.05,
+              fontSize: "clamp(56px, 8.5vw, 104px)",
+              lineHeight: 1.02,
               fontWeight: 700,
               color: "#fff",
-              marginTop: 24,
+              marginTop: 28,
             }}
           >
             CreatorOS
@@ -59,11 +59,11 @@ export default function Hero() {
           <p
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "clamp(22px, 3vw, 30px)",
-              lineHeight: 1.3,
+              fontSize: "clamp(28px, 4.2vw, 44px)",
+              lineHeight: 1.25,
               fontWeight: 600,
               color: "rgba(255,255,255,0.85)",
-              marginTop: 12,
+              marginTop: 16,
             }}
           >
             Grow your channel with real signal, not noise.
@@ -71,36 +71,47 @@ export default function Hero() {
           <p
             style={{
               color: "rgba(255,255,255,0.6)",
-              fontSize: 17,
-              maxWidth: 480,
-              marginTop: 16,
+              fontSize: 20,
+              maxWidth: 580,
+              marginTop: 20,
               lineHeight: 1.6,
             }}
           >
             Analytics, AI-backed insights, and your entire content pipeline — in
             one command center built for creators, not spreadsheets.
           </p>
-          <div style={{ display: "flex", gap: 12, marginTop: 32 }}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 16,
+              marginTop: 40,
+            }}
+          >
             <Link
               href="/signup"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium"
+              className="glow-interactive flex items-center gap-2 px-6 py-3.5 sm:px-8 sm:py-4 rounded-xl font-medium"
               style={{
                 backgroundColor: "var(--color-accent)",
                 color: "#000",
                 textDecoration: "none",
+                fontSize: 17,
+                whiteSpace: "nowrap",
               }}
             >
               Get started
-              <ArrowRight size={16} />
+              <ArrowRight size={20} />
             </Link>
             <Link
               href="/login"
-              className="flex items-center px-6 py-3 rounded-xl font-medium"
+              className="glow-interactive flex items-center px-6 py-3.5 sm:px-8 sm:py-4 rounded-xl font-medium"
               style={{
                 border: "1px solid rgba(255,255,255,0.15)",
                 color: "#fff",
                 backgroundColor: "rgba(0,0,0,0.3)",
                 textDecoration: "none",
+                fontSize: 17,
+                whiteSpace: "nowrap",
               }}
             >
               Log in

@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { Trash2 } from "lucide-react";
 import { deleteIdea } from "@/lib/ideas/actions";
 import InteractiveCard from "@/components/ui/InteractiveCard";
+import Button from "@/components/ui/button";
 import Spinner from "@/components/Spinner";
 
 interface Idea {
@@ -42,18 +43,21 @@ export default function IdeaCard({ idea }: { idea: Idea }) {
             </p>
           )}
         </div>
-        <button
+        <Button
+          variant="ghost"
+          iconOnly
+          size="sm"
           onClick={handleDelete}
           disabled={isPending}
+          aria-label="Delete idea"
           style={{
-            color: "var(--color-text-muted)",
-            background: "none",
             border: "none",
-            cursor: "pointer",
+            backgroundColor: "transparent",
+            color: "var(--color-text-muted)",
           }}
         >
           {isPending ? <Spinner size={14} /> : <Trash2 size={16} />}
-        </button>
+        </Button>
       </div>
     </InteractiveCard>
   );

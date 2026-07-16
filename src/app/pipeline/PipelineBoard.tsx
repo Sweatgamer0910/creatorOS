@@ -9,6 +9,7 @@ import {
 } from "@/lib/pipeline/actions";
 import Spinner from "@/components/Spinner";
 import Card from "@/components/ui/Card";
+import Button from "@/components/ui/button";
 import { radius } from "@/lib/design-tokens";
 
 interface ContentItem {
@@ -47,18 +48,21 @@ function ItemCard({ item }: { item: ContentItem }) {
       <Card padding="sm" style={{ backgroundColor: "var(--color-background)" }}>
         <div className="flex items-center justify-between">
           <span style={{ fontSize: 14 }}>{item.title}</span>
-          <button
+          <Button
+            variant="ghost"
+            iconOnly
+            size="sm"
             onClick={handleDelete}
             disabled={isDeleting}
+            aria-label="Delete item"
             style={{
-              color: "var(--color-text-muted)",
-              background: "none",
               border: "none",
-              cursor: "pointer",
+              backgroundColor: "transparent",
+              color: "var(--color-text-muted)",
             }}
           >
             {isDeleting ? <Spinner size={12} /> : <Trash2 size={14} />}
-          </button>
+          </Button>
         </div>
       </Card>
     </div>

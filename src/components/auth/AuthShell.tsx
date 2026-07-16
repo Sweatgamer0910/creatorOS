@@ -95,7 +95,12 @@ export default function AuthShell({
             style={{
               marginTop: 20,
               fontSize: 13,
-              color: "rgba(255,255,255,0.5)",
+              // 0.5 opacity measured ~4.2:1 against the animated aurora
+              // background behind this text (no glass card here) —
+              // marginally below WCAG AA's 4.5:1 for normal-size text, and
+              // fragile since it rides on wherever the aurora happens to
+              // be. Bumped for a real margin instead of a borderline pass.
+              color: "rgba(255,255,255,0.7)",
               textAlign: "center",
             }}
           >

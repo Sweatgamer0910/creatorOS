@@ -1,3 +1,10 @@
+import { cardSurfaceStyle } from "@/components/ui/Card";
+
+// Reuses Card's glass surface values (backdrop-blur/background/border) so
+// there's one source of truth for that look, but doesn't render Card
+// itself — GlassPanel's callers control padding via className (e.g.
+// `className="p-8"`), which Card's own padding prop would fight with via
+// inline-style specificity.
 export default function GlassPanel({
   children,
   className = "",
@@ -11,10 +18,7 @@ export default function GlassPanel({
     <div
       className={className}
       style={{
-        backgroundColor: "rgba(255, 255, 255, 0.04)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(255, 255, 255, 0.08)",
+        ...cardSurfaceStyle.glass,
         borderRadius: 20,
         ...style,
       }}

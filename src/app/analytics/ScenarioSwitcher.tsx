@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button";
 
 export default function ScenarioSwitcher({ current }: { current: string }) {
   const router = useRouter();
@@ -24,20 +25,15 @@ export default function ScenarioSwitcher({ current }: { current: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
       {scenarios.map((s) => (
-        <button
+        <Button
           key={s}
+          size="sm"
+          variant={current === s ? "primary" : "secondary"}
           onClick={() => handleClick(s)}
-          className="px-3 py-1.5 rounded-lg text-sm flex items-center gap-2"
-          style={{
-            backgroundColor:
-              current === s ? "var(--color-accent)" : "var(--color-surface)",
-            color: current === s ? "#0e1116" : "var(--color-text)",
-            border: "1px solid var(--color-border)",
-          }}
         >
           {pendingScenario === s ? <Spinner size={12} variant="dark" /> : null}
           {s}
-        </button>
+        </Button>
       ))}
     </div>
   );

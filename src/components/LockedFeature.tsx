@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { cloneElement, isValidElement, useState } from "react";
 import { Lock } from "lucide-react";
 
 export default function LockedFeature({
@@ -11,6 +11,19 @@ export default function LockedFeature({
   label?: string;
 }) {
   const [hovered, setHovered] = useState(false);
+
+  // pointer-events: none (below) only blocks mouse/touch activation — a
+  // keyboard or screen-reader user could still Tab to the wrapped control
+  // and activate it, with nothing announcing that it's locked. Injecting
+  // real `disabled`/`aria-disabled` onto the child fixes that for every
+  // caller at once, instead of each call site remembering to pass
+  // `disabled` itself (two of three previously didn't).
+  const child = isValidElement(children)
+    ? cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+        disabled: true,
+        "aria-disabled": true,
+      })
+    : children;
 
   return (
     <div
@@ -25,7 +38,7 @@ export default function LockedFeature({
           filter: "grayscale(30%)",
         }}
       >
-        {children}
+        {child}
       </div>
 
       <div

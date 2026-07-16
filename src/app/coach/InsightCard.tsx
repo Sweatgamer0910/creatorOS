@@ -1,4 +1,5 @@
 import { CoachInsight } from "@/lib/growth-coach";
+import Card from "@/components/ui/Card";
 
 const typeLabels: Record<CoachInsight["type"], string> = {
   fact: "Fact",
@@ -22,14 +23,7 @@ const confidenceLabels: Record<CoachInsight["confidence"], string> = {
 
 export default function InsightCard({ insight }: { insight: CoachInsight }) {
   return (
-    <div
-      className="p-4 rounded-xl"
-      style={{
-        backgroundColor: "var(--color-surface)",
-        border: `1px solid var(--color-border)`,
-        borderLeft: `3px solid ${typeColors[insight.type]}`,
-      }}
-    >
+    <Card padding="sm" accentBorder={typeColors[insight.type]}>
       <div className="flex items-center gap-3 mb-2">
         <span
           style={{
@@ -46,14 +40,28 @@ export default function InsightCard({ insight }: { insight: CoachInsight }) {
           {confidenceLabels[insight.confidence]}
         </span>
       </div>
-      <p style={{ margin: 0, color: "var(--color-text)", fontSize: 14, lineHeight: 1.6 }}>
+      <p
+        style={{
+          margin: 0,
+          color: "var(--color-text)",
+          fontSize: 14,
+          lineHeight: 1.6,
+        }}
+      >
         {insight.message}
       </p>
       {insight.evidence && (
-        <p style={{ marginTop: 8, fontSize: 12, color: "var(--color-text-muted)", fontStyle: "italic" }}>
+        <p
+          style={{
+            marginTop: 8,
+            fontSize: 12,
+            color: "var(--color-text-muted)",
+            fontStyle: "italic",
+          }}
+        >
           {insight.evidence}
         </p>
       )}
-    </div>
+    </Card>
   );
 }

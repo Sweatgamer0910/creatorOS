@@ -1,8 +1,13 @@
-"use client";
-
-import { useState } from "react";
 import Card from "./Card";
 
+// Thin, name-preserving wrapper around Card's own onClick-driven
+// interactivity (role="button", keyboard support, signature hover/focus
+// glow — see Card.tsx) — kept so the ~4 existing call sites don't need to
+// change, but the hover/lift/glow logic itself now lives in exactly one
+// place. Card only turns on the interactive treatment when `onClick` is
+// passed, so a caller that renders this with no onClick (e.g. a plain
+// info tile) correctly stays static instead of implying a click that does
+// nothing.
 export default function InteractiveCard({
   children,
   onClick,
@@ -14,29 +19,9 @@ export default function InteractiveCard({
   className?: string;
   style?: React.CSSProperties;
 }) {
-  const [hovered, setHovered] = useState(false);
-
   return (
-    <div
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        cursor: onClick ? "pointer" : "default",
-        transform: hovered ? "translateY(-2px)" : "translateY(0)",
-        transition: "transform 0.2s ease",
-      }}
-    >
-      <Card
-        className={className}
-        style={{
-          borderColor: hovered ? "var(--color-accent)" : "var(--color-border)",
-          boxShadow: hovered ? "0 8px 24px -8px rgba(245,166,35,0.25)" : "none",
-          ...style,
-        }}
-      >
-        {children}
-      </Card>
-    </div>
+    <Card onClick={onClick} className={className} style={style}>
+      {children}
+    </Card>
   );
 }

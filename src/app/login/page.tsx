@@ -144,24 +144,21 @@ export default function LoginPage() {
               Verification email resent.
             </p>
           ) : (
-            <button
+            <Button
               type="button"
+              variant="text"
               onClick={handleResend}
               disabled={resendStatus === "sending"}
               style={{
                 marginTop: 8,
-                background: "none",
-                border: "none",
-                padding: 0,
                 color: "var(--color-accent)",
                 fontSize: 13,
-                cursor: "pointer",
               }}
             >
               {resendStatus === "sending"
                 ? "Sending…"
                 : "Resend verification email"}
-            </button>
+            </Button>
           )}
         </div>
       )}

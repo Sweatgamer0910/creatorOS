@@ -15,6 +15,16 @@
   --font-mono: var(--font-jetbrains-mono);
 }
 
+/* RGB triplets of the two accent colors, for use inside rgba() glows below.
+   Kept as plain component vars (not derived from --color-accent via
+   relative-color syntax) so the glow renders identically across every
+   browser this app supports, instead of silently vanishing wherever
+   `rgb(from ...)` isn't implemented. */
+:root {
+  --glow-amber-rgb: 245, 166, 35;
+  --glow-teal-rgb: 45, 212, 191;
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-text);
@@ -35,4 +45,89 @@ body {
 .auth-input:focus {
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.18);
+}
+
+/* Signature interactive glow — the one shared implementation for every
+   button and clickable card (Button.tsx, Card.tsx's `interactive` mode,
+   and a few bespoke elements — NotchNav's nav icons, ScriptEditor's back
+   link — that apply the class directly because they can't route through
+   those components without losing their own layout/motion). Real
+   :hover/:focus-visible pseudo-classes rather than JS-driven hover state,
+   same reasoning as .auth-input above: only real CSS gets native
+   focus-visible semantics (no ring on mouse-click focus, a ring on
+   keyboard focus) for free.
+   Color is swapped via --glow-rgb so the same class serves both the amber
+   primary accent and the teal secondary accent — set .glow-teal to switch. */
+.glow-interactive {
+  --glow-rgb: var(--glow-amber-rgb);
+  /* Suppress the browser's default focus outline here (in CSS, not as an
+     inline style on the consumer) specifically so the :focus-visible rule
+     below — same selector, higher specificity via the pseudo-class — can
+     still turn it back on. An inline `outline: none` on the element would
+     permanently win over both rules regardless of which comes later. */
+  outline: none;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+.glow-interactive.glow-teal {
+  --glow-rgb: var(--glow-teal-rgb);
+}
+.glow-interactive:hover,
+.glow-interactive:focus-visible {
+  transform: translateY(-2px);
+  /* !important: a few consumers (e.g. AuthShell) set their own resting
+     box-shadow as an inline style for depth (a plain drop shadow, not a
+     hover state) — inline styles otherwise beat any class rule regardless
+     of specificity, which was silently swallowing the glow on exactly
+     those cards. This is the signature effect; it should reliably win. */
+  box-shadow:
+    0 0 0 1px rgba(var(--glow-rgb), 0.45),
+    0 0 20px -2px rgba(var(--glow-rgb), 0.5),
+    0 12px 28px -14px rgba(var(--glow-rgb), 0.4) !important;
+}
+.glow-interactive:active {
+  transform: translateY(0) scale(0.97);
+}
+.glow-interactive:focus-visible {
+  outline: 2px solid rgba(var(--glow-rgb), 0.6);
+  outline-offset: 2px;
+}
+.glow-interactive:disabled,
+.glow-interactive[aria-disabled="true"] {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* A lighter equivalent for plain-text buttons/links (e.g. "Back to
+   scripts") — a full box-shadow bloom reads as too heavy on inline text,
+   but focus-visible must still be unmistakable, so this keeps a visible
+   outline and a color shift instead of the glow's transform/shadow. */
+.glow-text {
+  outline: none;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+.glow-text:hover {
+  opacity: 0.8;
+}
+.glow-text:focus-visible {
+  outline: 2px solid rgba(var(--glow-amber-rgb), 0.6);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-interactive {
+    transition:
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .glow-interactive:hover,
+  .glow-interactive:focus-visible,
+  .glow-interactive:active {
+    transform: none;
+  }
 }

@@ -8,6 +8,7 @@ import { BarChart3, Sparkles, Lightbulb, FileText, Kanban } from "lucide-react";
 import ConnectYouTubeButton from "./ConnectYouTubeButton";
 import SignalBar from "./SignalBar";
 import QuickAccessCard from "./QuickAccessCard";
+import Card from "@/components/ui/Card";
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -39,13 +40,7 @@ export default async function DashboardPage() {
         Good to see you, {firstName}
       </h1>
 
-      <div
-        className="mt-8 p-6 rounded-2xl flex items-center justify-between"
-        style={{
-          backgroundColor: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-        }}
-      >
+      <Card padding="lg" className="mt-8 flex items-center justify-between">
         <div>
           <div
             style={{
@@ -90,7 +85,7 @@ export default async function DashboardPage() {
           </p>
         </div>
         <SignalBar score={healthScore.score} />
-      </div>
+      </Card>
 
       <div className="mt-4">
         <ConnectYouTubeButton />

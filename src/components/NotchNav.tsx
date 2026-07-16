@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
 import Spinner from "./Spinner";
+import Button from "@/components/ui/button";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -41,14 +42,14 @@ function Tooltip({ label, show }: { label: string; show: boolean }) {
           transition={{ duration: 0.12 }}
           style={{
             position: "absolute",
-            top: "calc(100% + 10px)",
+            top: "calc(100% + 14px)",
             left: "50%",
             transform: "translateX(-50%)",
-            padding: "5px 10px",
-            borderRadius: 6,
+            padding: "7px 14px",
+            borderRadius: 8,
             backgroundColor: "var(--color-surface)",
             border: "1px solid var(--color-border)",
-            fontSize: 12,
+            fontSize: 13,
             color: "var(--color-text)",
             whiteSpace: "nowrap",
             zIndex: 20,
@@ -84,7 +85,7 @@ function NavIcon({
     return val - (bounds.x + bounds.width / 2);
   });
 
-  const widthSync = useTransform(distance, [-150, 0, 150], [36, 56, 36]);
+  const widthSync = useTransform(distance, [-150, 0, 150], [50, 78, 50]);
   const width = useSpring(widthSync, {
     mass: 0.1,
     stiffness: 200,
@@ -104,7 +105,13 @@ function NavIcon({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.6 }}
       transition={{ duration: 0.15 }}
-      className="flex items-center justify-center rounded-full"
+      // glow-interactive's lift (translateY on :hover) is superseded by
+      // Framer Motion's own inline transform (it owns `transform` here via
+      // the `scale` animation above — inline style always wins over a CSS
+      // pseudo-class) so only the box-shadow/outline glow actually shows.
+      // That's the correct outcome: this button already has its own
+      // width-spring motion, it doesn't need a second lift animation.
+      className="flex items-center justify-center rounded-full glow-interactive"
     >
       <Tooltip label={item.label} show={hovered} />
       <div
@@ -116,9 +123,9 @@ function NavIcon({
         }}
       >
         {isActive && isPending ? (
-          <Spinner size={16} variant="dark" />
+          <Spinner size={22} variant="dark" />
         ) : (
-          <Icon size={18} color={isActive ? "#0e1116" : "var(--color-text)"} />
+          <Icon size={24} color={isActive ? "#0e1116" : "var(--color-text)"} />
         )}
       </div>
     </motion.button>
@@ -159,7 +166,7 @@ export default function NotchNav() {
     return null;
 
   return (
-    <div className="fixed top-4 left-0 right-0 flex justify-center z-50">
+    <div className="fixed top-6 left-0 right-0 flex justify-center z-50">
       <motion.div
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => {
@@ -168,12 +175,12 @@ export default function NotchNav() {
         }}
         onMouseMove={(e) => mouseX.set(e.clientX)}
         animate={{
-          width: expanded ? "auto" : 48,
-          paddingLeft: expanded ? 12 : 0,
-          paddingRight: expanded ? 12 : 0,
+          width: expanded ? "auto" : 68,
+          paddingLeft: expanded ? 18 : 0,
+          paddingRight: expanded ? 18 : 0,
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="flex items-center gap-2 h-12 rounded-full overflow-visible"
+        className="flex items-center gap-3 h-17 rounded-full overflow-visible"
         style={{
           backgroundColor: "var(--color-surface)",
           border: "1px solid var(--color-border)",
@@ -191,12 +198,12 @@ export default function NotchNav() {
               style={{ backgroundColor: "var(--color-accent)" }}
             >
               <div
-                className="w-2 h-2 rounded-full"
+                className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: "#0e1116" }}
               />
             </motion.div>
           ) : (
-            <motion.div key="items" className="flex items-center gap-2">
+            <motion.div key="items" className="flex items-center gap-3">
               {navItems.map((item) => (
                 <NavIcon
                   key={item.href}
@@ -208,7 +215,7 @@ export default function NotchNav() {
                 />
               ))}
               <div
-                className="w-px h-6 mx-1"
+                className="w-px h-9 mx-1.5"
                 style={{ backgroundColor: "var(--color-border)" }}
               />
               <div
@@ -217,17 +224,24 @@ export default function NotchNav() {
                 onMouseLeave={() => setLogoutHovered(false)}
               >
                 <Tooltip label="Log out" show={logoutHovered} />
-                <button
+                <Button
+                  variant="ghost"
+                  iconOnly
                   onClick={handleLogout}
-                  className="flex items-center justify-center rounded-full w-9 h-9"
-                  style={{ backgroundColor: "var(--color-surface-hover)" }}
+                  aria-label="Log out"
+                  style={{
+                    width: 50,
+                    height: 50,
+                    border: "none",
+                    backgroundColor: "var(--color-surface-hover)",
+                  }}
                 >
                   {isPending && pendingKey === "logout" ? (
-                    <Spinner size={14} />
+                    <Spinner size={18} />
                   ) : (
-                    <LogOut size={16} color="var(--color-text-muted)" />
+                    <LogOut size={22} color="var(--color-text-muted)" />
                   )}
-                </button>
+                </Button>
               </div>
             </motion.div>
           )}
