@@ -13,13 +13,13 @@ export default async function IdeasPage() {
   const ideas = await getIdeas();
 
   return (
-    <div style={{ padding: "20px 40px 40px", maxWidth: 800, margin: "0 auto" }}>
-      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>Idea Lab</p>
+    <div style={{ padding: "24px 40px 48px", maxWidth: 900, margin: "0 auto" }}>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>Idea Lab</p>
       <h1
         style={{
           fontFamily: "var(--font-display)",
-          fontSize: 32,
-          marginTop: 4,
+          fontSize: "clamp(30px, 3.5vw, 38px)",
+          marginTop: 6,
         }}
       >
         Your ideas
@@ -27,13 +27,15 @@ export default async function IdeasPage() {
       <p
         style={{
           color: "var(--color-text-muted)",
-          fontSize: 14,
-          marginTop: 8,
-          maxWidth: 500,
+          fontSize: 16,
+          marginTop: 10,
+          maxWidth: 640,
+          lineHeight: 1.6,
         }}
       >
-        Capture video ideas as they come to you. AI-assisted suggestions are
-        coming soon.
+        The best video ideas rarely show up when you&apos;re sitting down to plan
+        content — capture them the moment they hit, then come back and turn
+        the good ones into scripts. AI-assisted suggestions are coming soon.
       </p>
 
       <div className="mt-8">

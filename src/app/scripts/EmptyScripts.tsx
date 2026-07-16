@@ -3,19 +3,19 @@ import { FileText } from "lucide-react";
 export default function EmptyScripts() {
   return (
     <div
-      className="flex flex-col items-center text-center py-16 px-6 rounded-2xl"
+      className="flex flex-col items-center text-center py-20 px-6 rounded-2xl"
       style={{ border: "1px dashed var(--color-border)" }}
     >
       <div
-        className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+        className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
         style={{ backgroundColor: "var(--color-surface-hover)" }}
       >
-        <FileText size={22} color="var(--color-accent)" />
+        <FileText size={28} color="var(--color-accent)" />
       </div>
       <h3
         style={{
           fontFamily: "var(--font-display)",
-          fontSize: 16,
+          fontSize: 20,
           fontWeight: 600,
         }}
       >
@@ -23,14 +23,16 @@ export default function EmptyScripts() {
       </h3>
       <p
         style={{
-          fontSize: 13,
+          fontSize: 15,
           color: "var(--color-text-muted)",
-          marginTop: 6,
-          maxWidth: 280,
+          marginTop: 8,
+          maxWidth: 360,
+          lineHeight: 1.6,
         }}
       >
-        Start with a title above — you can fill in the hook, intro, body, and
-        outro once it&apos;s created.
+        Start with a title above, then fill in the hook, intro, body, and
+        outro section by section. Every field autosaves as you type, so
+        there&apos;s no &quot;save&quot; button to remember.
       </p>
     </div>
   );

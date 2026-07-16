@@ -16,17 +16,17 @@ export default async function ScriptsPage() {
   const scripts = await getScripts();
 
   return (
-    <div style={{ padding: "20px 40px 40px", maxWidth: 800, margin: "0 auto" }}>
+    <div style={{ padding: "24px 40px 48px", maxWidth: 900, margin: "0 auto" }}>
       <div className="flex items-center justify-between">
         <div>
-          <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
+          <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>
             Script Studio
           </p>
           <h1
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: 32,
-              marginTop: 4,
+              fontSize: "clamp(30px, 3.5vw, 38px)",
+              marginTop: 6,
             }}
           >
             Your scripts
@@ -43,12 +43,15 @@ export default async function ScriptsPage() {
       <p
         style={{
           color: "var(--color-text-muted)",
-          fontSize: 14,
-          marginTop: 8,
-          maxWidth: 500,
+          fontSize: 16,
+          marginTop: 10,
+          maxWidth: 640,
+          lineHeight: 1.6,
         }}
       >
-        Draft scripts section by section. AI-assisted writing is coming soon.
+        Draft hook, intro, body, and outro section by section instead of
+        staring at one blank page — each piece autosaves as you write.
+        AI-assisted writing is coming soon.
       </p>
 
       <div className="mt-8">

@@ -1,9 +1,30 @@
 # Landing page hero
 
-## v1: plain static hero (current)
+## v1.1: static hero + reactive 3D orb accent (current)
 
-`src/components/landing/Hero.tsx`. No scroll-jacking, no pinned sequence, no generated
-imagery. Just the name, punchline, subcopy, and the two CTAs, in normal document flow above
+`src/components/landing/Hero.tsx` is still the static text hero (name, punchline, subcopy,
+two CTAs, in normal document flow) — no scroll-jacking, no pinned sequence, no camera
+sequence. The one addition is `src/components/landing/HeroOrb.tsx`: a single reactive 3D
+object (Spline, `@splinetool/react-spline`), positioned as a background accent to the right
+of the text on `xl:` viewports and up, hidden below that breakpoint and under
+`prefers-reduced-motion`.
+
+The orb is remixed from Spline's community "Reactive Orb" template onto the site's real
+palette (`#000` / `#171B22` / `#F5A623` / `#2DD4BF`), keeps its native pointer-reactivity,
+and additionally has a slow, bounded scroll-linked rotation (see `HeroOrb.tsx` for the
+rotation math — capped drift over the first ~1200px of scroll, not a free spin). The
+template's own baked-in headline/CTA/background layers were hidden inside Spline before
+export specifically so they don't duplicate the real HTML hero text — the orb canvas ships
+containing only the reactive sphere.
+
+This is deliberately **not** a scroll-scrubbed camera sequence, and doesn't reopen the
+WebGL-camera question closed below. It's a single static 3D object with light pointer/scroll
+reactivity — a much smaller performance surface than a scroll-jacked shot, and the real hero
+copy stays real, selectable, accessible HTML rather than baked into a canvas.
+
+## v1: plain static hero (superseded by v1.1 above)
+
+Just the name, punchline, subcopy, and the two CTAs, in normal document flow above
 the fixed `Starfield` background. Scrolling past it reaches the existing 3-card feature grid
 (`TiltCard` + `GlassPanel`, in `src/app/page.tsx`) and the footer. This is the whole v1
 landing hero — no other moving parts.
@@ -37,3 +58,8 @@ Don't restart from either removed approach's code — read this file and
 `cinematic-hero-design.md` (marked superseded, but the narrative/camera-language sections are
 still a reasonable starting point) for what was tried and why it broke, then scope a new
 attempt as its own reviewed unit of work rather than folding it into an unrelated task.
+
+The v1.1 orb (above) is not that attempt — it's a static object with light reactivity, not a
+camera sequence, and doesn't touch the WebGL-scroll-camera question this section is about.
+`cinematic-hero-design.md`'s Nova-journey narrative and beat structure are still there,
+unbuilt, if a real scoped pass at the full sequence happens later.

@@ -7,6 +7,10 @@ import { ArrowRight } from "lucide-react";
 // pinned cinematic camera sequence and didn't hold up — overlapping UI,
 // no real continuity between beats. This is the plain, reliable version:
 // name, punchline, CTAs, then scroll to the feature cards below.
+//
+// A HeroOrb (Spline 3D accent) was wired in here briefly — pulled back out
+// deliberately for now, not deleted (still in ./HeroOrb.tsx, unused) so the
+// fix already applied to it isn't lost when it comes back.
 export default function Hero() {
   return (
     <section

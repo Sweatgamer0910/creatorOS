@@ -2,6 +2,8 @@
 // Single source of truth for spacing, typography, and radius scales.
 // Never use arbitrary values outside these scales in new components.
 
+import type { CSSProperties } from "react";
+
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -45,3 +47,28 @@ export const motion = {
   base: 0.2,
   slow: 0.25,
 } as const;
+
+// The two card surface treatments (Card.tsx's `variant`, and GlassPanel,
+// which reuses `flat` without rendering Card itself). Lives here — a plain
+// module with no "use client" — rather than in Card.tsx itself: Card.tsx
+// IS a Client Component (it has onClick/onKeyDown), and a Server Component
+// importing a named non-component export from a "use client" module gets
+// a client-reference stub instead of the real value in Next's RSC bundler,
+// not the plain object. That silently produced `undefined` wherever a
+// Server Component (like GlassPanel, and the page.tsx that renders it)
+// tried to read `cardSurfaceStyle.flat` — the object spread of `undefined`
+// is a silent no-op, so the card rendered with none of its background/
+// border styling and no error anywhere. Plain data modules don't have
+// this problem in either direction.
+export const cardSurfaceStyle: Record<"flat" | "glass", CSSProperties> = {
+  flat: {
+    backgroundColor: "var(--color-surface)",
+    border: "1px solid var(--color-border)",
+  },
+  glass: {
+    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    backdropFilter: "blur(20px)",
+    WebkitBackdropFilter: "blur(20px)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+  },
+};

@@ -36,21 +36,33 @@ export default async function AnalyticsPage({
 
   return (
     <div
-      style={{ padding: "20px 40px 60px", maxWidth: 1100, margin: "0 auto" }}
+      style={{ padding: "24px 40px 64px", maxWidth: 1160, margin: "0 auto" }}
     >
-      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>
         Analytics
       </p>
       <h1
         style={{
           fontFamily: "var(--font-display)",
-          fontSize: 32,
-          marginTop: 4,
-          marginBottom: 20,
+          fontSize: "clamp(30px, 3.5vw, 38px)",
+          marginTop: 6,
         }}
       >
         {data?.channelTitle ?? "Loading..."}
       </h1>
+      <p
+        style={{
+          color: "var(--color-text-muted)",
+          fontSize: 16,
+          marginTop: 10,
+          marginBottom: 20,
+          maxWidth: 640,
+          lineHeight: 1.6,
+        }}
+      >
+        Real performance data pulled from YouTube — or a realistic mock
+        dataset while you&apos;re still connecting your channel.
+      </p>
 
       <div className="flex items-center gap-3 flex-wrap">
         <SourceSwitcher current={useReal ? "real" : "mock"} />

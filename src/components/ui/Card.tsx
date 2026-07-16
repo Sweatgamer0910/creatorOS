@@ -1,6 +1,6 @@
 "use client";
 
-import { spacing, radius } from "@/lib/design-tokens";
+import { spacing, radius, cardSurfaceStyle } from "@/lib/design-tokens";
 
 type Variant = "flat" | "glass";
 type Padding = "sm" | "md" | "lg";
@@ -31,23 +31,6 @@ const paddingMap: Record<Padding, number> = {
   sm: spacing.base,
   md: spacing.lg,
   lg: spacing.xl,
-};
-
-// The two surface treatments, exported so components that need the same
-// glass/flat look but not Card's own padding/interactivity contract (e.g.
-// GlassPanel, which lets callers control padding via className) can reuse
-// the exact values instead of re-declaring them.
-export const cardSurfaceStyle: Record<Variant, React.CSSProperties> = {
-  flat: {
-    backgroundColor: "var(--color-surface)",
-    border: "1px solid var(--color-border)",
-  },
-  glass: {
-    backgroundColor: "rgba(255, 255, 255, 0.04)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
-  },
 };
 
 export default function Card({

@@ -25,26 +25,39 @@ export default async function DashboardPage() {
 
   return (
     <div
-      style={{ padding: "20px 40px 40px", maxWidth: 1000, margin: "0 auto" }}
+      style={{ padding: "24px 40px 48px", maxWidth: 1160, margin: "0 auto" }}
     >
-      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>
         {workspace?.name ?? "Your workspace"}
       </p>
       <h1
         style={{
           fontFamily: "var(--font-display)",
-          fontSize: 32,
-          marginTop: 4,
+          fontSize: "clamp(30px, 3.5vw, 38px)",
+          marginTop: 6,
         }}
       >
         Good to see you, {firstName}
       </h1>
+      <p
+        style={{
+          color: "var(--color-text-muted)",
+          fontSize: 16,
+          marginTop: 10,
+          maxWidth: 640,
+          lineHeight: 1.6,
+        }}
+      >
+        Here&apos;s where your channel stands right now, plus quick access to
+        every tool — analytics, coaching, ideas, scripts, and your upload
+        pipeline.
+      </p>
 
       <Card padding="lg" className="mt-8 flex items-center justify-between">
         <div>
           <div
             style={{
-              fontSize: 13,
+              fontSize: 14,
               color: "var(--color-text-muted)",
               textTransform: "uppercase",
               letterSpacing: 1,
@@ -57,28 +70,29 @@ export default async function DashboardPage() {
               display: "flex",
               alignItems: "baseline",
               gap: 12,
-              marginTop: 6,
+              marginTop: 8,
             }}
           >
             <span
               style={{
                 fontFamily: "var(--font-mono)",
-                fontSize: 40,
+                fontSize: 48,
                 fontWeight: 700,
               }}
             >
               {healthScore.score}
             </span>
-            <span style={{ fontFamily: "var(--font-display)", fontSize: 18 }}>
+            <span style={{ fontFamily: "var(--font-display)", fontSize: 20 }}>
               {healthScore.label}
             </span>
           </div>
           <p
             style={{
-              fontSize: 13,
+              fontSize: 14,
               color: "var(--color-text-muted)",
-              marginTop: 8,
-              maxWidth: 400,
+              marginTop: 10,
+              maxWidth: 440,
+              lineHeight: 1.5,
             }}
           >
             {healthScore.summary}
@@ -94,8 +108,8 @@ export default async function DashboardPage() {
       <h2
         style={{
           fontFamily: "var(--font-display)",
-          fontSize: 18,
-          marginTop: 40,
+          fontSize: 22,
+          marginTop: 48,
           marginBottom: 16,
         }}
       >

@@ -6,6 +6,7 @@ import { getHealthScore } from "@/lib/health-score";
 import { getCoachResponse } from "@/lib/growth-coach";
 import InsightCard from "./InsightCard";
 import ScenarioSwitcher from "./ScenarioSwitcher";
+import HealthScoreCard from "@/app/analytics/HealthScoreCard";
 
 export default async function CoachPage({
   searchParams,
@@ -24,24 +25,34 @@ export default async function CoachPage({
   const coachResponse = await getCoachResponse(data, healthScore);
 
   return (
-    <div style={{ padding: "20px 40px 40px", maxWidth: 700, margin: "0 auto" }}>
-      <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
+    <div style={{ padding: "24px 40px 48px", maxWidth: 900, margin: "0 auto" }}>
+      <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>
         Growth Coach
       </p>
       <h1
         style={{
           fontFamily: "var(--font-display)",
-          fontSize: 32,
-          marginTop: 4,
+          fontSize: "clamp(30px, 3.5vw, 38px)",
+          marginTop: 6,
         }}
       >
         Insights for {data.channelTitle}
       </h1>
       <p
-        style={{ color: "var(--color-text-muted)", fontSize: 14, marginTop: 8 }}
+        style={{
+          color: "var(--color-text-muted)",
+          fontSize: 16,
+          marginTop: 10,
+          maxWidth: 640,
+          lineHeight: 1.6,
+        }}
       >
-        Based on your recent analytics and Health Score.
+        Every insight below is read straight off your recent analytics and
+        Health Score — labeled by confidence, and never dressed up as more
+        certain than the data actually supports.
       </p>
+
+      <HealthScoreCard healthScore={healthScore} />
 
       <ScenarioSwitcher current={validScenario} />
 
