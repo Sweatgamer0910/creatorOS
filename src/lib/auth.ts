@@ -15,6 +15,33 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    sendResetPassword: async ({ user, url }) => {
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: "Reset your CreatorOS password",
+          html: `
+            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+              <h2 style="color: #0e1116;">Reset your password</h2>
+              <p style="color: #444;">
+                Someone requested a password reset for ${user.email}. If this
+                wasn't you, you can ignore this email.
+              </p>
+              <p>
+                <a href="${url}" style="display: inline-block; margin-top: 12px; padding: 10px 20px; background: #f5a623; color: #000; text-decoration: none; border-radius: 8px; font-weight: 600;">
+                  Reset password
+                </a>
+              </p>
+              <p style="color: #888; font-size: 13px; margin-top: 24px;">
+                Or paste this link into your browser: ${url}
+              </p>
+            </div>
+          `,
+        });
+      } catch (err) {
+        console.error("[auth] Failed to send reset-password email:", err);
+      }
+    },
   },
   emailVerification: {
     sendOnSignUp: true,

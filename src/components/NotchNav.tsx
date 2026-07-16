@@ -149,7 +149,13 @@ export default function NotchNav() {
     });
   }
 
-  if (pathname === "/login" || pathname === "/signup" || pathname === "/")
+  if (
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password" ||
+    pathname === "/"
+  )
     return null;
 
   return (

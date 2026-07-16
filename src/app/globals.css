@@ -19,3 +19,20 @@ body {
   background-color: var(--color-background);
   color: var(--color-text);
 }
+
+/* Auth forms (login/signup/forgot-password/reset-password) — plain inline
+   styles can't express :focus, so this is the one hand-authored class in
+   an otherwise inline-style codebase. Without it these inputs had no
+   visible focus state at all (outline: none, nothing replacing it). */
+.auth-input {
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.auth-input::placeholder {
+  color: var(--color-text-muted);
+}
+.auth-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.18);
+}

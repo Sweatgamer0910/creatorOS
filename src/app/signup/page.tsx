@@ -1,65 +1,112 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signUp } from "@/lib/auth-client";
-import Card from "@/components/ui/Card";
 import Button from "@/components/ui/button";
-import { inputStyle, authPageStyle, authFormStyle } from "../auth-form.styles";
+import AuthShell from "@/components/auth/AuthShell";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+import {
+  authFormStyle,
+  fieldStyle,
+  labelStyle,
+  inputStyle,
+  errorBoxStyle,
+  successBoxStyle,
+  linkStyle,
+  dividerRowStyle,
+  dividerLineStyle,
+  dividerTextStyle,
+} from "../auth-form.styles";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  // requireEmailVerification is on (src/lib/auth.ts), so a successful
+  // signUp.email() does NOT create a session or return an error — there's
+  // nothing to redirect to yet. Show an inline "check your email" state
+  // instead of the old router.push("/dashboard"), which would just bounce
+  // straight back to /login via middleware.
+  const [submittedEmail, setSubmittedEmail] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
+    setError("");
 
     const { error } = await signUp.email({ name, email, password });
 
     if (error) {
-      setMessage(error.message ?? "Something went wrong. Try again.");
+      setError(error.message ?? "Something went wrong. Try again.");
       setLoading(false);
     } else {
-      router.push("/dashboard");
+      setSubmittedEmail(email);
+      setLoading(false);
     }
   }
 
+  if (submittedEmail) {
+    return (
+      <AuthShell title="Check your email">
+        <p style={successBoxStyle}>
+          We sent a verification link to <strong>{submittedEmail}</strong>.
+          Confirm it to finish setting up your account, then{" "}
+          <Link href="/login" style={linkStyle}>
+            log in
+          </Link>
+          .
+        </p>
+      </AuthShell>
+    );
+  }
+
   return (
-    <div style={authPageStyle}>
-      <Card
-        variant="glass"
-        padding="lg"
-        style={{ maxWidth: 400, width: "100%" }}
-      >
-        <h1
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 24,
-            fontWeight: 600,
-            color: "#fff",
-            marginBottom: 24,
-          }}
-        >
-          Sign up for CreatorOS
-        </h1>
-        <form onSubmit={handleSubmit} style={authFormStyle}>
+    <AuthShell
+      title="Create your account"
+      subtitle="Start managing your channel with CreatorOS"
+      footer={
+        <>
+          Already have an account?{" "}
+          <Link href="/login" style={linkStyle}>
+            Log in
+          </Link>
+        </>
+      }
+    >
+      <GoogleSignInButton label="Sign up with Google" />
+
+      <div style={dividerRowStyle}>
+        <div style={dividerLineStyle} />
+        <span style={dividerTextStyle}>OR</span>
+        <div style={dividerLineStyle} />
+      </div>
+
+      <form onSubmit={handleSubmit} style={authFormStyle}>
+        <div style={fieldStyle}>
+          <label style={labelStyle} htmlFor="name">
+            Name
+          </label>
           <input
-            placeholder="Name"
+            id="name"
+            className="auth-input"
             required
             autoComplete="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             style={inputStyle}
           />
+        </div>
+
+        <div style={fieldStyle}>
+          <label style={labelStyle} htmlFor="email">
+            Email
+          </label>
           <input
-            placeholder="Email"
+            id="email"
+            className="auth-input"
             type="email"
             required
             autoComplete="email"
@@ -67,37 +114,31 @@ export default function SignupPage() {
             onChange={(e) => setEmail(e.target.value)}
             style={inputStyle}
           />
+        </div>
+
+        <div style={fieldStyle}>
+          <label style={labelStyle} htmlFor="password">
+            Password
+          </label>
           <input
-            placeholder="Password"
+            id="password"
+            className="auth-input"
             type="password"
             required
             autoComplete="new-password"
+            minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             style={inputStyle}
           />
-          <Button type="submit" loading={loading} style={{ marginTop: 8 }}>
-            Create account
-          </Button>
-        </form>
-        {message && (
-          <p style={{ color: "#e35d5d", fontSize: 13, marginTop: 16 }}>
-            {message}
-          </p>
-        )}
-        <p
-          style={{
-            fontSize: 13,
-            color: "rgba(255,255,255,0.5)",
-            marginTop: 20,
-          }}
-        >
-          Already have an account?{" "}
-          <Link href="/login" style={{ color: "var(--color-accent)" }}>
-            Log in
-          </Link>
-        </p>
-      </Card>
-    </div>
+        </div>
+
+        <Button type="submit" loading={loading} style={{ marginTop: 4 }}>
+          Create account
+        </Button>
+      </form>
+
+      {error && <p style={{ ...errorBoxStyle, marginTop: 16 }}>{error}</p>}
+    </AuthShell>
   );
 }

@@ -3,54 +3,91 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "@/lib/auth-client";
-import Card from "@/components/ui/Card";
+import { signIn, sendVerificationEmail } from "@/lib/auth-client";
 import Button from "@/components/ui/button";
-import { inputStyle, authPageStyle, authFormStyle } from "../auth-form.styles";
+import AuthShell from "@/components/auth/AuthShell";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+import {
+  authFormStyle,
+  fieldStyle,
+  labelStyle,
+  inputStyle,
+  errorBoxStyle,
+  linkStyle,
+  dividerRowStyle,
+  dividerLineStyle,
+  dividerTextStyle,
+} from "../auth-form.styles";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [unverified, setUnverified] = useState(false);
+  const [resendStatus, setResendStatus] = useState<"idle" | "sending" | "sent">(
+    "idle",
+  );
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
+    setError("");
+    setUnverified(false);
 
     const { error } = await signIn.email({ email, password });
 
     if (error) {
-      setMessage(error.message ?? "Something went wrong. Try again.");
+      // better-auth throws this specific message when the account exists
+      // but hasn't confirmed its email yet (see requireEmailVerification
+      // in src/lib/auth.ts) — surface a resend action instead of a dead end.
+      if (error.message === "Email not verified") {
+        setUnverified(true);
+      } else {
+        setError(error.message ?? "Something went wrong. Try again.");
+      }
       setLoading(false);
     } else {
       router.push("/dashboard");
     }
   }
 
+  async function handleResend() {
+    setResendStatus("sending");
+    await sendVerificationEmail({ email });
+    setResendStatus("sent");
+  }
+
   return (
-    <div style={authPageStyle}>
-      <Card
-        variant="glass"
-        padding="lg"
-        style={{ maxWidth: 400, width: "100%" }}
-      >
-        <h1
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 24,
-            fontWeight: 600,
-            color: "#fff",
-            marginBottom: 24,
-          }}
-        >
-          Log in to CreatorOS
-        </h1>
-        <form onSubmit={handleSubmit} style={authFormStyle}>
+    <AuthShell
+      title="Welcome back"
+      subtitle="Log in to your CreatorOS account"
+      footer={
+        <>
+          Don&apos;t have an account?{" "}
+          <Link href="/signup" style={linkStyle}>
+            Sign up
+          </Link>
+        </>
+      }
+    >
+      <GoogleSignInButton label="Continue with Google" />
+
+      <div style={dividerRowStyle}>
+        <div style={dividerLineStyle} />
+        <span style={dividerTextStyle}>OR</span>
+        <div style={dividerLineStyle} />
+      </div>
+
+      <form onSubmit={handleSubmit} style={authFormStyle}>
+        <div style={fieldStyle}>
+          <label style={labelStyle} htmlFor="email">
+            Email
+          </label>
           <input
-            placeholder="Email"
+            id="email"
+            className="auth-input"
             type="email"
             required
             autoComplete="email"
@@ -58,8 +95,29 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             style={inputStyle}
           />
+        </div>
+
+        <div style={fieldStyle}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+            }}
+          >
+            <label style={labelStyle} htmlFor="password">
+              Password
+            </label>
+            <Link
+              href="/forgot-password"
+              style={{ ...linkStyle, fontSize: 13 }}
+            >
+              Forgot password?
+            </Link>
+          </div>
           <input
-            placeholder="Password"
+            id="password"
+            className="auth-input"
             type="password"
             required
             autoComplete="current-password"
@@ -67,28 +125,46 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
             style={inputStyle}
           />
-          <Button type="submit" loading={loading} style={{ marginTop: 8 }}>
-            Log in
-          </Button>
-        </form>
-        {message && (
-          <p style={{ color: "#e35d5d", fontSize: 13, marginTop: 16 }}>
-            {message}
+        </div>
+
+        <Button type="submit" loading={loading} style={{ marginTop: 4 }}>
+          Log in
+        </Button>
+      </form>
+
+      {error && <p style={{ ...errorBoxStyle, marginTop: 16 }}>{error}</p>}
+
+      {unverified && (
+        <div style={{ ...errorBoxStyle, marginTop: 16 }}>
+          <p>
+            Your email isn&apos;t verified yet. Check your inbox for the link.
           </p>
-        )}
-        <p
-          style={{
-            fontSize: 13,
-            color: "rgba(255,255,255,0.5)",
-            marginTop: 20,
-          }}
-        >
-          Don&apos;t have an account?{" "}
-          <Link href="/signup" style={{ color: "var(--color-accent)" }}>
-            Sign up
-          </Link>
-        </p>
-      </Card>
-    </div>
+          {resendStatus === "sent" ? (
+            <p style={{ marginTop: 8, color: "#7fd8b8" }}>
+              Verification email resent.
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={resendStatus === "sending"}
+              style={{
+                marginTop: 8,
+                background: "none",
+                border: "none",
+                padding: 0,
+                color: "var(--color-accent)",
+                fontSize: 13,
+                cursor: "pointer",
+              }}
+            >
+              {resendStatus === "sending"
+                ? "Sending…"
+                : "Resend verification email"}
+            </button>
+          )}
+        </div>
+      )}
+    </AuthShell>
   );
 }

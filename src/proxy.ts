@@ -10,7 +10,13 @@ import { getSessionCookie } from "better-auth/cookies";
 // NOT replace the per-page `auth.api.getSession()` checks — those still
 // validate the session for real and scope data to the workspace; this is
 // just the first, cheap gate.
-const PUBLIC_PATHS = ["/", "/login", "/signup"];
+const PUBLIC_PATHS = [
+  "/",
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
