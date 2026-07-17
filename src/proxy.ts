@@ -18,6 +18,18 @@ const PUBLIC_PATHS = [
   "/reset-password",
 ];
 
+// Any request for a file with an extension (.glb, .svg, .png, .woff2, ...)
+// is a static asset from public/, never a protected page or API route —
+// this app's page routes never have extensions in their paths. Checking
+// this generically, instead of adding each new asset to PUBLIC_PATHS by
+// hand, is what this fixes: the landing page's 3D scene fetches
+// /models/nova.glb client-side, that path wasn't in PUBLIC_PATHS, so
+// every anonymous visitor got redirected to /login mid-request — the
+// browser tried to parse the returned /login HTML as a binary model and
+// the whole page crashed. A file-extension check can't go stale the same
+// way an exact-path allowlist does.
+const STATIC_FILE_PATTERN = /\.[a-zA-Z0-9]+$/;
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -25,7 +37,8 @@ export function proxy(request: NextRequest) {
     PUBLIC_PATHS.includes(pathname) ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon")
+    pathname.startsWith("/favicon") ||
+    STATIC_FILE_PATTERN.test(pathname)
   ) {
     return NextResponse.next();
   }

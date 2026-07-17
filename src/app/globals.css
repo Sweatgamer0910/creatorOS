@@ -25,9 +25,32 @@
   --glow-teal-rgb: 45, 212, 191;
 }
 
+/* Smooth in-page scrolling for the landing nav's anchor links (Product/
+   Features/How AI works) — native CSS, no JS scroll library needed.
+   Gated on prefers-reduced-motion: no-preference, matching how every
+   other animated thing in this app already treats that setting. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-text);
+  /* Guards against decorative elements (background grids, glow blobs)
+     bleeding past the viewport edge on narrow screens. Deliberately here
+     and not on a page-level wrapper div: setting `overflow-x` on an
+     element implicitly computes its `overflow-y` to `auto` per the CSS
+     Overflow spec, which turns that element into a scroll container —
+     and any `position: sticky` descendant then sticks relative to THAT
+     container instead of the real viewport. Since this element never
+     actually scrolls internally (its height just grows with content),
+     sticky inside it silently never engages. Cost the landing page's
+     workspace-assembly section its entire sticky-pinned scroll sequence
+     before this was traced down to here.
+     Applying it to `body` avoids creating any such wrapper. */
+  overflow-x: hidden;
 }
 
 /* Auth forms (login/signup/forgot-password/reset-password) — plain inline

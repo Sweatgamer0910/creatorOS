@@ -36,6 +36,12 @@ export default function TiltCard({
     useTransform(y, [-0.5, 0.5], ["-20%", "120%"]),
     springConfig,
   );
+  // Separate from glowX/glowY: those just reposition the glow (it was
+  // always visible, sitting at the card's center at rest instead of
+  // hidden). This fades it in only while actively hovering, and back out
+  // — not just back to center — once the cursor leaves.
+  const glowOpacity = useMotionValue(0);
+  const glowOpacitySpring = useSpring(glowOpacity, { stiffness: 200, damping: 25 });
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     if (prefersReducedMotion) return;
@@ -43,11 +49,13 @@ export default function TiltCard({
     if (!bounds) return;
     x.set((e.clientX - bounds.left) / bounds.width - 0.5);
     y.set((e.clientY - bounds.top) / bounds.height - 0.5);
+    glowOpacity.set(1);
   }
 
   function handleMouseLeave() {
     x.set(0);
     y.set(0);
+    glowOpacity.set(0);
   }
 
   return (
@@ -55,6 +63,8 @@ export default function TiltCard({
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      whileHover={prefersReducedMotion ? undefined : { scale: 1.02 }}
+      transition={{ scale: { duration: 0.2, ease: "easeOut" } }}
       style={{
         rotateX,
         rotateY,
@@ -82,13 +92,14 @@ export default function TiltCard({
             height: 200,
             left: glowX,
             top: glowY,
+            opacity: glowOpacitySpring,
             translateX: "-50%",
             translateY: "-50%",
             borderRadius: "50%",
             background:
               "radial-gradient(circle, rgba(245,166,35,0.25) 0%, transparent 70%)",
             filter: "blur(20px)",
-            willChange: "transform",
+            willChange: "transform, opacity",
           }}
         />
       </div>
