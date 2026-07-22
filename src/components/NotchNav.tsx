@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import Image from "next/image";
 import {
   motion,
   AnimatePresence,
@@ -135,6 +136,7 @@ function NavIcon({
 export default function NotchNav() {
   const [expanded, setExpanded] = useState(false);
   const [pendingKey, setPendingKey] = useState<string | null>(null);
+  const [logoHovered, setLogoHovered] = useState(false);
   const [logoutHovered, setLogoutHovered] = useState(false);
   const mouseX = useMotionValue(Infinity);
   const pathname = usePathname();
@@ -204,6 +206,48 @@ export default function NotchNav() {
             </motion.div>
           ) : (
             <motion.div key="items" className="flex items-center gap-3">
+              <div
+                style={{ position: "relative" }}
+                onMouseEnter={() => setLogoHovered(true)}
+                onMouseLeave={() => setLogoHovered(false)}
+              >
+                <Tooltip label="Home" show={logoHovered} />
+                <Button
+                  variant="ghost"
+                  iconOnly
+                  onClick={() => handleNavigate("/dashboard")}
+                  aria-label="CreatorOS home"
+                  style={{
+                    width: 50,
+                    height: 50,
+                    padding: 0,
+                    border: "none",
+                    backgroundColor: "transparent",
+                    // Kept as the logo's own native rounded-square shape
+                    // (radius.md, the same token used elsewhere in the
+                    // design system) rather than iconOnly's usual full
+                    // circle — the asset itself is a self-contained
+                    // rounded-square mark, not a transparent glyph, so
+                    // masking it into a circle would crop it against its
+                    // own baked-in corners instead of matching them.
+                    borderRadius: 12,
+                    overflow: "hidden",
+                  }}
+                >
+                  <Image
+                    src="/logo.png"
+                    alt="CreatorOS"
+                    width={50}
+                    height={50}
+                    priority
+                    style={{ borderRadius: 12 }}
+                  />
+                </Button>
+              </div>
+              <div
+                className="w-px h-9 mx-1.5"
+                style={{ backgroundColor: "var(--color-border)" }}
+              />
               {navItems.map((item) => (
                 <NavIcon
                   key={item.href}

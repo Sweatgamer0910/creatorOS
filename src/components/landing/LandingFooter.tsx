@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function LandingFooter() {
   return (
     <footer
@@ -27,13 +29,14 @@ export default function LandingFooter() {
           color: "#F5F3EE",
         }}
       >
-        <span
+        <Image
+          src="/logo.png"
+          alt=""
+          width={26}
+          height={26}
           style={{
-            width: 22,
-            height: 22,
-            borderRadius: 6,
-            background: "linear-gradient(135deg, #F5A623, #D9861A)",
-            boxShadow: "0 0 18px rgba(245,166,35,0.55)",
+            borderRadius: 7,
+            boxShadow: "0 0 18px rgba(245,166,35,0.4)",
             flexShrink: 0,
           }}
         />
