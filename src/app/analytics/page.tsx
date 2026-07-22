@@ -1,37 +1,29 @@
 import { auth } from "@/lib/auth";
-import { getChannelAnalytics } from "@/lib/analytics";
-import { getYouTubeAnalytics } from "@/lib/analytics/youtubeProvider";
+import { getChannelAnalytics, isYouTubeConnected } from "@/lib/analytics";
 import { getHealthScore } from "@/lib/health-score";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import AnalyticsCharts from "./AnalyticsCharts";
-import ScenarioSwitcher from "./ScenarioSwitcher";
-import SourceSwitcher from "./SourceSwitcher";
 import HealthScoreCard from "./HealthScoreCard";
 import InteractiveCard from "@/components/ui/InteractiveCard";
+import ConnectYouTubePrompt from "@/components/ConnectYouTubePrompt";
+import ReconnectYouTubeNotice from "@/components/ReconnectYouTubeNotice";
 
-export default async function AnalyticsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ scenario?: string; source?: string }>;
-}) {
+export default async function AnalyticsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
-  const { scenario, source } = await searchParams;
-  const validScenario =
-    scenario === "declining" || scenario === "new" ? scenario : "growing";
-  const useReal = source === "real";
+  const connected = await isYouTubeConnected(session.user.id);
+  let data: Awaited<ReturnType<typeof getChannelAnalytics>> = null;
+  let fetchFailed = false;
 
-  let data;
-  let error: string | null = null;
-
-  try {
-    data = useReal
-      ? await getYouTubeAnalytics(session.user.id)
-      : await getChannelAnalytics(validScenario);
-  } catch (e) {
-    error = (e as Error).message;
+  if (connected) {
+    try {
+      data = await getChannelAnalytics(session.user.id);
+    } catch (e) {
+      console.error("[analytics] Failed to load channel analytics:", e);
+      fetchFailed = true;
+    }
   }
 
   return (
@@ -48,7 +40,7 @@ export default async function AnalyticsPage({
           marginTop: 6,
         }}
       >
-        {data?.channelTitle ?? "Loading..."}
+        {data?.channelTitle ?? "Analytics"}
       </h1>
       <p
         style={{
@@ -60,19 +52,13 @@ export default async function AnalyticsPage({
           lineHeight: 1.6,
         }}
       >
-        Real performance data pulled from YouTube — or a realistic mock
-        dataset while you&apos;re still connecting your channel.
+        Real performance data pulled directly from your connected YouTube
+        channel.
       </p>
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <SourceSwitcher current={useReal ? "real" : "mock"} />
-        {!useReal && <ScenarioSwitcher current={validScenario} />}
-      </div>
-
-      {error && (
-        <div style={{ color: "#e35d5d", marginTop: 16 }}>
-          Error loading real data: {error}
-        </div>
+      {!connected && <ConnectYouTubePrompt callbackURL="/analytics" />}
+      {connected && fetchFailed && (
+        <ReconnectYouTubeNotice callbackURL="/analytics" />
       )}
 
       {data && (
@@ -102,9 +88,9 @@ export default async function AnalyticsPage({
             />
           </div>
 
-          {data.last30Days.length > 0 ? (
+          {data.history.length > 0 ? (
             <div className="mt-8">
-              <AnalyticsCharts data={data.last30Days} />
+              <AnalyticsCharts data={data.history} />
             </div>
           ) : (
             <p style={{ color: "var(--color-text-muted)", marginTop: 40 }}>

@@ -1,14 +1,18 @@
+import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getChannelAnalytics } from "@/lib/analytics";
+import { getChannelAnalytics, isYouTubeConnected } from "@/lib/analytics";
 import { getHealthScore } from "@/lib/health-score";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { BarChart3, Sparkles, Lightbulb, FileText, Kanban } from "lucide-react";
-import ConnectYouTubeButton from "./ConnectYouTubeButton";
+import ConnectYouTubePrompt from "@/components/ConnectYouTubePrompt";
+import ReconnectYouTubeNotice from "@/components/ReconnectYouTubeNotice";
 import SignalBar from "./SignalBar";
 import QuickAccessCard from "./QuickAccessCard";
-import Card from "@/components/ui/Card";
+import InteractiveCard from "@/components/ui/InteractiveCard";
+import { labelColors } from "@/app/analytics/HealthScoreCard";
+import type { HealthScore } from "@/lib/health-score";
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -18,8 +22,19 @@ export default async function DashboardPage() {
     where: { ownerId: session.user.id },
   });
 
-  const data = await getChannelAnalytics("growing");
-  const healthScore = await getHealthScore(data);
+  const connected = await isYouTubeConnected(session.user.id);
+  let healthScore: HealthScore | null = null;
+  let fetchFailed = false;
+
+  if (connected) {
+    try {
+      const data = await getChannelAnalytics(session.user.id);
+      healthScore = data && (await getHealthScore(data));
+    } catch (e) {
+      console.error("[dashboard] Failed to load channel analytics:", e);
+      fetchFailed = true;
+    }
+  }
 
   const firstName = session.user.name.split(" ")[0];
 
@@ -53,57 +68,82 @@ export default async function DashboardPage() {
         pipeline.
       </p>
 
-      <Card padding="lg" className="mt-8 flex items-center justify-between">
-        <div>
-          <div
-            style={{
-              fontSize: 14,
-              color: "var(--color-text-muted)",
-              textTransform: "uppercase",
-              letterSpacing: 1,
-            }}
-          >
-            Channel Health
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              gap: 12,
-              marginTop: 8,
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 48,
-                fontWeight: 700,
-              }}
-            >
-              {healthScore.score}
-            </span>
-            <span style={{ fontFamily: "var(--font-display)", fontSize: 20 }}>
-              {healthScore.label}
-            </span>
-          </div>
-          <p
-            style={{
-              fontSize: 14,
-              color: "var(--color-text-muted)",
-              marginTop: 10,
-              maxWidth: 440,
-              lineHeight: 1.5,
-            }}
-          >
-            {healthScore.summary}
-          </p>
-        </div>
-        <SignalBar score={healthScore.score} />
-      </Card>
-
-      <div className="mt-4">
-        <ConnectYouTubeButton />
-      </div>
+      {/* Compact "quick glance" tile linking out to Analytics, which owns
+          the full detailed/disclaimer-annotated version
+          (src/app/analytics/HealthScoreCard.tsx) — this used to duplicate
+          that card's explanation almost word for word. Score styling
+          (mono font, label color) intentionally echoes that card so this
+          reads as "the same metric, smaller," not a different one. */}
+      {!connected && (
+        <ConnectYouTubePrompt
+          description="Connect your YouTube channel to see your Channel Health score and quick stats here."
+          callbackURL="/dashboard"
+        />
+      )}
+      {connected && fetchFailed && (
+        <ReconnectYouTubeNotice callbackURL="/dashboard" />
+      )}
+      {connected && healthScore && (
+        <Link
+          href="/analytics"
+          className="mt-8 block"
+          style={{ textDecoration: "none" }}
+        >
+          <InteractiveCard className="flex items-center justify-between">
+            <div>
+              <div
+                style={{
+                  fontSize: 14,
+                  color: "var(--color-text-muted)",
+                  textTransform: "uppercase",
+                  letterSpacing: 1,
+                }}
+              >
+                Channel Health
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: 10,
+                  marginTop: 6,
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 34,
+                    fontWeight: 700,
+                  }}
+                >
+                  {healthScore.score}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: labelColors[healthScore.label],
+                  }}
+                >
+                  {healthScore.label}
+                </span>
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: "var(--color-accent)",
+                  marginTop: 10,
+                  fontWeight: 500,
+                }}
+              >
+                View details →
+              </div>
+            </div>
+            <SignalBar score={healthScore.score} />
+          </InteractiveCard>
+        </Link>
+      )}
 
       <h2
         style={{

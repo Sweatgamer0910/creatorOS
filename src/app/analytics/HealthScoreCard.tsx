@@ -1,7 +1,10 @@
 import { HealthScore } from "@/lib/health-score";
 import Card from "@/components/ui/Card";
 
-const labelColors: Record<HealthScore["label"], string> = {
+// Exported so Dashboard's compact health-score tile can color its label
+// the same way instead of re-declaring this map — same cross-route-import
+// precedent as Coach importing this whole component.
+export const labelColors: Record<HealthScore["label"], string> = {
   Excellent: "#16a34a",
   Good: "#2563eb",
   "Needs Attention": "#d97706",

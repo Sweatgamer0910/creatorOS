@@ -42,9 +42,10 @@ async function getChannelSnapshot(accessToken: string) {
 
 async function getHistoricalData(
   accessToken: string,
+  days: number,
 ): Promise<DailyDataPoint[]> {
   const endDate = new Date().toISOString().split("T")[0];
-  const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+  const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
     .toISOString()
     .split("T")[0];
 
@@ -85,7 +86,11 @@ export async function getYouTubeAnalytics(
 ): Promise<ChannelAnalytics> {
   const accessToken = await getAccessToken(userId);
   const channel = await getChannelSnapshot(accessToken);
-  const last30Days = await getHistoricalData(accessToken);
+  // A single Analytics API report call regardless of range, so fetching a
+  // full year up front is free relative to fetching 30 days — lets the
+  // chart's date-range picker work entirely client-side, no re-fetching.
+  const history = await getHistoricalData(accessToken, 365);
+  const last30Days = history.slice(-30);
 
   return {
     channelTitle: channel.snippet.title,
@@ -99,5 +104,6 @@ export async function getYouTubeAnalytics(
       ),
     },
     last30Days,
+    history,
   };
 }

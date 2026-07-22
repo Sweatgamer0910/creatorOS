@@ -4,26 +4,25 @@ Full audit of what's real versus mocked/missing, prioritized by what actually bl
 launch versus what's polish. Written after the security/QA pass and the Resend integration —
 those items aren't repeated here, see `docs/03-engineering/qa-security-review.md`.
 
-## Blocking — the product doesn't do what it claims yet
+## Resolved — mock data removed, real YouTube data is now the only path
 
-**Analytics, Health Score, and the AI Growth Coach are 100% mocked, with no real
-implementation behind them at all.** This is the single biggest gap. Concretely:
+Dashboard, Analytics, and Coach all now source data from `getChannelAnalytics()`
+(`src/lib/analytics/index.ts`), which checks whether the user has a connected Google account
+and either fetches real data via `src/lib/analytics/youtubeProvider.ts` or returns `null` —
+there is no mock fallback left anywhere (`mockProvider.ts` and the on-page scenario/source
+toggle switches were deleted). Every page shows a "Connect your YouTube channel" prompt when
+disconnected, and a "reconnect" prompt if a connected account's token has expired or a fetch
+otherwise fails.
 
-- `src/lib/analytics/index.ts`, `src/lib/health-score/index.ts`,
-  `src/lib/growth-coach/index.ts` each have a mock path and a real path — but the "real" path
-  in health-score and growth-coach is just `throw new Error("... not implemented yet")`.
-  There is no Anthropic/OpenAI API key anywhere in `.env`, no LLM call anywhere in the
-  codebase. "AI-backed insights, labeled by confidence, never fabricated" (the landing page's
-  own copy) is currently entirely hardcoded sample data, not AI output.
-- Real YouTube Analytics fetching _does_ exist (`src/lib/analytics/youtubeProvider.ts`), but
-  it's wired in as a separate `source=real` toggle on the analytics page only — Health Score
-  and Coach never call it, they only ever see mock data.
-- All three mock flags (`NEXT_PUBLIC_USE_MOCK_ANALYTICS/HEALTH_SCORE/COACH`) are `"true"` in
-  `.env` right now, so this is what every current user sees by default.
-
-This needs a decision, not just code: which LLM provider for the coach/scoring (Claude via
-the Anthropic API is what the code comments assume), and a budget for it. I can build the
-integration once that's picked.
+**Health Score and the Growth Coach are still rule-based, not AI/LLM-backed** — this was never
+actually mocked data, just genuine logic (`src/lib/health-score/scorer.ts`,
+`src/lib/growth-coach/coach.ts`) that used to run on fake input. It now runs on real analytics
+data, so the numbers/insights are real, but the "AI-backed insights" framing on the landing
+page is still aspirational rather than literal (the landing copy itself already says
+"rule-based ... today, AI insights coming soon", so it isn't overclaiming). Wiring in an actual
+LLM (Claude via the Anthropic API is what the code comments assume) is still a separate,
+unbuilt piece of work needing a provider decision and budget — not required to ship v1 honestly
+as-is, since nothing currently claims otherwise.
 
 ## Blocking — legal / account basics
 

@@ -15,10 +15,10 @@ export default function SignalBar({ score }: { score: number }) {
         : "#e35d5d";
 
   return (
-    <div className="flex items-end gap-[3px] h-10">
+    <div className="flex items-end gap-[3px] h-8">
       {Array.from({ length: SEGMENTS }).map((_, i) => {
         const isFilled = i < filledSegments;
-        const height = 12 + (i / SEGMENTS) * 28;
+        const height = 10 + (i / SEGMENTS) * 22;
 
         return (
           <motion.div

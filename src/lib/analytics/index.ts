@@ -1,17 +1,24 @@
+import { prisma } from "@/lib/prisma";
 import { ChannelAnalytics } from "./types";
-import { getMockAnalytics } from "./mockProvider";
+import { getYouTubeAnalytics } from "./youtubeProvider";
 
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_ANALYTICS !== "false";
+export async function isYouTubeConnected(userId: string): Promise<boolean> {
+  const account = await prisma.account.findFirst({
+    where: { userId, providerId: "google" },
+  });
+  return account !== null;
+}
 
+// Returns null when the user hasn't connected a YouTube channel yet — callers
+// render a connect prompt for that case. A connected account whose fetch
+// fails (expired token, API error) throws instead, so callers can tell
+// "never connected" apart from "connected but something went wrong."
 export async function getChannelAnalytics(
-  scenario: "growing" | "declining" | "new" = "growing",
-): Promise<ChannelAnalytics> {
-  if (USE_MOCK_DATA) {
-    return getMockAnalytics(scenario);
-  }
-
-  // Real YouTube API implementation goes here later
-  throw new Error("Real YouTube provider not implemented yet");
+  userId: string,
+): Promise<ChannelAnalytics | null> {
+  const connected = await isYouTubeConnected(userId);
+  if (!connected) return null;
+  return getYouTubeAnalytics(userId);
 }
 
 export type { ChannelAnalytics, ChannelStats, DailyDataPoint } from "./types";
