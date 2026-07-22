@@ -6,12 +6,15 @@ import { deleteIdea } from "@/lib/ideas/actions";
 import InteractiveCard from "@/components/ui/InteractiveCard";
 import Button from "@/components/ui/button";
 import Spinner from "@/components/Spinner";
+import SeriesBadge from "@/components/SeriesBadge";
 
 interface Idea {
   id: string;
   title: string;
   notes: string | null;
   createdAt: Date;
+  episodeNumber?: number | null;
+  series?: { id: string; title: string } | null;
 }
 
 export default function IdeaCard({ idea }: { idea: Idea }) {
@@ -31,6 +34,15 @@ export default function IdeaCard({ idea }: { idea: Idea }) {
           <div style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}>
             {idea.title}
           </div>
+          {idea.series && (
+            <div style={{ marginTop: 6 }}>
+              <SeriesBadge
+                id={idea.series.id}
+                title={idea.series.title}
+                episodeNumber={idea.episodeNumber}
+              />
+            </div>
+          )}
           {idea.notes && (
             <p
               style={{

@@ -68,7 +68,14 @@ export async function getContentItems() {
     where: { workspaceId },
     orderBy: { createdAt: "desc" },
     include: {
-      idea: { select: { id: true, title: true } },
+      idea: {
+        select: {
+          id: true,
+          title: true,
+          episodeNumber: true,
+          series: { select: { id: true, title: true } },
+        },
+      },
       script: { select: { id: true, title: true } },
     },
   });

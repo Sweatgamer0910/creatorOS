@@ -11,6 +11,7 @@ import {
 import Spinner from "@/components/Spinner";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/button";
+import SeriesBadge from "@/components/SeriesBadge";
 import { radius } from "@/lib/design-tokens";
 
 interface ContentItem {
@@ -18,7 +19,12 @@ interface ContentItem {
   title: string;
   status: string;
   dueDate: Date | null;
-  idea: { id: string; title: string } | null;
+  idea: {
+    id: string;
+    title: string;
+    episodeNumber: number | null;
+    series: { id: string; title: string } | null;
+  } | null;
   script: { id: string; title: string } | null;
 }
 
@@ -81,6 +87,15 @@ function ItemCard({ item }: { item: ContentItem }) {
           >
             from: {item.idea ? item.idea.title : item.script!.title}
           </Link>
+        )}
+        {item.idea?.series && (
+          <div style={{ marginTop: 6 }}>
+            <SeriesBadge
+              id={item.idea.series.id}
+              title={item.idea.series.title}
+              episodeNumber={item.idea.episodeNumber}
+            />
+          </div>
         )}
       </Card>
     </div>

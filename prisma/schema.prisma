@@ -85,6 +85,7 @@ model Workspace {
   ideas        Idea[]
   scripts      Script[]
   contentItems ContentItem[]
+  series       Series[]
 
   @@map("workspace")
 }
@@ -128,10 +129,36 @@ model Idea {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  // Optional position within a series — e.g. "Part 3" of an ongoing
+  // series. Both null for an idea that isn't part of a series.
+  seriesId      String?
+  series        Series? @relation(fields: [seriesId], references: [id], onDelete: SetNull)
+  episodeNumber Int?
+
   scripts      Script[]
   contentItems ContentItem[]
 
   @@map("idea")
+}
+
+model Series {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  // Free-text-ish string, not a Prisma enum — same convention as
+  // ContentItem.status/PipelineStatus: a small fixed set of values
+  // enforced in TypeScript (see src/lib/series/actions.ts), not the
+  // database. "custom" covers anything outside the common presets.
+  cadence     String? // daily | weekly | biweekly | custom
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  ideas Idea[]
+
+  @@map("series")
 }
 
 model Script {

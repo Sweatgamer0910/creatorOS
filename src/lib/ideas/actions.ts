@@ -17,10 +17,20 @@ async function getWorkspaceId() {
   return workspace.id;
 }
 
-export async function createIdea(title: string, notes: string) {
+export async function createIdea(
+  title: string,
+  notes: string,
+  series?: { seriesId?: string; episodeNumber?: number },
+) {
   const workspaceId = await getWorkspaceId();
   await prisma.idea.create({
-    data: { title, notes, workspaceId },
+    data: {
+      title,
+      notes,
+      workspaceId,
+      seriesId: series?.seriesId,
+      episodeNumber: series?.episodeNumber,
+    },
   });
   revalidatePath("/ideas");
 }
@@ -39,5 +49,6 @@ export async function getIdeas() {
   return prisma.idea.findMany({
     where: { workspaceId },
     orderBy: { createdAt: "desc" },
+    include: { series: { select: { id: true, title: true } } },
   });
 }
