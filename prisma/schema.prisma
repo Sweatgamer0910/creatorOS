@@ -171,6 +171,13 @@ model Script {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Manual per-section completeness — deliberately not inferred from word
+  // count (too often wrong), set only by the writer clicking "mark done".
+  hookComplete  Boolean @default(false)
+  introComplete Boolean @default(false)
+  bodyComplete  Boolean @default(false)
+  outroComplete Boolean @default(false)
+
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -178,8 +185,23 @@ model Script {
   idea   Idea?   @relation(fields: [ideaId], references: [id], onDelete: SetNull)
 
   contentItems ContentItem[]
+  versions     ScriptVersion[]
 
   @@map("script")
+}
+
+model ScriptVersion {
+  id        String   @id @default(cuid())
+  hook      String   @db.Text
+  intro     String   @db.Text
+  body      String   @db.Text
+  outro     String   @db.Text
+  createdAt DateTime @default(now())
+
+  scriptId String
+  script   Script @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+
+  @@map("script_version")
 }
 
 model ContentItem {
