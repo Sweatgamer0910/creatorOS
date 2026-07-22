@@ -19,10 +19,19 @@ async function getWorkspaceId() {
   return workspace.id;
 }
 
-export async function createContentItem(title: string) {
+export async function createContentItem(
+  title: string,
+  source?: { ideaId?: string; scriptId?: string },
+) {
   const workspaceId = await getWorkspaceId();
   await prisma.contentItem.create({
-    data: { title, workspaceId, status: "idea" },
+    data: {
+      title,
+      workspaceId,
+      status: "idea",
+      ideaId: source?.ideaId,
+      scriptId: source?.scriptId,
+    },
   });
   revalidatePath("/pipeline");
 }
@@ -58,5 +67,9 @@ export async function getContentItems() {
   return prisma.contentItem.findMany({
     where: { workspaceId },
     orderBy: { createdAt: "desc" },
+    include: {
+      idea: { select: { id: true, title: true } },
+      script: { select: { id: true, title: true } },
+    },
   });
 }

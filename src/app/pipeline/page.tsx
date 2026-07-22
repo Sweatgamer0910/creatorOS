@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getContentItems } from "@/lib/pipeline/actions";
+import { getIdeas } from "@/lib/ideas/actions";
+import { getScripts } from "@/lib/scripts/actions";
 import PipelineBoard from "./PipelineBoard";
 import NewItemForm from "./NewItemForm";
 
@@ -9,7 +11,11 @@ export default async function PipelinePage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
-  const items = await getContentItems();
+  const [items, ideas, scripts] = await Promise.all([
+    getContentItems(),
+    getIdeas(),
+    getScripts(),
+  ]);
 
   return (
     <div
@@ -36,13 +42,13 @@ export default async function PipelinePage() {
           lineHeight: 1.6,
         }}
       >
-        Every video lives in one of four stages, from a rough idea to
-        published. Drag a card between columns as it moves through your
-        workflow — the board is the single source of truth for what&apos;s next.
+        Every video lives in one of four stages, from a rough idea to published.
+        Drag a card between columns as it moves through your workflow — the
+        board is the single source of truth for what&apos;s next.
       </p>
 
       <div className="mt-8">
-        <NewItemForm />
+        <NewItemForm ideas={ideas} scripts={scripts} />
       </div>
 
       <div className="mt-8">

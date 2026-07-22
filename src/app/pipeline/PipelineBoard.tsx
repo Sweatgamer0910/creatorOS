@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
+import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import {
   updateContentItemStatus,
@@ -17,6 +18,8 @@ interface ContentItem {
   title: string;
   status: string;
   dueDate: Date | null;
+  idea: { id: string; title: string } | null;
+  script: { id: string; title: string } | null;
 }
 
 const columns: { status: PipelineStatus; label: string }[] = [
@@ -64,6 +67,21 @@ function ItemCard({ item }: { item: ContentItem }) {
             {isDeleting ? <Spinner size={12} /> : <Trash2 size={14} />}
           </Button>
         </div>
+        {(item.idea || item.script) && (
+          <Link
+            href={item.idea ? "/ideas" : `/scripts/${item.script!.id}`}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              display: "inline-block",
+              marginTop: 6,
+              fontSize: 11,
+              color: "var(--color-text-muted)",
+              textDecoration: "none",
+            }}
+          >
+            from: {item.idea ? item.idea.title : item.script!.title}
+          </Link>
+        )}
       </Card>
     </div>
   );

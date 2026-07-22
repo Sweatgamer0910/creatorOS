@@ -128,7 +128,8 @@ model Idea {
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  scripts Script[]
+  scripts      Script[]
+  contentItems ContentItem[]
 
   @@map("idea")
 }
@@ -149,6 +150,8 @@ model Script {
   ideaId String?
   idea   Idea?   @relation(fields: [ideaId], references: [id], onDelete: SetNull)
 
+  contentItems ContentItem[]
+
   @@map("script")
 }
 
@@ -162,6 +165,15 @@ model ContentItem {
 
   workspaceId String
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // Optional trace back to where this card came from — set when a card is
+  // created "from" an idea or script rather than typed fresh. Both SetNull
+  // so deleting the source idea/script never takes the pipeline card with it.
+  ideaId String?
+  idea   Idea?   @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+
+  scriptId String?
+  script   Script? @relation(fields: [scriptId], references: [id], onDelete: SetNull)
 
   @@map("content_item")
 }
