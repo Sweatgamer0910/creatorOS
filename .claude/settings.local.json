@@ -8,7 +8,13 @@
       "Bash(npx tsc *)",
       "Bash(curl -s http://localhost:3000/ -o /tmp/creatoros-page.html -w \"%{http_code}\\\\n\")",
       "Read(//tmp/**)",
-      "Bash(pnpm install *)"
+      "Bash(pnpm install *)",
+      "Bash(npm run *)",
+      "Bash(grep -n \"[0-9]\\\\{2,\\\\}\" src/components/landing/WorkspaceAssembly.tsx)",
+      "Bash(sed -n '1,170' \"/Users/ayaan/Documents/CreatorOS Workspace/creatoros/src/app/globals.css\")"
+    ],
+    "additionalDirectories": [
+      "/Users/ayaan/Documents/CreatorOS Workspace/creatoros/src/app"
     ]
   }
 }
