@@ -47,7 +47,9 @@ function easeOutCubic(t: number) {
 function AnalyticsPanel() {
   const heights = [40, 70, 50, 90, 60];
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: 5, height: 44 }}>
+    <div
+      style={{ display: "flex", alignItems: "flex-end", gap: 5, height: 44 }}
+    >
       {heights.map((h, i) => (
         <span
           key={i}
@@ -119,35 +121,82 @@ function KanbanPanel() {
     </div>
   );
 }
-function HealthPanel() {
+// Mini insight rows with confidence-tier dots — the same Fact (blue) /
+// Pattern (purple) / Recommendation (amber) color language the pipeline
+// stage cards and ConfidenceSystem section already use, so the Coach card
+// reads as "labeled insights," which is the product's actual promise.
+function CoachPanel() {
+  const rows = [
+    { color: "#5FB3E0", width: "100%" },
+    { color: "#8B7FE0", width: "78%" },
+    { color: "#F5A623", width: "88%" },
+  ];
   return (
-    <div
-      style={{
-        width: 52,
-        height: 52,
-        margin: "4px auto 0",
-        borderRadius: "50%",
-        background: "conic-gradient(#F5A623 0deg 260deg, #1F242C 260deg 360deg)",
-        WebkitMask:
-          "radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 8px))",
-        mask: "radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 8px))",
-      }}
-    />
+    <div>
+      {rows.map((row, i) => (
+        <div
+          key={i}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 7,
+            marginBottom: 8,
+          }}
+        >
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              backgroundColor: row.color,
+              flexShrink: 0,
+            }}
+          />
+          <span
+            style={{
+              display: "block",
+              height: 7,
+              borderRadius: 3,
+              background: "rgba(245,243,238,0.08)",
+              width: row.width,
+            }}
+          />
+        </div>
+      ))}
+    </div>
   );
 }
 
+// Exactly the 5 shipped V1 features, per docs/05-roadmap/v1-production-
+// checklist.md's "already solid" list + the actual app routes (/analytics,
+// /coach, /ideas, /scripts, /pipeline). Channel Health Score is deliberately
+// NOT one of the 5 — it was dropped from this lineup as the weakest
+// feature. Don't re-add it here, and don't add anything from the deferred
+// V2+ list either.
 const PANELS = [
-  { key: "analytics", label: "Analytics", Content: AnalyticsPanel },
-  { key: "script", label: "Script Studio", Content: ScriptPanel },
+  { key: "analytics", label: "Analytics Dashboard", Content: AnalyticsPanel },
+  { key: "coach", label: "AI Growth Coach", Content: CoachPanel },
   { key: "idea", label: "Idea Lab", Content: IdeaPanel },
-  { key: "kanban", label: "Kanban", Content: KanbanPanel },
-  { key: "health", label: "Channel Health", Content: HealthPanel },
+  { key: "script", label: "Script Studio", Content: ScriptPanel },
+  { key: "kanban", label: "Kanban Pipeline", Content: KanbanPanel },
 ];
 
 const TEXT_BEATS = [
-  <>Five tools. Five logins.<br />Zero shared context.</>,
-  <>CreatorOS pulls them<br />into one object.</>,
-  <>One workspace.<br />Every stage of the channel.</>,
+  <>
+    Five tools. Five logins.
+    <br />
+    Zero shared context.
+  </>,
+  <>
+    CreatorOS pulls them
+    <br />
+    into one object.
+  </>,
+  <>
+    One workspace.
+    <br />
+    Every stage of the channel.
+  </>,
 ];
 
 function Panel({
@@ -155,7 +204,15 @@ function Panel({
   transform,
 }: {
   index: number;
-  transform: { x: number; y: number; z: number; rot: number; scale: number; opacity: number; blur: number };
+  transform: {
+    x: number;
+    y: number;
+    z: number;
+    rot: number;
+    scale: number;
+    opacity: number;
+    blur: number;
+  };
 }) {
   const { Content, label } = PANELS[index];
   return (
@@ -306,7 +363,8 @@ export default function WorkspaceAssembly() {
                 position: "absolute",
                 top: "50%",
                 left: i === 1 ? "12%" : "50%",
-                transform: i === 1 ? "translate(0,-50%)" : "translate(-50%,-50%)",
+                transform:
+                  i === 1 ? "translate(0,-50%)" : "translate(-50%,-50%)",
                 maxWidth: i === 0 ? 520 : i === 1 ? 460 : 560,
                 textAlign: i === 1 ? "left" : "center",
                 fontFamily: "var(--font-display)",
@@ -329,13 +387,60 @@ export default function WorkspaceAssembly() {
         <svg
           viewBox="0 0 1000 600"
           preserveAspectRatio="xMidYMid meet"
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 1, opacity: lockT }}
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 1,
+            opacity: lockT,
+          }}
         >
-          <line x1={500} y1={150} x2={500} y2={300} stroke="#F5A623" strokeWidth={1} opacity={0.6} />
-          <line x1={500} y1={300} x2={260} y2={420} stroke="#F5A623" strokeWidth={1} opacity={0.6} />
-          <line x1={500} y1={300} x2={740} y2={420} stroke="#F5A623" strokeWidth={1} opacity={0.6} />
-          <line x1={500} y1={300} x2={180} y2={220} stroke="#F5A623" strokeWidth={1} opacity={0.6} />
-          <line x1={500} y1={300} x2={820} y2={220} stroke="#F5A623" strokeWidth={1} opacity={0.6} />
+          <line
+            x1={500}
+            y1={150}
+            x2={500}
+            y2={300}
+            stroke="#F5A623"
+            strokeWidth={1}
+            opacity={0.6}
+          />
+          <line
+            x1={500}
+            y1={300}
+            x2={260}
+            y2={420}
+            stroke="#F5A623"
+            strokeWidth={1}
+            opacity={0.6}
+          />
+          <line
+            x1={500}
+            y1={300}
+            x2={740}
+            y2={420}
+            stroke="#F5A623"
+            strokeWidth={1}
+            opacity={0.6}
+          />
+          <line
+            x1={500}
+            y1={300}
+            x2={180}
+            y2={220}
+            stroke="#F5A623"
+            strokeWidth={1}
+            opacity={0.6}
+          />
+          <line
+            x1={500}
+            y1={300}
+            x2={820}
+            y2={220}
+            stroke="#F5A623"
+            strokeWidth={1}
+            opacity={0.6}
+          />
         </svg>
 
         <div
@@ -344,7 +449,8 @@ export default function WorkspaceAssembly() {
             width: 520,
             height: 520,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(245,166,35,0.55), transparent 70%)",
+            background:
+              "radial-gradient(circle, rgba(245,166,35,0.55), transparent 70%)",
             opacity: lockT * 0.8,
             filter: "blur(10px)",
             zIndex: 0,

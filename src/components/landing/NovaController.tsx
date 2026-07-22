@@ -5,10 +5,14 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { useLandingScrollStore } from "@/lib/landing-scroll-store";
 import NovaMascot from "./NovaMascot";
-import { MODEL_HALF_WIDTH, MODEL_HALF_HEIGHT, MODEL_HALF_DEPTH } from "./novaGeometry";
+import { frameAlpha } from "./PipelineScene";
+import {
+  MODEL_HALF_WIDTH,
+  MODEL_HALF_HEIGHT,
+  MODEL_HALF_DEPTH,
+} from "./novaGeometry";
 
 const STAGE_COUNT = 6;
-const DAMPING = 0.06; // same per-frame lerp factor the old Hero3D CameraRig used
 
 // She reads as a mascot cameo, not a second hero object — smaller than her
 // original 1:1 scale, which (see below) was large enough at her original
@@ -145,7 +149,9 @@ export default function NovaController({
   reducedMotion: boolean;
 }) {
   const { camera, size } = useThree();
-  const currentPos = useRef(new THREE.Vector3().addVectors(camera.position, HERO_OFFSET));
+  const currentPos = useRef(
+    new THREE.Vector3().addVectors(camera.position, HERO_OFFSET),
+  );
   const currentRotation = useRef(HERO_ROTATION);
   const currentScale = useRef(reducedMotion ? 0.01 : BASE_SCALE);
   const currentVisible = useRef(true);
@@ -220,7 +226,11 @@ export default function NovaController({
         ),
         1,
       );
-      targetOffset.current.lerpVectors(ASSEMBLY_START_OFFSET, ASSEMBLY_END_OFFSET, t);
+      targetOffset.current.lerpVectors(
+        ASSEMBLY_START_OFFSET,
+        ASSEMBLY_END_OFFSET,
+        t,
+      );
       targetRotation = -0.2 + t * 0.2;
     } else {
       // assemblyPhase === "after" — her path ends here.
@@ -258,10 +268,18 @@ export default function NovaController({
     // scaled the offset *up* on narrow aspects instead of checking it was
     // still on-screen at all).
     const depth = Math.abs(targetOffset.current.z);
-    const maxX = frustumHalfWidth(depth, size.width / size.height) * FRUSTUM_SAFETY;
-    targetOffset.current.x = THREE.MathUtils.clamp(targetOffset.current.x, -maxX, maxX);
+    const maxX =
+      frustumHalfWidth(depth, size.width / size.height) * FRUSTUM_SAFETY;
+    targetOffset.current.x = THREE.MathUtils.clamp(
+      targetOffset.current.x,
+      -maxX,
+      maxX,
+    );
 
-    const targetPos = new THREE.Vector3().addVectors(camera.position, targetOffset.current);
+    const targetPos = new THREE.Vector3().addVectors(
+      camera.position,
+      targetOffset.current,
+    );
 
     if (process.env.NODE_ENV === "development" && pipelinePhase === "during") {
       // Turns the MIN_CLEARANCE derivation above from a comment someone
@@ -269,6 +287,18 @@ export default function NovaController({
       // catches it — checks live distance from Nova's target position to
       // the tile at world origin against the same threshold the offsets
       // were sized to clear.
+      //
+      // This is a raw 3D straight-line distance, not a screen-space
+      // check — it's only meaningful because the shared camera is
+      // translation-only (see the parallax comment in PipelineScene.tsx).
+      // A rotated camera can make two points that are far apart in world
+      // space read as overlapping on screen (or vice versa) without this
+      // number changing at all — that's exactly how the tile/Nova overlap
+      // bug went undetected through several rounds of constant-tuning
+      // before its real cause (camera rotation) was found. If camera
+      // rotation is ever reintroduced anywhere this component's camera is
+      // shared, this check needs to become a screen-space/NDC projection
+      // check instead, not another round of retuning MIN_CLEARANCE.
       const distanceToTile = targetPos.length();
       if (distanceToTile < MIN_CLEARANCE) {
         console.warn(
@@ -283,9 +313,14 @@ export default function NovaController({
       currentPos.current.copy(targetPos);
       currentRotation.current = targetRotation;
     } else {
-      currentPos.current.lerp(targetPos, DAMPING);
+      // frameAlpha (shared with the camera dolly in PipelineScene) keeps
+      // her follow speed identical across refresh rates — with the old
+      // fixed per-frame factor she trailed noticeably further behind her
+      // target on 30Hz-throttled machines than on 120Hz ones.
+      const alpha = frameAlpha(delta);
+      currentPos.current.lerp(targetPos, alpha);
       currentRotation.current +=
-        (targetRotation - currentRotation.current) * DAMPING;
+        (targetRotation - currentRotation.current) * alpha;
     }
   });
 

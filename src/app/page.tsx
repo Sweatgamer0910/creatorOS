@@ -1,5 +1,5 @@
 import LandingScrollTracker from "@/components/landing/LandingScrollTracker";
-import LandingScene from "@/components/landing/LandingScene";
+import LandingSceneLoader from "@/components/landing/LandingSceneLoader";
 import LandingNav from "@/components/landing/LandingNav";
 import Hero from "@/components/landing/Hero";
 import PipelineSection from "@/components/landing/PipelineSection";
@@ -21,7 +21,7 @@ export default function LandingPage() {
       }}
     >
       <LandingScrollTracker />
-      <LandingScene />
+      <LandingSceneLoader />
 
       <div style={{ position: "relative", zIndex: 1 }}>
         <LandingNav />
