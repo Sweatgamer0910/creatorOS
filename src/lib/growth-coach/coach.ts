@@ -9,6 +9,7 @@ export function computeCoachResponse(
   const insights: CoachInsight[] = [];
 
   insights.push({
+    id: "fact-overview",
     type: "fact",
     confidence: "high",
     message: `Your channel currently has ${data.currentStats.subscriberCount.toLocaleString()} subscribers and ${data.currentStats.videoCount} published videos.`,
@@ -16,6 +17,7 @@ export function computeCoachResponse(
 
   const recent = data.last30Days.slice(-7);
   const earlier = data.last30Days.slice(0, 7);
+  const trendData = data.last30Days.map((d) => d.views);
 
   if (recent.length > 0 && earlier.length > 0) {
     const recentAvg = recent.reduce((s, d) => s + d.views, 0) / recent.length;
@@ -25,13 +27,16 @@ export function computeCoachResponse(
 
     if (change > 0.1) {
       insights.push({
+        id: "pattern-trend-up",
         type: "pattern",
         confidence: "high",
         message: `Views in the last week are trending up compared to a month ago (roughly ${Math.round(change * 100)}% higher).`,
         evidence:
           "Based on comparing average daily views across the two periods.",
+        trendData,
       });
       insights.push({
+        id: "recommendation-momentum",
         type: "recommendation",
         confidence: "medium",
         message:
@@ -39,13 +44,16 @@ export function computeCoachResponse(
       });
     } else if (change < -0.1) {
       insights.push({
+        id: "pattern-trend-down",
         type: "pattern",
         confidence: "high",
         message: `Views in the last week are down compared to a month ago (roughly ${Math.abs(Math.round(change * 100))}% lower).`,
         evidence:
           "Based on comparing average daily views across the two periods.",
+        trendData,
       });
       insights.push({
+        id: "hypothesis-decline-reason",
         type: "hypothesis",
         confidence: "exploratory",
         message:
@@ -53,10 +61,12 @@ export function computeCoachResponse(
       });
     } else {
       insights.push({
+        id: "pattern-trend-steady",
         type: "pattern",
         confidence: "high",
         message:
           "Views have stayed fairly steady over the last month — no major swings up or down.",
+        trendData,
       });
     }
   }
@@ -66,6 +76,7 @@ export function computeCoachResponse(
     healthScore.label === "Needs Attention"
   ) {
     insights.push({
+      id: "recommendation-consistency",
       type: "recommendation",
       confidence: "medium",
       message:

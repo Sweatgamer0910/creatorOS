@@ -25,23 +25,37 @@ export default function VersionHistoryPanel({
 }) {
   const [versions, setVersions] = useState<ScriptVersionRecord[] | null>(null);
   const [restoringId, setRestoringId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   useEffect(() => {
-    getScriptVersions(scriptId).then(setVersions);
+    getScriptVersions(scriptId)
+      .then(setVersions)
+      .catch((e) => {
+        console.error("[VersionHistoryPanel] Failed to load versions:", e);
+        setLoadError("Couldn't load version history — try again.");
+      });
   }, [scriptId]);
 
   function handleRestore(version: ScriptVersionRecord) {
     setRestoringId(version.id);
+    setRestoreError(null);
     startTransition(async () => {
-      await restoreScriptVersion(scriptId, version.id);
-      onRestored({
-        hook: version.hook,
-        intro: version.intro,
-        body: version.body,
-        outro: version.outro,
-      });
-      setRestoringId(null);
+      try {
+        await restoreScriptVersion(scriptId, version.id);
+        onRestored({
+          hook: version.hook,
+          intro: version.intro,
+          body: version.body,
+          outro: version.outro,
+        });
+      } catch (e) {
+        console.error("[VersionHistoryPanel] Failed to restore version:", e);
+        setRestoreError("Couldn't restore that version — try again.");
+      } finally {
+        setRestoringId(null);
+      }
     });
   }
 
@@ -96,10 +110,18 @@ export default function VersionHistoryPanel({
           </Button>
         </div>
 
-        {versions === null && (
+        {loadError && (
+          <p style={{ color: "#e35d5d", fontSize: 14 }}>{loadError}</p>
+        )}
+        {!loadError && versions === null && (
           <div className="flex justify-center" style={{ marginTop: 40 }}>
             <Spinner size={28} />
           </div>
+        )}
+        {restoreError && (
+          <p style={{ color: "#e35d5d", fontSize: 13, marginBottom: 8 }}>
+            {restoreError}
+          </p>
         )}
         {versions && versions.length === 0 && (
           <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>

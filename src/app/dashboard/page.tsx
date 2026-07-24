@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getChannelAnalytics, isYouTubeConnected } from "@/lib/analytics";
 import { getHealthScore } from "@/lib/health-score";
+import { getRecentWork } from "@/lib/dashboard/actions";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { BarChart3, Sparkles, Lightbulb, FileText, Kanban } from "lucide-react";
@@ -10,6 +11,7 @@ import ConnectYouTubePrompt from "@/components/ConnectYouTubePrompt";
 import ReconnectYouTubeNotice from "@/components/ReconnectYouTubeNotice";
 import SignalBar from "./SignalBar";
 import QuickAccessCard from "./QuickAccessCard";
+import ResumeWork from "./ResumeWork";
 import InteractiveCard from "@/components/ui/InteractiveCard";
 import { labelColors } from "@/app/analytics/HealthScoreCard";
 import type { HealthScore } from "@/lib/health-score";
@@ -18,9 +20,10 @@ export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
-  const workspace = await prisma.workspace.findUnique({
-    where: { ownerId: session.user.id },
-  });
+  const [workspace, recentWork] = await Promise.all([
+    prisma.workspace.findUnique({ where: { ownerId: session.user.id } }),
+    getRecentWork(),
+  ]);
 
   const connected = await isYouTubeConnected(session.user.id);
   let healthScore: HealthScore | null = null;
@@ -144,6 +147,8 @@ export default async function DashboardPage() {
           </InteractiveCard>
         </Link>
       )}
+
+      <ResumeWork items={recentWork} />
 
       <h2
         style={{

@@ -11,7 +11,8 @@
       "Bash(pnpm install *)",
       "Bash(npm run *)",
       "Bash(grep -n \"[0-9]\\\\{2,\\\\}\" src/components/landing/WorkspaceAssembly.tsx)",
-      "Bash(sed -n '1,170' \"/Users/ayaan/Documents/CreatorOS Workspace/creatoros/src/app/globals.css\")"
+      "Bash(sed -n '1,170' \"/Users/ayaan/Documents/CreatorOS Workspace/creatoros/src/app/globals.css\")",
+      "Bash(curl -sI http://localhost:3000)"
     ],
     "additionalDirectories": [
       "/Users/ayaan/Documents/CreatorOS Workspace/creatoros/src/app"

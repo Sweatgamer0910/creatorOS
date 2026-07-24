@@ -52,7 +52,7 @@ export default async function PipelinePage() {
       </div>
 
       <div className="mt-8">
-        <PipelineBoard items={items} />
+        <PipelineBoard items={items} ideas={ideas} scripts={scripts} />
       </div>
     </div>
   );

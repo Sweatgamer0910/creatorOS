@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getSeriesById } from "@/lib/series/actions";
 import { computeIdeaStage } from "@/lib/series/stage";
+import { PIPELINE_STAGE_LABELS } from "@/lib/pipeline/stages";
 import Card from "@/components/ui/Card";
 
 const CADENCE_LABELS: Record<string, string> = {
@@ -12,13 +13,6 @@ const CADENCE_LABELS: Record<string, string> = {
   weekly: "Weekly",
   biweekly: "Biweekly",
   custom: "Custom",
-};
-
-const PIPELINE_STATUS_LABELS: Record<string, string> = {
-  idea: "Idea",
-  filming: "Filming",
-  editing: "Editing",
-  published: "Published",
 };
 
 const STAGE_COLORS: Record<string, string> = {
@@ -142,7 +136,7 @@ export default async function SeriesDetailPage({
                 >
                   {stage.label}
                   {stage.label === "In pipeline" &&
-                    ` — ${PIPELINE_STATUS_LABELS[stage.pipelineStatus] ?? stage.pipelineStatus}`}
+                    ` — ${(PIPELINE_STAGE_LABELS as Record<string, string>)[stage.pipelineStatus] ?? stage.pipelineStatus}`}
                 </span>
               </Card>
             );

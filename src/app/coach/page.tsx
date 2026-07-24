@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { getChannelAnalytics, isYouTubeConnected } from "@/lib/analytics";
 import { getHealthScore, HealthScore } from "@/lib/health-score";
 import { getCoachResponse, CoachResponse } from "@/lib/growth-coach";
-import InsightCard from "./InsightCard";
+import InsightList from "./InsightList";
+import EmptyCoachInsights from "./EmptyCoachInsights";
+import CoachSummaryHeader from "./CoachSummaryHeader";
 import ConnectYouTubePrompt from "@/components/ConnectYouTubePrompt";
 import ReconnectYouTubeNotice from "@/components/ReconnectYouTubeNotice";
 
@@ -16,6 +18,7 @@ export default async function CoachPage() {
   let channelTitle: string | null = null;
   let healthScore: HealthScore | null = null;
   let coachResponse: CoachResponse | null = null;
+  let trendData: number[] = [];
   let fetchFailed = false;
 
   if (connected) {
@@ -25,12 +28,20 @@ export default async function CoachPage() {
         channelTitle = data.channelTitle;
         healthScore = await getHealthScore(data);
         coachResponse = await getCoachResponse(data, healthScore);
+        trendData = data.last30Days.map((d) => d.views);
       }
     } catch (e) {
       console.error("[coach] Failed to load channel analytics:", e);
       fetchFailed = true;
     }
   }
+
+  const recommendations = coachResponse?.insights.filter(
+    (i) => i.type === "recommendation",
+  );
+  const otherInsights = coachResponse?.insights.filter(
+    (i) => i.type !== "recommendation",
+  );
 
   return (
     <div style={{ padding: "24px 40px 48px", maxWidth: 900, margin: "0 auto" }}>
@@ -49,35 +60,62 @@ export default async function CoachPage() {
 
       {healthScore && coachResponse && (
         <>
+          <CoachSummaryHeader healthScore={healthScore} trendData={trendData} />
           <p
             style={{
               color: "var(--color-text-muted)",
-              fontSize: 16,
+              fontSize: 13,
               marginTop: 10,
               maxWidth: 640,
               lineHeight: 1.6,
             }}
           >
-            Every insight below is read straight off your recent analytics and
-            your current Health Score of{" "}
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontWeight: 600,
-                color: "var(--color-text)",
-              }}
-            >
-              {healthScore.score}
-            </span>{" "}
-            ({healthScore.label}) — labeled by confidence, and never dressed up
+            Every insight below is labeled by confidence, and never dressed up
             as more certain than the data actually supports.
           </p>
 
-          <div className="flex flex-col gap-4 mt-6">
-            {coachResponse.insights.map((insight, i) => (
-              <InsightCard key={i} insight={insight} />
-            ))}
-          </div>
+          {coachResponse.insights.length === 0 ? (
+            <div className="mt-6">
+              <EmptyCoachInsights />
+            </div>
+          ) : (
+            <>
+              {recommendations && recommendations.length > 0 && (
+                <div className="mt-8">
+                  <h2
+                    style={{
+                      fontFamily: "var(--font-display)",
+                      fontSize: 16,
+                      fontWeight: 600,
+                      marginBottom: 12,
+                    }}
+                  >
+                    Your next move
+                  </h2>
+                  <InsightList insights={recommendations} emphasized />
+                </div>
+              )}
+
+              {otherInsights && otherInsights.length > 0 && (
+                <div className="mt-8">
+                  {recommendations && recommendations.length > 0 && (
+                    <h2
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: 16,
+                        fontWeight: 600,
+                        marginBottom: 12,
+                        color: "var(--color-text-muted)",
+                      }}
+                    >
+                      Why
+                    </h2>
+                  )}
+                  <InsightList insights={otherInsights} />
+                </div>
+              )}
+            </>
+          )}
         </>
       )}
 

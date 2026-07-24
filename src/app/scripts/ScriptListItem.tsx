@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { deleteScript } from "@/lib/scripts/actions";
 import InteractiveCard from "@/components/ui/InteractiveCard";
@@ -12,6 +13,7 @@ interface Script {
   id: string;
   title: string;
   updatedAt: Date;
+  idea: { id: string; title: string } | null;
 }
 
 export default function ScriptListItem({ script }: { script: Script }) {
@@ -50,6 +52,21 @@ export default function ScriptListItem({ script }: { script: Script }) {
             >
               Updated {new Date(script.updatedAt).toLocaleDateString()}
             </div>
+            {script.idea && (
+              <Link
+                href="/ideas"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  display: "inline-block",
+                  marginTop: 4,
+                  fontSize: 11,
+                  color: "var(--color-text-muted)",
+                  textDecoration: "none",
+                }}
+              >
+                from: {script.idea.title}
+              </Link>
+            )}
           </div>
         </div>
         <Button

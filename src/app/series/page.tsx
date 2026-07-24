@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { getSeriesList } from "@/lib/series/actions";
 import InteractiveCard from "@/components/ui/InteractiveCard";
 import EmptySeries from "./EmptySeries";
@@ -21,7 +22,30 @@ export default async function SeriesListPage() {
 
   return (
     <div style={{ padding: "24px 40px 48px", maxWidth: 900, margin: "0 auto" }}>
-      <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>Series</p>
+      <Link
+        href="/ideas"
+        className="glow-text"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          fontSize: 13,
+          color: "var(--color-text-muted)",
+          textDecoration: "none",
+        }}
+      >
+        <ArrowLeft size={14} />
+        Idea Lab
+      </Link>
+      <p
+        style={{
+          color: "var(--color-text-muted)",
+          fontSize: 15,
+          marginTop: 10,
+        }}
+      >
+        Series
+      </p>
       <h1
         style={{
           fontFamily: "var(--font-display)",

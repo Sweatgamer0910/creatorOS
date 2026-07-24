@@ -22,7 +22,7 @@ import {
 import Spinner from "@/components/Spinner";
 import LockedFeature from "@/components/LockedFeature";
 import Button from "@/components/ui/button";
-import { motion as motionTokens } from "@/lib/design-tokens";
+import { motion as motionTokens, radius, spacing } from "@/lib/design-tokens";
 import Teleprompter from "./Teleprompter";
 import VersionHistoryPanel from "./VersionHistoryPanel";
 
@@ -33,7 +33,18 @@ interface Script extends ScriptSections {
   introComplete: boolean;
   bodyComplete: boolean;
   outroComplete: boolean;
+  idea: { id: string; title: string } | null;
 }
+
+const selectStyle: React.CSSProperties = {
+  backgroundColor: "var(--color-background)",
+  border: "1px solid var(--color-border)",
+  color: "var(--color-text)",
+  borderRadius: radius.sm,
+  padding: `${spacing.xs}px ${spacing.sm}px`,
+  outline: "none",
+  fontSize: 13,
+};
 
 const sections = [
   {
@@ -57,13 +68,25 @@ function completeFieldFor(key: SectionKey) {
     "hookComplete" | "introComplete" | "bodyComplete" | "outroComplete";
 }
 
-export default function ScriptEditor({ script }: { script: Script }) {
+export default function ScriptEditor({
+  script,
+  ideas = [],
+}: {
+  script: Script;
+  ideas?: { id: string; title: string }[];
+}) {
   const [values, setValues] = useState<ScriptSections>({
     hook: script.hook,
     intro: script.intro,
     body: script.body,
     outro: script.outro,
   });
+  const [linkedIdea, setLinkedIdea] = useState<{
+    id: string;
+    title: string;
+  } | null>(script.idea);
+  const [showIdeaEditor, setShowIdeaEditor] = useState(false);
+  const [isLinkingIdea, startLinkIdea] = useTransition();
   const [complete, setComplete] = useState<Record<SectionKey, boolean>>({
     hook: script.hookComplete,
     intro: script.introComplete,
@@ -80,8 +103,14 @@ export default function ScriptEditor({ script }: { script: Script }) {
   const [isNavigatingBack, startBack] = useTransition();
   const timers = useRef<Record<string, NodeJS.Timeout>>({});
   const router = useRouter();
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const stats = useMemo(() => computeScriptWordStats(values), [values]);
+
+  function reportError(message: string) {
+    setActionError(message);
+    setTimeout(() => setActionError(null), 4000);
+  }
 
   function handleChange(key: SectionKey, value: string) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -90,8 +119,14 @@ export default function ScriptEditor({ script }: { script: Script }) {
     timers.current[key] = setTimeout(() => {
       setSavingKey(key);
       startTransition(async () => {
-        await updateScript(script.id, { [key]: value });
-        setSavingKey(null);
+        try {
+          await updateScript(script.id, { [key]: value });
+        } catch (e) {
+          console.error("[ScriptEditor] Failed to save section:", e);
+          reportError("Couldn't save — check your connection and try again.");
+        } finally {
+          setSavingKey(null);
+        }
       });
     }, 800);
   }
@@ -100,15 +135,42 @@ export default function ScriptEditor({ script }: { script: Script }) {
     const next = !complete[key];
     setComplete((prev) => ({ ...prev, [key]: next }));
     startTransition(async () => {
-      await updateScript(script.id, { [completeFieldFor(key)]: next });
+      try {
+        await updateScript(script.id, { [completeFieldFor(key)]: next });
+      } catch (e) {
+        console.error("[ScriptEditor] Failed to update section status:", e);
+        setComplete((prev) => ({ ...prev, [key]: !next }));
+        reportError("Couldn't save that change — try again.");
+      }
+    });
+  }
+
+  function handleLinkIdea(id: string) {
+    const previous = linkedIdea;
+    const idea = id ? (ideas.find((i) => i.id === id) ?? null) : null;
+    setLinkedIdea(idea);
+    setShowIdeaEditor(false);
+    startLinkIdea(async () => {
+      try {
+        await updateScript(script.id, { ideaId: id || null });
+      } catch (e) {
+        console.error("[ScriptEditor] Failed to update linked idea:", e);
+        setLinkedIdea(previous);
+        reportError("Couldn't save that link — try again.");
+      }
     });
   }
 
   function handleSaveVersion() {
     startSavingVersion(async () => {
-      await createScriptVersion(script.id);
-      setVersionSaved(true);
-      setTimeout(() => setVersionSaved(false), 2000);
+      try {
+        await createScriptVersion(script.id);
+        setVersionSaved(true);
+        setTimeout(() => setVersionSaved(false), 2000);
+      } catch (e) {
+        console.error("[ScriptEditor] Failed to save version:", e);
+        reportError("Couldn't save a version — try again.");
+      }
     });
   }
 
@@ -125,6 +187,21 @@ export default function ScriptEditor({ script }: { script: Script }) {
 
   return (
     <div>
+      {actionError && (
+        <div
+          style={{
+            marginBottom: 12,
+            padding: "8px 12px",
+            borderRadius: 8,
+            backgroundColor: "rgba(227,93,93,0.1)",
+            border: "1px solid rgba(227,93,93,0.3)",
+            color: "#e35d5d",
+            fontSize: 13,
+          }}
+        >
+          {actionError}
+        </div>
+      )}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <Button
           variant="text"
@@ -177,6 +254,64 @@ export default function ScriptEditor({ script }: { script: Script }) {
             Write with AI
           </Button>
         </LockedFeature>
+      </div>
+
+      <div
+        className="flex items-center gap-2 flex-wrap"
+        style={{ marginTop: 8 }}
+      >
+        {!showIdeaEditor && linkedIdea && (
+          <>
+            <span style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+              From idea:{" "}
+              <span style={{ color: "var(--color-text)", fontWeight: 500 }}>
+                {linkedIdea.title}
+              </span>
+            </span>
+            <Button
+              variant="text"
+              size="sm"
+              style={{ fontSize: 12 }}
+              onClick={() => setShowIdeaEditor(true)}
+            >
+              Change
+            </Button>
+          </>
+        )}
+        {!showIdeaEditor && !linkedIdea && ideas.length > 0 && (
+          <Button
+            variant="text"
+            size="sm"
+            style={{ fontSize: 12, color: "var(--color-accent-teal)" }}
+            onClick={() => setShowIdeaEditor(true)}
+          >
+            + Link to an idea
+          </Button>
+        )}
+        {showIdeaEditor && (
+          <div className="flex items-center gap-2">
+            <select
+              value={linkedIdea?.id ?? ""}
+              onChange={(e) => handleLinkIdea(e.target.value)}
+              style={selectStyle}
+            >
+              <option value="">Not linked to an idea</option>
+              {ideas.map((idea) => (
+                <option key={idea.id} value={idea.id}>
+                  {idea.title}
+                </option>
+              ))}
+            </select>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowIdeaEditor(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        )}
+        {isLinkingIdea && <Spinner size={12} />}
       </div>
 
       <div
@@ -278,6 +413,7 @@ export default function ScriptEditor({ script }: { script: Script }) {
                     border: "1px solid var(--color-border)",
                     color: "var(--color-text)",
                     fontFamily: "var(--font-body)",
+                    overflowY: "auto",
                   }}
                 />
               )}

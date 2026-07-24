@@ -207,7 +207,7 @@ model ScriptVersion {
 model ContentItem {
   id        String    @id @default(cuid())
   title     String
-  status    String    @default("idea") // idea | filming | editing | published
+  status    String    @default("idea") // idea | scripted | filming | editing | published — see src/lib/pipeline/stages.ts
   dueDate   DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

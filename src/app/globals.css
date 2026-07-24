@@ -25,15 +25,16 @@
   --glow-teal-rgb: 45, 212, 191;
 }
 
-/* Smooth in-page scrolling for the landing nav's anchor links (Product/
-   Features/How AI works) — native CSS, no JS scroll library needed.
-   Gated on prefers-reduced-motion: no-preference, matching how every
-   other animated thing in this app already treats that setting. */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
-}
+/* Deliberately NOT `html { scroll-behavior: smooth }` here. That used to
+   back the landing nav's anchor links, but it's a document-wide mode — a
+   real Chromium/Blink quirk means once it's set, mouse-wheel scrolling
+   over ANY nested `overflow: auto` element (a scrollable textarea, a
+   dropdown, anything) gets swallowed by the root's smooth-scroll
+   coordinator instead of reaching that element's own scrollbox. That
+   silently broke scrolling inside Script Studio's section textareas.
+   LandingNav.tsx now does the smooth scroll itself, per click, via
+   `Element.scrollIntoView({ behavior: "smooth" })` — scoped to that one
+   scroll action instead of a standing document-wide mode. */
 
 body {
   background-color: var(--color-background);

@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import AnalyticsCharts from "./AnalyticsCharts";
 import HealthScoreCard from "./HealthScoreCard";
-import InteractiveCard from "@/components/ui/InteractiveCard";
+import StatCard from "./StatCard";
 import ConnectYouTubePrompt from "@/components/ConnectYouTubePrompt";
 import ReconnectYouTubeNotice from "@/components/ReconnectYouTubeNotice";
 
@@ -70,21 +70,13 @@ export default async function AnalyticsPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
             <StatCard
               label="Subscribers"
-              value={data.currentStats.subscriberCount.toLocaleString()}
+              value={data.currentStats.subscriberCount}
             />
-            <StatCard
-              label="Total Views"
-              value={data.currentStats.viewCount.toLocaleString()}
-            />
-            <StatCard
-              label="Videos"
-              value={data.currentStats.videoCount.toLocaleString()}
-            />
+            <StatCard label="Total Views" value={data.currentStats.viewCount} />
+            <StatCard label="Videos" value={data.currentStats.videoCount} />
             <StatCard
               label="Watch Time (hrs)"
-              value={Math.round(
-                data.currentStats.watchTimeMinutes / 60,
-              ).toLocaleString()}
+              value={Math.round(data.currentStats.watchTimeMinutes / 60)}
             />
           </div>
 
@@ -110,24 +102,4 @@ async function HealthScoreCardWrapper({
 }) {
   const healthScore = await getHealthScore(data);
   return <HealthScoreCard healthScore={healthScore} />;
-}
-
-function StatCard({ label, value }: { label: string; value: string }) {
-  return (
-    <InteractiveCard className="p-4">
-      <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
-        {label}
-      </div>
-      <div
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 24,
-          fontWeight: 700,
-          marginTop: 4,
-        }}
-      >
-        {value}
-      </div>
-    </InteractiveCard>
-  );
 }

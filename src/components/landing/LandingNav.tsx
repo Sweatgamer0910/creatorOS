@@ -1,5 +1,24 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+
+// Scrolls smoothly to a section per click, instead of relying on a
+// document-wide `html { scroll-behavior: smooth }` — see the comment in
+// globals.css for why that global mode was removed.
+function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
+  e.preventDefault();
+  const target = document.getElementById(id);
+  if (!target) return;
+
+  const reducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+  target.scrollIntoView({
+    behavior: reducedMotion ? "auto" : "smooth",
+    block: "start",
+  });
+}
 
 export default function LandingNav() {
   return (
@@ -53,13 +72,25 @@ export default function LandingNav() {
         {/* The 5-card scatter/converge sequence is what visitors actually
             mean by "the product" — the ring/tile pipeline section above it
             is more of a process illustration. */}
-        <a href="#workspace-assembly-track" className="glow-text">
+        <a
+          href="#workspace-assembly-track"
+          className="glow-text"
+          onClick={(e) => handleAnchorClick(e, "workspace-assembly-track")}
+        >
           Product
         </a>
-        <a href="#features" className="glow-text">
+        <a
+          href="#features"
+          className="glow-text"
+          onClick={(e) => handleAnchorClick(e, "features")}
+        >
           Features
         </a>
-        <a href="#confidence" className="glow-text">
+        <a
+          href="#confidence"
+          className="glow-text"
+          onClick={(e) => handleAnchorClick(e, "confidence")}
+        >
           How AI works here
         </a>
       </div>

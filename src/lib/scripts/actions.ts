@@ -17,10 +17,10 @@ async function getWorkspaceId() {
   return workspace.id;
 }
 
-export async function createScript(title: string) {
+export async function createScript(title: string, ideaId?: string) {
   const workspaceId = await getWorkspaceId();
   const script = await prisma.script.create({
-    data: { title, workspaceId },
+    data: { title, workspaceId, ideaId },
   });
   revalidatePath("/scripts");
   return script;
@@ -38,6 +38,7 @@ export async function updateScript(
     introComplete: boolean;
     bodyComplete: boolean;
     outroComplete: boolean;
+    ideaId: string | null;
   }>,
 ) {
   const workspaceId = await getWorkspaceId();
@@ -68,6 +69,7 @@ export async function getScripts() {
   return prisma.script.findMany({
     where: { workspaceId },
     orderBy: { updatedAt: "desc" },
+    include: { idea: { select: { id: true, title: true } } },
   });
 }
 
@@ -75,7 +77,10 @@ export async function getScript(id: string) {
   const workspaceId = await getWorkspaceId();
   // findFirst + workspaceId, not findUnique(id) — this was previously
   // readable by anyone who knew/guessed a script id, logged in or not.
-  return prisma.script.findFirst({ where: { id, workspaceId } });
+  return prisma.script.findFirst({
+    where: { id, workspaceId },
+    include: { idea: { select: { id: true, title: true } } },
+  });
 }
 
 // Manual only — snapshots are taken on explicit user action ("save

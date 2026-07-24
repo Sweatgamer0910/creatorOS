@@ -2,17 +2,18 @@
 
 import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
+import { Trash2, Link2 } from "lucide-react";
 import {
   updateContentItemStatus,
+  updateContentItemLink,
   deleteContentItem,
-  PipelineStatus,
 } from "@/lib/pipeline/actions";
+import { PIPELINE_STAGES, type PipelineStatus } from "@/lib/pipeline/stages";
 import Spinner from "@/components/Spinner";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/button";
 import SeriesBadge from "@/components/SeriesBadge";
-import { radius } from "@/lib/design-tokens";
+import { radius, spacing } from "@/lib/design-tokens";
 
 interface ContentItem {
   id: string;
@@ -28,15 +29,36 @@ interface ContentItem {
   script: { id: string; title: string } | null;
 }
 
-const columns: { status: PipelineStatus; label: string }[] = [
-  { status: "idea", label: "Idea" },
-  { status: "filming", label: "Filming" },
-  { status: "editing", label: "Editing" },
-  { status: "published", label: "Published" },
-];
+const columns = PIPELINE_STAGES;
 
-function ItemCard({ item }: { item: ContentItem }) {
+const linkSelectStyle: React.CSSProperties = {
+  backgroundColor: "var(--color-background)",
+  border: "1px solid var(--color-border)",
+  color: "var(--color-text)",
+  borderRadius: radius.sm,
+  padding: `${spacing.xs}px ${spacing.sm}px`,
+  outline: "none",
+  fontSize: 12,
+};
+
+function ItemCard({
+  item,
+  ideas,
+  scripts,
+}: {
+  item: ContentItem;
+  ideas: { id: string; title: string }[];
+  scripts: { id: string; title: string }[];
+}) {
   const [isDeleting, startDelete] = useTransition();
+  const [isLinking, startLinking] = useTransition();
+  const [showLinkEditor, setShowLinkEditor] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
+
+  function reportCardError(message: string) {
+    setCardError(message);
+    setTimeout(() => setCardError(null), 4000);
+  }
 
   function handleDragStart(e: React.DragEvent) {
     e.dataTransfer.setData("text/plain", item.id);
@@ -44,9 +66,39 @@ function ItemCard({ item }: { item: ContentItem }) {
 
   function handleDelete() {
     startDelete(async () => {
-      await deleteContentItem(item.id);
+      try {
+        await deleteContentItem(item.id);
+      } catch (e) {
+        console.error("[PipelineBoard] Failed to delete item:", e);
+        reportCardError("Couldn't delete — try again.");
+      }
     });
   }
+
+  function handleLink(value: string) {
+    const [kind, id] = value ? value.split(":") : ["", ""];
+    const link =
+      kind === "idea"
+        ? { ideaId: id, scriptId: null }
+        : kind === "script"
+          ? { ideaId: null, scriptId: id }
+          : { ideaId: null, scriptId: null };
+    setShowLinkEditor(false);
+    startLinking(async () => {
+      try {
+        await updateContentItemLink(item.id, link);
+      } catch (e) {
+        console.error("[PipelineBoard] Failed to update link:", e);
+        reportCardError("Couldn't save that link — try again.");
+      }
+    });
+  }
+
+  const currentLinkValue = item.idea
+    ? `idea:${item.idea.id}`
+    : item.script
+      ? `script:${item.script.id}`
+      : "";
 
   return (
     <div
@@ -73,21 +125,107 @@ function ItemCard({ item }: { item: ContentItem }) {
             {isDeleting ? <Spinner size={12} /> : <Trash2 size={14} />}
           </Button>
         </div>
-        {(item.idea || item.script) && (
-          <Link
-            href={item.idea ? "/ideas" : `/scripts/${item.script!.id}`}
-            onClick={(e) => e.stopPropagation()}
+
+        {!showLinkEditor && (item.idea || item.script) && (
+          <div className="flex items-center gap-1" style={{ marginTop: 6 }}>
+            <Link
+              href={item.idea ? "/ideas" : `/scripts/${item.script!.id}`}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                fontSize: 11,
+                color: "var(--color-text-muted)",
+                textDecoration: "none",
+              }}
+            >
+              from: {item.idea ? item.idea.title : item.script!.title}
+            </Link>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowLinkEditor(true);
+              }}
+              aria-label="Change link"
+              style={{
+                background: "none",
+                border: "none",
+                padding: 2,
+                cursor: "pointer",
+                color: "var(--color-text-muted)",
+                display: "inline-flex",
+              }}
+            >
+              <Link2 size={11} />
+            </button>
+          </div>
+        )}
+
+        {!showLinkEditor && !item.idea && !item.script && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowLinkEditor(true);
+            }}
             style={{
-              display: "inline-block",
               marginTop: 6,
+              background: "none",
+              border: "none",
+              padding: 0,
               fontSize: 11,
-              color: "var(--color-text-muted)",
-              textDecoration: "none",
+              color: "var(--color-accent-teal)",
+              cursor: "pointer",
             }}
           >
-            from: {item.idea ? item.idea.title : item.script!.title}
-          </Link>
+            + Link
+          </button>
         )}
+
+        {showLinkEditor && (
+          <div
+            className="flex items-center gap-2"
+            style={{ marginTop: 6 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <select
+              value={currentLinkValue}
+              onChange={(e) => handleLink(e.target.value)}
+              style={linkSelectStyle}
+            >
+              <option value="">None</option>
+              {ideas.length > 0 && (
+                <optgroup label="Ideas">
+                  {ideas.map((idea) => (
+                    <option key={idea.id} value={`idea:${idea.id}`}>
+                      {idea.title}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+              {scripts.length > 0 && (
+                <optgroup label="Scripts">
+                  {scripts.map((script) => (
+                    <option key={script.id} value={`script:${script.id}`}>
+                      {script.title}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowLinkEditor(false);
+              }}
+            >
+              Cancel
+            </Button>
+            {isLinking && <Spinner size={12} />}
+          </div>
+        )}
+
         {item.idea?.series && (
           <div style={{ marginTop: 6 }}>
             <SeriesBadge
@@ -97,6 +235,12 @@ function ItemCard({ item }: { item: ContentItem }) {
             />
           </div>
         )}
+
+        {cardError && (
+          <div style={{ marginTop: 6, fontSize: 11, color: "#e35d5d" }}>
+            {cardError}
+          </div>
+        )}
       </Card>
     </div>
   );
@@ -104,8 +248,12 @@ function ItemCard({ item }: { item: ContentItem }) {
 
 export default function PipelineBoard({
   items: initialItems,
+  ideas = [],
+  scripts = [],
 }: {
   items: ContentItem[];
+  ideas?: { id: string; title: string }[];
+  scripts?: { id: string; title: string }[];
 }) {
   const [items, setItems] = useState(initialItems);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
@@ -160,7 +308,7 @@ export default function PipelineBoard({
           {error}
         </div>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {columns.map((col) => {
           const colItems = items.filter((i) => i.status === col.status);
           const isOver = dragOverCol === col.status;
@@ -206,7 +354,12 @@ export default function PipelineBoard({
                 </span>
               </div>
               {colItems.map((item) => (
-                <ItemCard key={item.id} item={item} />
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  ideas={ideas}
+                  scripts={scripts}
+                />
               ))}
             </div>
           );

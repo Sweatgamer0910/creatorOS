@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getScripts } from "@/lib/scripts/actions";
+import { getIdeas } from "@/lib/ideas/actions";
 import NewScriptForm from "./NewScriptForm";
 import ScriptListItem from "./ScriptListItem";
 import EmptyScripts from "./EmptyScripts";
@@ -9,11 +10,19 @@ import LockedFeature from "@/components/LockedFeature";
 import Button from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 
-export default async function ScriptsPage() {
+export default async function ScriptsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ideaId?: string }>;
+}) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
-  const scripts = await getScripts();
+  const [{ ideaId }, scripts, ideas] = await Promise.all([
+    searchParams,
+    getScripts(),
+    getIdeas(),
+  ]);
 
   return (
     <div style={{ padding: "24px 40px 48px", maxWidth: 900, margin: "0 auto" }}>
@@ -49,13 +58,13 @@ export default async function ScriptsPage() {
           lineHeight: 1.6,
         }}
       >
-        Draft hook, intro, body, and outro section by section instead of
-        staring at one blank page — each piece autosaves as you write.
-        AI-assisted writing is coming soon.
+        Draft hook, intro, body, and outro section by section instead of staring
+        at one blank page — each piece autosaves as you write. AI-assisted
+        writing is coming soon.
       </p>
 
       <div className="mt-8">
-        <NewScriptForm />
+        <NewScriptForm ideas={ideas} initialIdeaId={ideaId} />
       </div>
 
       <div className="mt-8 flex flex-col gap-3">

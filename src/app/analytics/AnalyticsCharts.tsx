@@ -1,32 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import ReactECharts from "echarts-for-react";
 import { DailyDataPoint } from "@/lib/analytics";
 import Card from "@/components/ui/Card";
+import RangePicker from "@/components/RangePicker";
+import {
+  chartColors,
+  chartTooltipTheme,
+  chartAxisPointerTheme,
+  chartAnimationDuration,
+  chartAnimationEasing,
+  formatCompactNumber,
+} from "@/lib/chartTheme";
+import {
+  RangePreset,
+  RANGE_DAYS,
+  RANGE_LABELS,
+  RANGE_WINDOW_NAMES,
+  bucketData,
+  formatDateRange,
+} from "@/lib/analytics/buckets";
 
 type MetricKey = "views" | "subscribersGained" | "watchTimeMinutes";
 type ChartStyle = "line" | "bar" | "area";
-type RangePreset = "7d" | "30d" | "90d" | "1y";
 
 const METRICS: Record<MetricKey, { label: string; color: string }> = {
   views: { label: "Views", color: "#f5a623" },
   subscribersGained: { label: "Subscribers Gained", color: "#2dd4bf" },
   watchTimeMinutes: { label: "Watch Time (hrs)", color: "#5fb3e0" },
-};
-
-const RANGE_DAYS: Record<RangePreset, number> = {
-  "7d": 7,
-  "30d": 30,
-  "90d": 90,
-  "1y": 365,
-};
-
-const RANGE_LABELS: Record<RangePreset, string> = {
-  "7d": "7D",
-  "30d": "30D",
-  "90d": "90D",
-  "1y": "1Y",
 };
 
 const selectStyle: React.CSSProperties = {
@@ -66,6 +68,7 @@ function MetricChartCard({
   defaultMetric: MetricKey;
   defaultStyle: ChartStyle;
 }) {
+  const pickerId = useId();
   const availableRanges = (Object.keys(RANGE_DAYS) as RangePreset[]).filter(
     (r) => data.length >= RANGE_DAYS[r],
   );
@@ -75,50 +78,41 @@ function MetricChartCard({
   const [style, setStyle] = useState<ChartStyle>(defaultStyle);
   const [range, setRange] = useState<RangePreset>(initialRange);
 
-  const windowed = data.slice(-RANGE_DAYS[range]);
+  const buckets = bucketData(data, range);
   const meta = METRICS[metric];
 
-  const dates = windowed.map((d) => d.date.slice(5));
-  const values = windowed.map((d) =>
+  const dates = buckets.map((b) => b.label);
+  const values = buckets.map((b) =>
     metric === "watchTimeMinutes"
-      ? Math.round(d.watchTimeMinutes / 60)
-      : d[metric],
+      ? Math.round(b.watchTimeMinutes / 60)
+      : b[metric],
   );
 
-  const showZoom = windowed.length > 14;
-
   const option = {
-    tooltip: { trigger: "axis" },
-    grid: { left: 44, right: 16, top: 16, bottom: showZoom ? 56 : 30 },
+    tooltip: {
+      trigger: "axis",
+      ...chartTooltipTheme,
+      axisPointer: chartAxisPointerTheme,
+    },
+    grid: { left: 48, right: 16, top: 16, bottom: 30 },
+    animationDuration: chartAnimationDuration,
+    animationEasing: chartAnimationEasing,
     xAxis: {
       type: "category",
       data: dates,
-      axisLine: { lineStyle: { color: "#262b34" } },
-      axisLabel: { color: "#8b93a1" },
+      axisLine: { lineStyle: { color: chartColors.border } },
+      axisLabel: { color: chartColors.textMuted },
+      axisPointer: chartAxisPointerTheme,
     },
     yAxis: {
       type: "value",
-      splitLine: { lineStyle: { color: "#1f242d" } },
-      axisLabel: { color: "#8b93a1" },
+      splitLine: { lineStyle: { color: chartColors.surfaceHover } },
+      axisLabel: {
+        color: chartColors.textMuted,
+        formatter: formatCompactNumber,
+      },
     },
-    textStyle: { color: "#8b93a1" },
-    dataZoom: showZoom
-      ? [
-          { type: "inside", start: 0, end: 100 },
-          {
-            type: "slider",
-            start: 0,
-            end: 100,
-            height: 18,
-            bottom: 6,
-            borderColor: "#262b34",
-            backgroundColor: "#171b22",
-            fillerColor: `${meta.color}1f`,
-            handleStyle: { color: meta.color },
-            textStyle: { color: "#8b93a1" },
-          },
-        ]
-      : [],
+    textStyle: { color: chartColors.textMuted },
     series: [
       {
         data: values,
@@ -135,7 +129,7 @@ function MetricChartCard({
     <Card padding="sm">
       <div
         className="flex items-center justify-between flex-wrap gap-3"
-        style={{ marginBottom: 12 }}
+        style={{ marginBottom: 4 }}
       >
         <div
           style={{
@@ -176,20 +170,33 @@ function MetricChartCard({
             ))}
           </div>
           {availableRanges.length > 1 && (
-            <div style={segmentWrapStyle}>
-              {availableRanges.map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRange(r)}
-                  style={segmentButtonStyle(range === r)}
-                >
-                  {RANGE_LABELS[r]}
-                </button>
-              ))}
-            </div>
+            <RangePicker
+              options={availableRanges.map((r) => ({
+                value: r,
+                label: RANGE_LABELS[r],
+              }))}
+              value={range}
+              onChange={setRange}
+              layoutId={`range-highlight-${pickerId}`}
+            />
           )}
         </div>
       </div>
+
+      {/* "What am I looking at" — always visible, not dependent on any
+          scroll/scrub gesture, so it's never ambiguous how much data is
+          shown (the thing the free-scrubbing zoom slider it replaced made
+          genuinely unclear). */}
+      <div
+        style={{
+          fontSize: 12,
+          color: "var(--color-text-muted)",
+          marginBottom: 12,
+        }}
+      >
+        {formatDateRange(data, range)} · {RANGE_WINDOW_NAMES[range]}
+      </div>
+
       <ReactECharts
         option={option}
         style={{ height: 280 }}
