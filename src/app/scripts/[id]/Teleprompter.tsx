@@ -9,7 +9,10 @@ import { ScriptSections } from "@/lib/scripts/wordCount";
 const SPEED_MIN = 0.5;
 const SPEED_MAX = 3;
 const SPEED_STEP = 0.25;
-const PX_PER_FRAME_AT_1X = 0.6;
+const PX_PER_SECOND_AT_1X = 36; // was 0.6px/frame assuming 60fps — now framerate-independent
+// requestAnimationFrame pauses in background tabs; without this cap, coming
+// back to a stale tab produces one giant dt and the text leaps forward.
+const MAX_DT_MS = 100;
 
 export default function Teleprompter({
   sections,
@@ -22,17 +25,34 @@ export default function Teleprompter({
   const [playing, setPlaying] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number | null>(null);
+  // scrollTop is rounded to whole pixels by the browser on every read/write,
+  // so accumulating via `scrollTop += fraction` compounds rounding error
+  // into visibly irregular, jittery per-frame jumps. Tracking the
+  // fractional remainder ourselves and only ever nudging scrollTop by whole
+  // pixels keeps the motion even — while still using `+=` (not an absolute
+  // assignment) so a manual wheel-scroll mid-playback isn't fought.
+  const carryRef = useRef(0);
+  const lastTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
-    function tick() {
+    function tick(now: number) {
+      if (lastTimeRef.current == null) lastTimeRef.current = now;
+      const dt = Math.min(now - lastTimeRef.current, MAX_DT_MS);
+      lastTimeRef.current = now;
+
       if (containerRef.current && playing) {
-        containerRef.current.scrollTop += speed * PX_PER_FRAME_AT_1X;
+        const wanted =
+          carryRef.current + speed * PX_PER_SECOND_AT_1X * (dt / 1000);
+        const whole = Math.trunc(wanted);
+        carryRef.current = wanted - whole;
+        if (whole !== 0) containerRef.current.scrollTop += whole;
       }
       frameRef.current = requestAnimationFrame(tick);
     }
     frameRef.current = requestAnimationFrame(tick);
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
+      lastTimeRef.current = null;
     };
   }, [speed, playing]);
 

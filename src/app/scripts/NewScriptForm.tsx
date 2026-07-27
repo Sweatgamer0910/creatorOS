@@ -64,7 +64,11 @@ export default function NewScriptForm({
 
   return (
     <Card>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <form
+        data-tour="script-form"
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-3"
+      >
         <div className="flex gap-3 flex-wrap">
           <input
             placeholder="New script title"

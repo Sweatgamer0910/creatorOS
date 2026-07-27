@@ -23,7 +23,7 @@ import {
 } from "@/lib/analytics/buckets";
 
 type MetricKey = "views" | "subscribersGained" | "watchTimeMinutes";
-type ChartStyle = "line" | "bar" | "area";
+type ChartStyle = "line" | "bar" | "scatter";
 
 const METRICS: Record<MetricKey, { label: string; color: string }> = {
   views: { label: "Views", color: "#f5a623" },
@@ -63,10 +63,12 @@ function MetricChartCard({
   data,
   defaultMetric,
   defaultStyle,
+  dataTourId,
 }: {
   data: DailyDataPoint[];
   defaultMetric: MetricKey;
   defaultStyle: ChartStyle;
+  dataTourId?: string;
 }) {
   const pickerId = useId();
   const availableRanges = (Object.keys(RANGE_DAYS) as RangePreset[]).filter(
@@ -116,9 +118,11 @@ function MetricChartCard({
     series: [
       {
         data: values,
-        type: style === "bar" ? "bar" : "line",
-        smooth: style !== "bar",
-        areaStyle: style === "area" ? { color: `${meta.color}26` } : undefined,
+        type:
+          style === "bar" ? "bar" : style === "scatter" ? "scatter" : "line",
+        smooth: style === "line",
+        symbol: style === "scatter" ? "circle" : "none",
+        symbolSize: style === "scatter" ? 8 : undefined,
         lineStyle: { color: meta.color },
         itemStyle: { color: meta.color },
       },
@@ -141,7 +145,10 @@ function MetricChartCard({
         >
           {meta.label}
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div
+          data-tour={dataTourId}
+          className="flex items-center gap-2 flex-wrap"
+        >
           <select
             value={metric}
             onChange={(e) => setMetric(e.target.value as MetricKey)}
@@ -159,7 +166,7 @@ function MetricChartCard({
             ))}
           </select>
           <div style={segmentWrapStyle}>
-            {(["line", "bar", "area"] as ChartStyle[]).map((s) => (
+            {(["line", "bar", "scatter"] as ChartStyle[]).map((s) => (
               <button
                 key={s}
                 onClick={() => setStyle(s)}
@@ -210,7 +217,12 @@ function MetricChartCard({
 export default function AnalyticsCharts({ data }: { data: DailyDataPoint[] }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <MetricChartCard data={data} defaultMetric="views" defaultStyle="line" />
+      <MetricChartCard
+        data={data}
+        defaultMetric="views"
+        defaultStyle="line"
+        dataTourId="range-picker"
+      />
       <MetricChartCard
         data={data}
         defaultMetric="subscribersGained"

@@ -18,8 +18,10 @@ import {
   FileText,
   Kanban,
   LogOut,
+  HelpCircle,
 } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
+import { useOnboardingTour } from "@/lib/onboarding/context";
 import Spinner from "./Spinner";
 import Button from "@/components/ui/button";
 
@@ -138,10 +140,12 @@ export default function NotchNav() {
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [logoHovered, setLogoHovered] = useState(false);
   const [logoutHovered, setLogoutHovered] = useState(false);
+  const [helpHovered, setHelpHovered] = useState(false);
   const mouseX = useMotionValue(Infinity);
   const pathname = usePathname();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const { start: startTour } = useOnboardingTour();
 
   function handleNavigate(href: string) {
     setPendingKey(href);
@@ -170,6 +174,7 @@ export default function NotchNav() {
   return (
     <div className="fixed top-6 left-0 right-0 flex justify-center z-50">
       <motion.div
+        data-tour="nav"
         onMouseEnter={() => setExpanded(true)}
         onMouseLeave={() => {
           setExpanded(false);
@@ -285,6 +290,27 @@ export default function NotchNav() {
                   ) : (
                     <LogOut size={22} color="var(--color-text-muted)" />
                   )}
+                </Button>
+              </div>
+              <div
+                style={{ position: "relative" }}
+                onMouseEnter={() => setHelpHovered(true)}
+                onMouseLeave={() => setHelpHovered(false)}
+              >
+                <Tooltip label="Replay tour" show={helpHovered} />
+                <Button
+                  variant="ghost"
+                  iconOnly
+                  onClick={startTour}
+                  aria-label="Replay onboarding tour"
+                  style={{
+                    width: 50,
+                    height: 50,
+                    border: "none",
+                    backgroundColor: "transparent",
+                  }}
+                >
+                  <HelpCircle size={20} color="var(--color-text-muted)" />
                 </Button>
               </div>
             </motion.div>

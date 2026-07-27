@@ -81,7 +81,7 @@ export default async function CoachPage() {
           ) : (
             <>
               {recommendations && recommendations.length > 0 && (
-                <div className="mt-8">
+                <div className="mt-8" data-tour="coach-recommendations">
                   <h2
                     style={{
                       fontFamily: "var(--font-display)",

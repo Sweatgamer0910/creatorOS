@@ -75,30 +75,26 @@ function ItemCard({
     });
   }
 
-  function handleLink(value: string) {
-    const [kind, id] = value ? value.split(":") : ["", ""];
-    const link =
-      kind === "idea"
-        ? { ideaId: id, scriptId: null }
-        : kind === "script"
-          ? { ideaId: null, scriptId: id }
-          : { ideaId: null, scriptId: null };
-    setShowLinkEditor(false);
+  // Idea and script are independent — changing one leaves the other exactly
+  // as it was, so a card can end up linked to both at once instead of the
+  // old one-or-the-other behavior.
+  function handleLinkChange(field: "idea" | "script", value: string) {
+    const nextIdeaId =
+      field === "idea" ? value || null : (item.idea?.id ?? null);
+    const nextScriptId =
+      field === "script" ? value || null : (item.script?.id ?? null);
     startLinking(async () => {
       try {
-        await updateContentItemLink(item.id, link);
+        await updateContentItemLink(item.id, {
+          ideaId: nextIdeaId,
+          scriptId: nextScriptId,
+        });
       } catch (e) {
         console.error("[PipelineBoard] Failed to update link:", e);
         reportCardError("Couldn't save that link — try again.");
       }
     });
   }
-
-  const currentLinkValue = item.idea
-    ? `idea:${item.idea.id}`
-    : item.script
-      ? `script:${item.script.id}`
-      : "";
 
   return (
     <div
@@ -127,18 +123,38 @@ function ItemCard({
         </div>
 
         {!showLinkEditor && (item.idea || item.script) && (
-          <div className="flex items-center gap-1" style={{ marginTop: 6 }}>
-            <Link
-              href={item.idea ? "/ideas" : `/scripts/${item.script!.id}`}
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                fontSize: 11,
-                color: "var(--color-text-muted)",
-                textDecoration: "none",
-              }}
-            >
-              from: {item.idea ? item.idea.title : item.script!.title}
-            </Link>
+          <div
+            className="flex items-start justify-between gap-1"
+            style={{ marginTop: 6 }}
+          >
+            <div className="flex flex-col" style={{ gap: 2 }}>
+              {item.idea && (
+                <Link
+                  href="/ideas"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    fontSize: 11,
+                    color: "var(--color-text-muted)",
+                    textDecoration: "none",
+                  }}
+                >
+                  idea: {item.idea.title}
+                </Link>
+              )}
+              {item.script && (
+                <Link
+                  href={`/scripts/${item.script.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    fontSize: 11,
+                    color: "var(--color-text-muted)",
+                    textDecoration: "none",
+                  }}
+                >
+                  script: {item.script.title}
+                </Link>
+              )}
+            </div>
             <button
               type="button"
               onClick={(e) => {
@@ -153,6 +169,7 @@ function ItemCard({
                 cursor: "pointer",
                 color: "var(--color-text-muted)",
                 display: "inline-flex",
+                flexShrink: 0,
               }}
             >
               <Link2 size={11} />
@@ -183,46 +200,71 @@ function ItemCard({
 
         {showLinkEditor && (
           <div
-            className="flex items-center gap-2"
+            className="flex flex-col gap-2"
             style={{ marginTop: 6 }}
             onClick={(e) => e.stopPropagation()}
           >
-            <select
-              value={currentLinkValue}
-              onChange={(e) => handleLink(e.target.value)}
-              style={linkSelectStyle}
-            >
-              <option value="">None</option>
-              {ideas.length > 0 && (
-                <optgroup label="Ideas">
-                  {ideas.map((idea) => (
-                    <option key={idea.id} value={`idea:${idea.id}`}>
-                      {idea.title}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-              {scripts.length > 0 && (
-                <optgroup label="Scripts">
-                  {scripts.map((script) => (
-                    <option key={script.id} value={`script:${script.id}`}>
-                      {script.title}
-                    </option>
-                  ))}
-                </optgroup>
-              )}
-            </select>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowLinkEditor(false);
-              }}
-            >
-              Cancel
-            </Button>
-            {isLinking && <Spinner size={12} />}
+            <div className="flex items-center gap-2">
+              <span
+                style={{
+                  fontSize: 11,
+                  color: "var(--color-text-muted)",
+                  width: 36,
+                  flexShrink: 0,
+                }}
+              >
+                Idea
+              </span>
+              <select
+                value={item.idea?.id ?? ""}
+                onChange={(e) => handleLinkChange("idea", e.target.value)}
+                style={linkSelectStyle}
+              >
+                <option value="">None</option>
+                {ideas.map((idea) => (
+                  <option key={idea.id} value={idea.id}>
+                    {idea.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                style={{
+                  fontSize: 11,
+                  color: "var(--color-text-muted)",
+                  width: 36,
+                  flexShrink: 0,
+                }}
+              >
+                Script
+              </span>
+              <select
+                value={item.script?.id ?? ""}
+                onChange={(e) => handleLinkChange("script", e.target.value)}
+                style={linkSelectStyle}
+              >
+                <option value="">None</option>
+                {scripts.map((script) => (
+                  <option key={script.id} value={script.id}>
+                    {script.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowLinkEditor(false);
+                }}
+              >
+                Done
+              </Button>
+              {isLinking && <Spinner size={12} />}
+            </div>
           </div>
         )}
 
@@ -292,7 +334,7 @@ export default function PipelineBoard({
   }
 
   return (
-    <div>
+    <div data-tour="pipeline-board">
       {error && (
         <div
           style={{

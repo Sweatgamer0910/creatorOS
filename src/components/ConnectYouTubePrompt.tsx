@@ -9,29 +9,31 @@ export default function ConnectYouTubePrompt({
   callbackURL?: string;
 }) {
   return (
-    <Card style={{ maxWidth: 480, marginTop: 20 }}>
-      <div
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: 18,
-          fontWeight: 600,
-        }}
-      >
-        Connect your YouTube channel
-      </div>
-      <p
-        style={{
-          color: "var(--color-text-muted)",
-          fontSize: 14,
-          marginTop: 8,
-          lineHeight: 1.6,
-        }}
-      >
-        {description}
-      </p>
-      <div style={{ marginTop: 16 }}>
-        <ConnectYouTubeButton callbackURL={callbackURL} />
-      </div>
-    </Card>
+    <div data-tour="connect-youtube">
+      <Card style={{ maxWidth: 480, marginTop: 20 }}>
+        <div
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: 18,
+            fontWeight: 600,
+          }}
+        >
+          Connect your YouTube channel
+        </div>
+        <p
+          style={{
+            color: "var(--color-text-muted)",
+            fontSize: 14,
+            marginTop: 8,
+            lineHeight: 1.6,
+          }}
+        >
+          {description}
+        </p>
+        <div style={{ marginTop: 16 }}>
+          <ConnectYouTubeButton callbackURL={callbackURL} />
+        </div>
+      </Card>
+    </div>
   );
 }

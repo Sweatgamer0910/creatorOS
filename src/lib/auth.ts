@@ -95,6 +95,19 @@ export const auth = betterAuth({
       trustedProviders: ["google"],
     },
   },
+  user: {
+    additionalFields: {
+      // Surfaces onto session.user so OnboardingTourHost can decide to
+      // auto-launch client-side without a separate fetch. `input: false`
+      // blocks it from any user-facing update-profile call — only
+      // completeOnboarding() (src/lib/onboarding/actions.ts) ever writes it.
+      onboardingCompletedAt: {
+        type: "date",
+        required: false,
+        input: false,
+      },
+    },
+  },
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
   // @upstash/ratelimit was a dependency with nothing using it — this is

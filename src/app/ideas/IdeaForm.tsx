@@ -86,7 +86,11 @@ export default function IdeaForm({
 
   return (
     <Card>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <form
+        data-tour="idea-form"
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-3"
+      >
         <div className="flex items-center justify-between">
           <span style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
             New idea

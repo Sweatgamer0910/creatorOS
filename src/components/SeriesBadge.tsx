@@ -15,6 +15,7 @@ export default function SeriesBadge({
     <Link
       href={`/series/${id}`}
       onClick={(e) => e.stopPropagation()}
+      title={episodeNumber != null ? `#${episodeNumber} · ${title}` : title}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -28,10 +29,20 @@ export default function SeriesBadge({
         borderRadius: 999,
         padding: "3px 8px",
         textDecoration: "none",
-        whiteSpace: "nowrap",
+        maxWidth: "100%",
+        minWidth: 0,
       }}
     >
-      {episodeNumber != null ? `#${episodeNumber} · ${title}` : title}
+      <span
+        style={{
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          minWidth: 0,
+        }}
+      >
+        {episodeNumber != null ? `#${episodeNumber} · ${title}` : title}
+      </span>
     </Link>
   );
 }

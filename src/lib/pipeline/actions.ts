@@ -67,9 +67,10 @@ export async function updateContentItemLink(
   link: { ideaId: string | null; scriptId: string | null },
 ) {
   const workspaceId = await getWorkspaceId();
-  // Always sets both fields explicitly (rather than a partial patch) so a
-  // card links to at most one of idea/script — same mutual exclusivity the
-  // creation flow already has, enforced here instead of left ambiguous.
+  // Idea and script are independent fields on the model — a card can link
+  // to both at once (e.g. a script written from an idea still wants the
+  // idea link kept). Always sets both explicitly (rather than a partial
+  // patch) so the caller controls the full link state in one call.
   const { count } = await prisma.contentItem.updateMany({
     where: { id, workspaceId },
     data: { ideaId: link.ideaId, scriptId: link.scriptId },

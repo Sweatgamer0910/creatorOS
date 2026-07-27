@@ -160,7 +160,10 @@ export default async function DashboardPage() {
       >
         Quick access
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div
+        data-tour="quick-access"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+      >
         <QuickAccessCard
           href="/analytics"
           label="Analytics"

@@ -155,3 +155,26 @@ body {
     transform: none;
   }
 }
+
+/* The onboarding tour's Nova avatar (src/components/onboarding/
+   TourWidget.tsx) — a slow breathing glow in her existing brand amber,
+   distinct from .glow-interactive's hover-only bloom since this one runs
+   continuously to read as "alive" while she's on screen. */
+@keyframes nova-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 16px 3px rgba(var(--glow-amber-rgb), 0.45);
+  }
+  50% {
+    box-shadow: 0 0 26px 7px rgba(var(--glow-amber-rgb), 0.75);
+  }
+}
+.nova-pulse {
+  animation: nova-pulse 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nova-pulse {
+    animation: none;
+    box-shadow: 0 0 16px 3px rgba(var(--glow-amber-rgb), 0.55);
+  }
+}

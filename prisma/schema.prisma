@@ -18,6 +18,11 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Set once, by the completeOnboarding server action, when the Nova tour
+  // is finished or skipped — null means "hasn't seen it yet" and drives
+  // the auto-launch check in OnboardingTourHost.
+  onboardingCompletedAt DateTime?
+
   sessions  Session[]
   accounts  Account[]
   workspace Workspace?

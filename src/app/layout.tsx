@@ -5,6 +5,7 @@ import NotchNav from "@/components/NotchNav";
 import BodyBackgroundSync from "@/components/BodyBackgroundSync";
 import LenisProvider from "@/components/providers/LenisProvider";
 import MainShell from "@/components/MainShell";
+import OnboardingTourProvider from "@/components/onboarding/OnboardingTourProvider";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -39,8 +40,10 @@ export default function RootLayout({
       >
         <LenisProvider>
           <BodyBackgroundSync />
-          <NotchNav />
-          <MainShell>{children}</MainShell>
+          <OnboardingTourProvider>
+            <NotchNav />
+            <MainShell>{children}</MainShell>
+          </OnboardingTourProvider>
         </LenisProvider>
       </body>
     </html>
