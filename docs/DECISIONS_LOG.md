@@ -2,6 +2,27 @@
 
 Non-obvious technical decisions, newest first, with the reasoning behind them.
 
+## 2026-07-28 — Standing rule: zero dollars spent until first paying customer
+
+**Ayaan's explicit instruction: no money gets spent on CreatorOS — domains, paid API tiers, paid
+developer program fees, upgraded plans, anything with a cost — until the product has its first
+real sale.** Once there's revenue, that capital gets reinvested into the product. This is a hard
+rule, not a default that can be talked past with "it's only $8" reasoning — Claude (or any future
+session) should treat any action with a real-money cost as blocked until Ayaan says the zero-spend
+rule has lifted, and should say so explicitly rather than proceeding or re-raising the same
+purchase.
+
+**Concrete fallout as of today:**
+- Buying `creatoroshq.tech` (or any domain) is paused. This means Resend's shared
+  `onboarding@resend.dev` sender stays restricted to sending only to Ayaan's own email — no real
+  user can receive marketing/product-update email yet — and Google's OAuth app verification stays
+  blocked on the homepage-ownership requirement. Both are accepted trade-offs for now.
+- Sign-in with Apple is out for the same reason (requires the $99/year Apple Developer Program).
+- The auth rebuild (removing email/password, adding Discord OAuth alongside Google, adding a
+  `plan` field + Resend Audience-sync hook for when sending becomes possible) is still going
+  ahead — all of that is free (code + Discord's free developer portal), so none of it is blocked
+  by this rule.
+
 ## 2026-07-28 — Sentry wrapper stays "safe to ship" without a real project yet; Prisma client generated via postinstall, not committed
 
 **`next.config.ts`'s `withSentryConfig` call passes `org`/`project`/`authToken` as `|| undefined`,
