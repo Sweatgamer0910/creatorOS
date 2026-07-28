@@ -92,7 +92,13 @@ export default function TourWidget({
           overflow: "hidden",
         }}
       >
-        <Image src="/logo.png" alt="" width={28} height={28} />
+        <Image
+          src="/nova-avatar.png"
+          alt=""
+          width={44}
+          height={44}
+          style={{ objectFit: "cover" }}
+        />
       </div>
 
       <div

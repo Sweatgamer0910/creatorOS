@@ -18,10 +18,9 @@ import {
   FileText,
   Kanban,
   LogOut,
-  HelpCircle,
+  Settings,
 } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
-import { useOnboardingTour } from "@/lib/onboarding/context";
 import Spinner from "./Spinner";
 import Button from "@/components/ui/button";
 
@@ -140,12 +139,11 @@ export default function NotchNav() {
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [logoHovered, setLogoHovered] = useState(false);
   const [logoutHovered, setLogoutHovered] = useState(false);
-  const [helpHovered, setHelpHovered] = useState(false);
+  const [settingsHovered, setSettingsHovered] = useState(false);
   const mouseX = useMotionValue(Infinity);
   const pathname = usePathname();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const { start: startTour } = useOnboardingTour();
 
   function handleNavigate(href: string) {
     setPendingKey(href);
@@ -294,23 +292,30 @@ export default function NotchNav() {
               </div>
               <div
                 style={{ position: "relative" }}
-                onMouseEnter={() => setHelpHovered(true)}
-                onMouseLeave={() => setHelpHovered(false)}
+                onMouseEnter={() => setSettingsHovered(true)}
+                onMouseLeave={() => setSettingsHovered(false)}
               >
-                <Tooltip label="Replay tour" show={helpHovered} />
+                <Tooltip label="Settings" show={settingsHovered} />
                 <Button
                   variant="ghost"
                   iconOnly
-                  onClick={startTour}
-                  aria-label="Replay onboarding tour"
+                  onClick={() => handleNavigate("/settings")}
+                  aria-label="Settings"
                   style={{
                     width: 50,
                     height: 50,
                     border: "none",
-                    backgroundColor: "transparent",
+                    backgroundColor:
+                      pathname === "/settings"
+                        ? "var(--color-surface-hover)"
+                        : "transparent",
                   }}
                 >
-                  <HelpCircle size={20} color="var(--color-text-muted)" />
+                  {isPending && pendingKey === "/settings" ? (
+                    <Spinner size={18} />
+                  ) : (
+                    <Settings size={20} color="var(--color-text-muted)" />
+                  )}
                 </Button>
               </div>
             </motion.div>

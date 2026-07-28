@@ -2,6 +2,23 @@
 
 Non-obvious technical decisions, newest first, with the reasoning behind them.
 
+## 2026-07-27 — Onboarding tour points at the real gating UI instead of skipping gated steps
+
+**Steps whose `target` isn't in the DOM yet (Analytics/Coach before a YouTube channel is
+connected) fall back to a `fallbackTarget`/`fallbackBody`, not a skip.** Pointing the tour at the
+actual Connect-YouTube prompt with adjusted copy keeps the walkthrough honest about what's really
+on screen, instead of either describing a chart that doesn't exist yet or silently dropping the
+step — which would make the tour feel broken for anyone who hasn't connected YouTube yet, likely
+most first-time users.
+
+## 2026-07-23 — Scripted-stage migration script uses raw `pg`, not the Prisma client
+
+**`scripts/migrate-scripted-stage.ts` talks to Postgres directly via `pg`, not the generated
+Prisma client.** The generated client's own internal imports aren't extension-qualified, which
+Node's native ESM loader (used here via `--experimental-strip-types`, no bundler) can't resolve
+without a bundler. Raw SQL against two tables is simple enough not to need the ORM for a one-time,
+hand-run backfill script.
+
 ## 2026-07-22 — Series + pipeline linking + Script Studio polish
 
 **`AI_CONTEXT_HANDOFF.md` / `DEVELOPMENT_LOG.md` / `DECISIONS_LOG.md` didn't exist yet.** A task

@@ -138,6 +138,26 @@ export default function SignupPage() {
         </Button>
       </form>
 
+      <p
+        style={{
+          fontSize: 12,
+          color: "var(--color-text-muted)",
+          marginTop: 14,
+          textAlign: "center",
+          lineHeight: 1.5,
+        }}
+      >
+        By creating an account you agree to our{" "}
+        <Link href="/terms" style={linkStyle}>
+          Terms
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" style={linkStyle}>
+          Privacy Policy
+        </Link>
+        .
+      </p>
+
       {error && <p style={{ ...errorBoxStyle, marginTop: 16 }}>{error}</p>}
     </AuthShell>
   );

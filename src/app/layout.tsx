@@ -22,9 +22,33 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const DESCRIPTION =
+  "Mission control for your YouTube channel — plan ideas, write scripts, track your pipeline, and see real analytics and coaching, all in one place.";
+
 export const metadata: Metadata = {
-  title: "CreatorOS",
-  description: "Mission control for your YouTube channel",
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: "CreatorOS",
+    template: "%s — CreatorOS",
+  },
+  description: DESCRIPTION,
+  openGraph: {
+    title: "CreatorOS",
+    description: DESCRIPTION,
+    url: APP_URL,
+    siteName: "CreatorOS",
+    // A proper 1200x630 social card isn't cut yet — the logo mark is a
+    // reasonable placeholder in the meantime rather than nothing at all.
+    images: ["/logo.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "CreatorOS",
+    description: DESCRIPTION,
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({

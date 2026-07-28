@@ -16,6 +16,8 @@ const PUBLIC_PATHS = [
   "/signup",
   "/forgot-password",
   "/reset-password",
+  "/privacy",
+  "/terms",
 ];
 
 // Any request for a file with an extension (.glb, .svg, .png, .woff2, ...)

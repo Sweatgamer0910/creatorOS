@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function LandingFooter() {
   return (
@@ -42,7 +43,7 @@ export default function LandingFooter() {
         />
         CreatorOS
       </div>
-      <div style={{ display: "flex", gap: 32, fontSize: 13 }}>
+      <div style={{ display: "flex", gap: 32, fontSize: 13, flexWrap: "wrap" }}>
         <a href="#workspace-assembly-track" className="glow-text">
           Product
         </a>
@@ -52,6 +53,12 @@ export default function LandingFooter() {
         <a href="#confidence" className="glow-text">
           How AI works here
         </a>
+        <Link href="/privacy" className="glow-text">
+          Privacy
+        </Link>
+        <Link href="/terms" className="glow-text">
+          Terms
+        </Link>
       </div>
       <div>© {new Date().getFullYear()} CreatorOS</div>
     </footer>
