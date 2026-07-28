@@ -3,6 +3,27 @@
 Running log of feature work on CreatorOS, newest entries first. See `DECISIONS_LOG.md` for the
 reasoning behind non-obvious technical choices made along the way.
 
+## 2026-07-28 — Deployment prep (legal pages, Settings, Sentry), Vercel build fix, landing preview mode
+
+**Deployment readiness pass.** Real `/privacy` and `/terms` pages replace whatever stood in for
+them before — needed to clear Google's OAuth verification for the YouTube scopes. New `/settings`
+page covers workspace rename, YouTube disconnect (with token revocation), delete account, and
+replaying the onboarding tour (`WorkspaceNameForm.tsx`, `YouTubeConnectionSection.tsx`,
+`DeleteAccountSection.tsx`, `ReplayTourButton.tsx`, `settings/actions.ts`). Sentry error monitoring
+scaffolding landed (`sentry.server.config.ts`, `sentry.edge.config.ts`, `instrumentation.ts`,
+`instrumentation-client.ts`, `global-error.tsx`), wired into `next.config.ts` via
+`withSentryConfig`. `robots.ts` and `sitemap.ts` cover crawler/OG metadata. The onboarding tour's
+placeholder avatar is now a real captured render of the 3D Nova model.
+
+**Vercel build fix.** Production builds were failing on a fresh Vercel clone with an unresolvable
+`@generated/prisma/client` import — the custom Prisma generator output only existed locally
+because it'd been generated once during dev and never committed (it's gitignored). Added a
+`postinstall` hook so `prisma generate` runs on every install, local or CI.
+
+**Landing page preview mode.** `src/app/page.tsx` now accepts a `?preview=1` query param so a
+signed-in visitor can view the marketing landing page without being auto-redirected to
+`/dashboard` — an escape hatch for testing the landing page without logging out first.
+
 ## 2026-07-27 — Onboarding tour (Nova walkthrough)
 
 **First-run onboarding tour.** New `OnboardingTourProvider.tsx` drives a step-by-step spotlight

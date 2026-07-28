@@ -2,6 +2,21 @@
 
 Non-obvious technical decisions, newest first, with the reasoning behind them.
 
+## 2026-07-28 — Sentry wrapper stays "safe to ship" without a real project yet; Prisma client generated via postinstall, not committed
+
+**`next.config.ts`'s `withSentryConfig` call passes `org`/`project`/`authToken` as `|| undefined`,
+not the raw env vars.** `.env` currently declares them as empty strings, not absent — the plugin
+needs a real `undefined` to know to skip source-map upload rather than trying (and failing) to
+authenticate with an empty token. Paired with `silent: true`, this means the Sentry wrapper can
+ship now, ahead of a real Sentry project existing, without breaking builds.
+
+**`src/generated/prisma` (custom Prisma generator output) stays gitignored; a `postinstall`
+script runs `prisma generate` instead of committing the generated client.** It only ever existed
+locally because it'd been generated once during dev — Vercel's fresh clone + install never ran
+`prisma generate`, so the build failed trying to resolve `@generated/prisma/client`. Committing
+the generated output would also work, but a postinstall hook keeps it regenerated from the schema
+on every install instead of risking it drifting out of sync in git.
+
 ## 2026-07-27 — Onboarding tour points at the real gating UI instead of skipping gated steps
 
 **Steps whose `target` isn't in the DOM yet (Analytics/Coach before a YouTube channel is
