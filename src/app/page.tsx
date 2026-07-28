@@ -12,11 +12,20 @@ import FeatureGrid from "@/components/landing/FeatureGrid";
 import ConfidenceSystem from "@/components/landing/ConfidenceSystem";
 import LandingFooter from "@/components/landing/LandingFooter";
 
-export default async function LandingPage() {
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ preview?: string }>;
+}) {
   // A returning, already-signed-in visitor hitting "/" (bookmark, typed
-  // URL, etc.) wants their dashboard, not the marketing pitch again.
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (session) redirect("/dashboard");
+  // URL, etc.) wants their dashboard, not the marketing pitch again —
+  // except with ?preview=1, an escape hatch for testing the landing page
+  // itself without having to log out first.
+  const [session, { preview }] = await Promise.all([
+    auth.api.getSession({ headers: await headers() }),
+    searchParams,
+  ]);
+  if (session && !preview) redirect("/dashboard");
 
   return (
     <div
