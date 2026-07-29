@@ -83,6 +83,14 @@ model Workspace {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Free-text-ish string (same convention as ContentItem.status /
+  // Series.cadence — small fixed set enforced in TypeScript, not the
+  // database). Everyone is "free" today since there's no billing yet (see
+  // docs/DECISIONS_LOG.md, 2026-07-28) — this field exists so a future
+  // paid tier has somewhere to land without another migration, and so the
+  // Resend audience sync can segment broadcasts by plan from day one.
+  plan String @default("free")
+
   ownerId String @unique
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
