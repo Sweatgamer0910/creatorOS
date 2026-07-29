@@ -135,6 +135,11 @@ export const auth = betterAuth({
       // API traffic, back now that email/password sign-in exists again.
       "/sign-in/email": { window: 60, max: 5 },
       "/sign-up/email": { window: 60, max: 5 },
+      // Tighter than sign-in/sign-up: this endpoint sends an email per
+      // request and doesn't reveal whether the address exists, so it's a
+      // cheap vector for spamming a real user's inbox or hammering Resend's
+      // send volume. 2026-07-29 security pass — see docs/DECISIONS_LOG.md.
+      "/request-password-reset": { window: 60, max: 3 },
     },
   },
   databaseHooks: {

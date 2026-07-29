@@ -2,6 +2,16 @@
 
 Non-obvious technical decisions, newest first, with the reasoning behind them.
 
+## 2026-07-29 — `/request-password-reset` gets its own tight rate limit
+
+**Added a `max: 3, window: 60` custom rule for `/request-password-reset`, tighter than the
+`sign-in`/`sign-up` endpoints' `max: 5`.** This endpoint sends an email per call and deliberately
+doesn't reveal whether the address exists (see the comment in `forgot-password/page.tsx`), which
+makes it a cheap vector for spamming a real user's inbox or running up Resend send volume — a
+tighter budget than credential-guessing endpoints is warranted. Verified live against production
+by firing repeat requests at the deployed endpoint and confirming a 429 after the 3rd request in
+a window (see task notes, 2026-07-29 security pass).
+
 ## 2026-07-29 — creatoros.onl bought, email/password auth re-enabled
 
 **Ayaan bought `creatoros.onl`**, lifting the specific blockers the 2026-07-28 zero-spend entry
