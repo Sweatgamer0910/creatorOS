@@ -32,12 +32,17 @@ describe("bucketData", () => {
     expect(buckets).toHaveLength(30);
   });
 
-  it("groups a 90-day range into weekly buckets", () => {
+  it("groups a 90-day range into real calendar weeks, labeled 'Week of ...'", () => {
     const buckets = bucketData(makeDays(90), "90d");
-    // 90 days / 7 = 12 full weeks + 1 partial (6 days) = 13 buckets
-    expect(buckets).toHaveLength(13);
-    // Every bucket's views should be the sum of its (up to 7) days, never
-    // a single raw day's value pretending to represent a week.
+    // makeDays(90) runs 2026-01-01 (a Thursday) through 2026-03-31, which
+    // spans 14 distinct Sunday-start calendar weeks (a partial 3-day week
+    // at each end) — not the 13 you'd get from blindly chunking every 7
+    // raw days regardless of what weekday they start on.
+    expect(buckets).toHaveLength(14);
+    expect(buckets[0].label).toBe("Week of Dec 28");
+    expect(buckets[0].label.startsWith("Week of ")).toBe(true);
+    // Every bucket's views should be the sum of its days, never a single
+    // raw day's value pretending to represent a week.
     const totalAcrossBuckets = buckets.reduce((s, b) => s + b.views, 0);
     const totalAcrossDays = makeDays(90)
       .slice(-90)
@@ -55,8 +60,10 @@ describe("bucketData", () => {
   });
 
   it("sums (not averages) metrics within a bucket", () => {
-    const days = makeDays(7);
-    const buckets = bucketData(days, "90d"); // 7 days all fall in one weekly bucket
+    // startOffset 3 -> 2026-01-04, a Sunday, so these 7 consecutive days
+    // are exactly one calendar week and land in a single bucket.
+    const days = makeDays(7, 3);
+    const buckets = bucketData(days, "90d");
     expect(buckets).toHaveLength(1);
     const expectedSum = days.reduce((s, d) => s + d.views, 0);
     expect(buckets[0].views).toBe(expectedSum);

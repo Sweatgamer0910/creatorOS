@@ -42,6 +42,20 @@ function formatMonthLabel(yyyymm: string): string {
   return d.toLocaleDateString("en-US", { month: "short" });
 }
 
+// Sunday of the calendar week containing dateStr, as a YYYY-MM-DD string —
+// the grouping key for weekly buckets and the date shown in "Week of ..."
+// labels. Matches the "real calendar unit, not an arbitrary N-day chunk"
+// approach already used for 1Y's month buckets below.
+function getWeekStart(dateStr: string): string {
+  const d = new Date(`${dateStr}T00:00:00`);
+  d.setDate(d.getDate() - d.getDay()); // getDay(): 0 = Sunday
+  return d.toISOString().slice(0, 10);
+}
+
+function formatWeekLabel(weekStartDate: string): string {
+  return `Week of ${formatShortDate(weekStartDate)}`;
+}
+
 function chunk<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
@@ -85,8 +99,21 @@ export function bucketData(
   }
 
   if (range === "90d") {
-    return chunk(windowed, 7).map((group) =>
-      summarize(group, formatShortDate(group[0].date)),
+    // Group by real calendar week (Sunday–Saturday), not an arbitrary
+    // 7-day chunk anchored to "90 days before today" — that anchor floats
+    // with today's date and rarely lines up with a Sunday, so a plain
+    // chunk(windowed, 7) would label a bucket with whatever day it happened
+    // to start on rather than the week it actually represents. Same
+    // "real calendar unit" reasoning as 1Y's month grouping below.
+    const byWeek = new Map<string, DailyDataPoint[]>();
+    for (const d of windowed) {
+      const key = getWeekStart(d.date);
+      const existing = byWeek.get(key);
+      if (existing) existing.push(d);
+      else byWeek.set(key, [d]);
+    }
+    return [...byWeek.entries()].map(([weekStart, group]) =>
+      summarize(group, formatWeekLabel(weekStart)),
     );
   }
 
