@@ -2,6 +2,32 @@
 
 Non-obvious technical decisions, newest first, with the reasoning behind them.
 
+## 2026-07-29 — creatoros.onl bought, email/password auth re-enabled
+
+**Ayaan bought `creatoros.onl`**, lifting the specific blockers the 2026-07-28 zero-spend entry
+called out (Resend sending-domain restriction, Google OAuth homepage-ownership requirement). The
+zero-spend rule itself still stands for everything else — this was a one-off, deliberate spend,
+not a lift of the policy.
+
+**`emailAndPassword`/`emailVerification` are back in `src/lib/auth.ts`**, restored from the
+pre-2026-07-28 implementation (git history, commit before `fe4f5d8`) and merged with the
+Google/Discord OAuth + Resend-audience-sync additions from that pass rather than reverting them.
+Google and Discord remain available above the divider on `/login`/`/signup` — this adds
+email/password as a third option, it doesn't replace OAuth. `/forgot-password` and
+`/reset-password` are real forms again instead of redirect stubs.
+
+**`RESEND_FROM_EMAIL` was updated ahead of Resend actually verifying the domain.** The env var
+now points at `noreply@creatoros.onl` before the DNS records are confirmed — sends will fail
+until Resend shows the domain verified. This is intentional: the code should be ready to go the
+moment domain verification completes, rather than needing a second deploy. Whoever finishes the
+DNS/Resend steps should confirm a real signup verification email actually arrives before
+considering this fully done.
+
+**Google OAuth verification (sensitive `youtube.readonly`/`yt-analytics.readonly` scopes) still
+needs the Cloud Console side done separately** — authorized domain, homepage/privacy/terms URLs,
+redirect URIs, and submitting for review. Not automatic just because the domain exists; someone
+has to click through the Console.
+
 ## 2026-07-28 — Standing rule: zero dollars spent until first paying customer
 
 **Ayaan's explicit instruction: no money gets spent on CreatorOS — domains, paid API tiers, paid
@@ -13,6 +39,7 @@ rule has lifted, and should say so explicitly rather than proceeding or re-raisi
 purchase.
 
 **Concrete fallout as of today:**
+
 - Buying `creatoroshq.tech` (or any domain) is paused. This means Resend's shared
   `onboarding@resend.dev` sender stays restricted to sending only to Ayaan's own email — no real
   user can receive marketing/product-update email yet — and Google's OAuth app verification stays

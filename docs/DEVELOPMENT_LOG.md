@@ -3,6 +3,22 @@
 Running log of feature work on CreatorOS, newest entries first. See `DECISIONS_LOG.md` for the
 reasoning behind non-obvious technical choices made along the way.
 
+## 2026-07-29 — Fixed Health Score / Growth Coach false-signal bug; email/password auth restored
+
+**Health Score and Growth Coach were reporting confident "Excellent"/"At Risk" verdicts (and
+occasionally a literal "Infinity%") off channels with near-zero view history.** Root cause: both
+`src/lib/health-score/scorer.ts` and `src/lib/growth-coach/coach.ts` computed a week-over-week
+percentage growth rate by dividing by the earlier week's average views with no floor — `0/0` is
+`NaN`, and `x/0` is `Infinity`, either of which can silently trip a scoring branch. New shared
+`src/lib/analytics/viewsGrowth.ts` adds a minimum-average-views floor before trusting a percentage
+at all; below it, both features now report an honest "Insufficient Data" state instead of a
+number pulled from noise. `HealthScore["label"]` gained the new `"Insufficient Data"` value.
+
+**Email/password sign-in, verification, and password reset are back**, alongside Google/Discord
+OAuth rather than replacing them. See the 2026-07-29 `DECISIONS_LOG.md` entry for the reasoning
+(short version: `creatoros.onl` is bought, which unblocks the Resend verified-sending-domain
+requirement that motivated going OAuth-only on 2026-07-28).
+
 ## 2026-07-28 — OAuth-only auth (Google + Discord), Workspace.plan, Resend audience sync
 
 **Removed `emailAndPassword`/`emailVerification` entirely from `src/lib/auth.ts`.** Sign-in is
