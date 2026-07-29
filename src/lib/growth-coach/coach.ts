@@ -1,4 +1,5 @@
 import { ChannelAnalytics } from "@/lib/analytics";
+import { computeViewsGrowth } from "@/lib/analytics/viewsGrowth";
 import { HealthScore } from "@/lib/health-score";
 import { CoachInsight, CoachResponse } from "./types";
 
@@ -15,22 +16,32 @@ export function computeCoachResponse(
     message: `Your channel currently has ${data.currentStats.subscriberCount.toLocaleString()} subscribers and ${data.currentStats.videoCount} published videos.`,
   });
 
-  const recent = data.last30Days.slice(-7);
-  const earlier = data.last30Days.slice(0, 7);
   const trendData = data.last30Days.map((d) => d.views);
+  const { hasWindowData, isTrendReliable, growthRate } = computeViewsGrowth(
+    data.last30Days,
+  );
 
-  if (recent.length > 0 && earlier.length > 0) {
-    const recentAvg = recent.reduce((s, d) => s + d.views, 0) / recent.length;
-    const earlierAvg =
-      earlier.reduce((s, d) => s + d.views, 0) / earlier.length;
-    const change = (recentAvg - earlierAvg) / earlierAvg;
-
-    if (change > 0.1) {
+  if (hasWindowData) {
+    if (!isTrendReliable) {
+      // Same noise-floor guard as the Health Score: don't report a
+      // percentage swing computed from near-zero (or zero) view counts
+      // as if it were a real week-over-week trend.
+      insights.push({
+        id: "pattern-insufficient-trend-data",
+        type: "pattern",
+        confidence: "high",
+        message:
+          "View counts are still too low to measure a reliable week-over-week trend — on a small channel, a tiny change in raw views can look like a huge percentage swing.",
+        evidence:
+          "Based on average daily views being too low for a percentage comparison to be meaningful.",
+        trendData,
+      });
+    } else if (growthRate! > 0.1) {
       insights.push({
         id: "pattern-trend-up",
         type: "pattern",
         confidence: "high",
-        message: `Views in the last week are trending up compared to a month ago (roughly ${Math.round(change * 100)}% higher).`,
+        message: `Views in the last week are trending up compared to a month ago (roughly ${Math.round(growthRate! * 100)}% higher).`,
         evidence:
           "Based on comparing average daily views across the two periods.",
         trendData,
@@ -42,12 +53,12 @@ export function computeCoachResponse(
         message:
           "Whatever you changed recently seems to be working — consider keeping a similar upload style or topic for your next couple of videos to see if the trend holds.",
       });
-    } else if (change < -0.1) {
+    } else if (growthRate! < -0.1) {
       insights.push({
         id: "pattern-trend-down",
         type: "pattern",
         confidence: "high",
-        message: `Views in the last week are down compared to a month ago (roughly ${Math.abs(Math.round(change * 100))}% lower).`,
+        message: `Views in the last week are down compared to a month ago (roughly ${Math.abs(Math.round(growthRate! * 100))}% lower).`,
         evidence:
           "Based on comparing average daily views across the two periods.",
         trendData,

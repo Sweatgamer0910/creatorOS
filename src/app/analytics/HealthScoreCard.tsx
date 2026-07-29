@@ -9,6 +9,7 @@ export const labelColors: Record<HealthScore["label"], string> = {
   Good: "#2563eb",
   "Needs Attention": "#d97706",
   "At Risk": "#dc2626",
+  "Insufficient Data": "var(--color-text-muted)",
 };
 
 export default function HealthScoreCard({
