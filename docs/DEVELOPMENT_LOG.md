@@ -3,6 +3,32 @@
 Running log of feature work on CreatorOS, newest entries first. See `DECISIONS_LOG.md` for the
 reasoning behind non-obvious technical choices made along the way.
 
+## 2026-07-28 — OAuth-only auth (Google + Discord), Workspace.plan, Resend audience sync
+
+**Removed `emailAndPassword`/`emailVerification` entirely from `src/lib/auth.ts`.** Sign-in is
+now Google + Discord only (`GoogleSignInButton`/`DiscordSignInButton`, both on `/login` and
+`/signup`). No password field exists anywhere in the app anymore. `/forgot-password` and
+`/reset-password` are now plain `redirect("/login")` stubs instead of rendering dead forms.
+Discord's Client ID/Secret aren't filled in yet — creating the app in Discord's Developer Portal
+needs a human to click through an hCaptcha, so sign-in with Discord doesn't functionally work
+until that's done and the real values are added to `.env`/Vercel.
+
+**Added `Workspace.plan`** (`String @default("free")`, migration
+`20260728220000_add_workspace_plan`) — nothing reads/writes it yet beyond the default, it exists
+so a future paid tier has somewhere to land.
+
+**New `src/lib/resend-audience.ts`.** The post-signup `databaseHooks.user.create.after` hook now
+best-effort syncs every new user into Resend's Contacts list (flat `POST /contacts`, with a
+`plan` custom property) using a separate `RESEND_AUDIENCE_API_KEY` (Full access — the existing
+`RESEND_API_KEY` is Sending-access only and can't write contacts). Lets marketing/product-update
+emails be sent straight from Resend's dashboard later. Couldn't be live-tested from this sandbox
+(network-blocked from `api.resend.com`, same allowlist restriction as the npm registry) — worth
+a real signup test once deployed to confirm a contact actually appears in Resend.
+
+**`package.json`'s `build` script now runs `prisma migrate deploy && next build`** instead of
+just `next build`, so schema migrations apply automatically on every deploy rather than relying
+on someone running `migrate deploy` by hand.
+
 ## 2026-07-28 — Deployment prep (legal pages, Settings, Sentry), Vercel build fix, landing preview mode
 
 **Deployment readiness pass.** Real `/privacy` and `/terms` pages replace whatever stood in for
