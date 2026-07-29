@@ -80,6 +80,20 @@ export default function PrivacyPage() {
         YouTube data is never shown to anyone but you.
       </p>
 
+      <h2 style={h2Style}>How we protect your data</h2>
+      <p style={pStyle}>
+        Security procedures are in place to protect the confidentiality of
+        your data. All traffic to and from CreatorOS is encrypted in transit
+        over HTTPS/TLS. Your account information and YouTube data are stored
+        in a managed database that encrypts data at rest, and are only
+        accessible through authenticated requests scoped to your own
+        workspace — no other user or account can query or view your data.
+        YouTube access tokens are stored and used server-side only; they are
+        never exposed to the browser, to other users, or to any party outside
+        the infrastructure providers required to run the app (see{" "}
+        <em>Third parties</em> below).
+      </p>
+
       <h2 style={h2Style}>How long we keep it</h2>
       <p style={pStyle}>
         We retain your data for as long as your account exists. You can
