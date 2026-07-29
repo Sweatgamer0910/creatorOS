@@ -42,7 +42,14 @@ export async function addToAudience({
       // Custom contact property — configured in Resend's Audience >
       // Properties tab (string, fallback "free"). Lets broadcasts be
       // segmented by plan once paid tiers exist.
-      properties: [{ key: "plan", value: plan }],
+      //
+      // `properties` is a flat object (a "record"), NOT an array of
+      // {key, value} pairs — the array shape looked right from the docs'
+      // "Expandable" key/value description but fails at runtime with
+      // "422 Invalid input: expected record, received array" (caught via
+      // the first real signup test, 2026-07-29). Confirmed against
+      // Resend's current API reference.
+      properties: { plan },
     }),
   });
 
