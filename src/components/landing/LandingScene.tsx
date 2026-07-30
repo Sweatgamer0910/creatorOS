@@ -5,6 +5,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
+import { useWebGLSupported } from "@/hooks/useWebGLSupported";
 import PipelineScene from "./PipelineScene";
 import NovaController from "./NovaController";
 
@@ -77,8 +78,13 @@ function PrecompileShaders() {
 export default function LandingScene() {
   const reducedMotion = usePrefersReducedMotion();
   const isNarrow = useIsNarrowViewport();
+  const webglSupported = useWebGLSupported();
 
-  if (isNarrow) return null;
+  // Same not-mounted-at-all fallback as the narrow-viewport case: the
+  // page's own background (dark + radial gradient, set in page.tsx)
+  // already reads as intentional on its own, so skipping the canvas
+  // entirely here is enough — no separate "3D unavailable" UI needed.
+  if (isNarrow || !webglSupported) return null;
 
   return (
     <div
