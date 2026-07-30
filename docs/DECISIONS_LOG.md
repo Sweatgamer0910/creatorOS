@@ -2,6 +2,51 @@
 
 Non-obvious technical decisions, newest first, with the reasoning behind them.
 
+## 2026-07-30 — Mobile nav was effectively unusable; fixed, desktop untouched. Re-confirmed Google verification.
+
+**Re-checked Google OAuth verification/publishing status independently** (not trusting the earlier
+in-session check): `console.cloud.google.com/auth/audience?project=creatoros-502020` shows
+Publishing Status = **In production** (not Testing), with the `youtube.readonly` and
+`yt-analytics.readonly` scopes already verified and approved. Because publishing status is "In
+production," the 100-user testing cap doesn't apply — any brand-new random user, not just
+pre-added test users, gets a normal Google consent screen and normal sign-in with no warning
+interstitial. This directly confirms a first-time visitor's experience is unaffected.
+
+**Audited actual mobile rendering by reading the source** (Chrome's `resize_window` tool doesn't
+actually resize the real page viewport in this sandbox — confirmed by checking `window.innerWidth`
+before/after, it never changed — so this was a code read, not a visual/screenshot test). Found the
+dominant root cause of "mobile is a disaster": `NotchNav.tsx`, the entire app's navigation (home,
+6 tools, settings, logout), only expands out of a collapsed dot via `onMouseEnter` — a desktop-only
+hover interaction with zero touch equivalent. On a real phone the nav was likely never visible or
+tappable at all.
+
+Fixed by adding a second, mobile-only branch to `NotchNav.tsx`, gated on the pre-existing
+`useIsNarrowViewport()` hook (760px breakpoint): a fixed, always-visible top bar (home/settings/
+logout) and bottom tab bar (6 tools, icon+label, real tap targets). The existing desktop hover-dock
+branch is byte-for-byte unchanged and is the only branch that renders when `isNarrow` is false.
+`MainShell.tsx` got matching top/bottom content padding for the new mobile bars (72px/84px vs.
+desktop's original 100px/0), verified mathematically identical to the pre-existing desktop values
+when `isNarrow` is false.
+
+Separately found a second, systemic (less severe) issue: 10 page files all used an identical fixed
+`padding: "Npx 40px Mpx"` inline style — 40px of side padding alone eats ~20% of a 390px phone
+screen. Most of these are async Server Components, so the client-only viewport hook doesn't work
+there; used Tailwind's `className="px-4 sm:px-10"` instead, which works via CSS media query even
+in a Server Component, with `sm:` (640px) safely below any real desktop width so desktop is
+unaffected.
+
+**Known gap, not fixed in this pass:** Pipeline's Kanban board uses native HTML5 drag-and-drop
+(`e.dataTransfer`), which does not work on touch devices at all. Needs a follow-up (touch-based DnD
+or a library swap) — bigger scope than this nav/padding fix.
+
+**Caveat:** none of the above was visually screenshot-verified on an actual phone — the sandbox
+can't resize a real viewport. Confidence here is code-level (brace/paren-balance checked across all
+12 touched files, TypeScript structure reviewed by hand); `tsc`/`eslint` could not be run in this
+sandbox because the local `node_modules` here (already noted as corrupted by earlier interrupted
+installs, and gitignored so it never affected what's committed) is missing the `eslint` and `next`
+packages entirely. Ayaan should check the real result on his own phone before calling this fully
+done.
+
 ## 2026-07-30 — Security patch pass + Terms/Privacy hardened to what a lawyer would flag
 
 **Fresh `pnpm audit` (not the stale 2026-07-29 log entry) found `next` was still on 16.2.10** —
