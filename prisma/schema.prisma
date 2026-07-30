@@ -5,16 +5,16 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // Prisma Migrate can't run through Neon's pooled (PgBouncer) endpoint —
-  // it needs a direct connection for the schema-engine operations migrate
-  // deploy performs. DATABASE_URL (pooled, via prisma.config.ts) stays the
-  // one the app's Prisma Client actually queries through at runtime;
-  // DIRECT_URL (same credentials, endpoint without the "-pooler" suffix)
-  // is only used by `prisma migrate deploy` in the build step. See
-  // docs/DEVELOPMENT_LOG.md, 2026-07-30 — this is what broke the first
-  // deploy after switching DATABASE_URL to the pooled connection string
-  // (P1001 "Can't reach database server" against the pooler host).
-  directUrl = env("DIRECT_URL")
+  // Connection URL lives in prisma.config.ts under Prisma v7's config
+  // system, not here — declaring `url` or `directUrl` in this file errors
+  // with P1012 ("no longer supported in schema files") under Prisma 7.8.0.
+  // DATABASE_URL points at Neon's pooled endpoint as of 2026-07-30; a
+  // directUrl-style split (pooled for the app, direct for migrate) isn't
+  // available in this Prisma version's config.datasource type (@prisma/
+  // config only exposes `url`/`shadowDatabaseUrl`, not `directUrl`) — not
+  // needed in practice either, since `prisma migrate deploy` has run clean
+  // through the pooled connection every time so far. See
+  // docs/DEVELOPMENT_LOG.md, 2026-07-30.
 }
 
 // ===== Better Auth required tables =====

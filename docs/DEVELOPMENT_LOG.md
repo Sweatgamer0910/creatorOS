@@ -19,13 +19,23 @@ which Vercel's serverless functions can exhaust under concurrent load since each
 its own connection with no shared pool. Plausibly the cause of intermittent 503s seen during the
 2026-07-29 live QA pass.
 
-**That change broke the next deploy — `prisma migrate deploy` can't run through Neon's pooled
-(PgBouncer) endpoint.** Build failed with `P1001: Can't reach database server` against the
-`-pooler` host. Standard Prisma+Neon fix: added a `directUrl` field to the `datasource db` block
-in `schema.prisma`, reading a new `DIRECT_URL` env var — the schema engine uses `directUrl` for
-migrations, the generated Client keeps using the pooled `DATABASE_URL` (set via
-`prisma.config.ts`) for everything at runtime. `DIRECT_URL` is the same credentials as
-`DATABASE_URL`, just without the `-pooler` suffix on the hostname.
+**That change broke the next deploy — `P1001: Can't reach database server` against the `-pooler`
+host during `prisma migrate deploy`.** First read as the well-known Prisma+PgBouncer migration
+incompatibility, so a `directUrl` field went into `schema.prisma` (the standard fix, pointing
+migrate at a direct, non-pooled connection while the app's Client keeps using the pooled one).
+That's wrong for this project's Prisma version: 7.8.0 rejects `directUrl` in `schema.prisma`
+entirely (P1012, "no longer supported in schema files — move connection URLs to
+prisma.config.ts"), and `@prisma/config`'s `Datasource` type only exposes `url`/
+`shadowDatabaseUrl` — no `directUrl` equivalent there either. Reverted the schema.prisma edit and
+the attempted `prisma.config.ts` mirror of it.
+
+**Turned out `directUrl` was never needed.** A manual redeploy (after adding `DIRECT_URL` as an
+env var, unused as it turned out) succeeded through the pooled connection on retry — 7 migrations
+applied clean, no P1001. The original failure was a one-off (Neon compute cold-start after
+sitting idle, most likely), not a hard pooled-connection-can't-run-migrations wall. Left
+`DATABASE_URL` on the pooled endpoint (the fix that actually mattered, for the runtime connection-
+exhaustion concern); `DIRECT_URL` in Vercel's env vars is now unused and can be deleted whenever,
+no rush.
 
 ## 2026-07-29 — Live QA pass on production; two findings fixed
 
