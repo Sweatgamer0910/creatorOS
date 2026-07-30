@@ -5,6 +5,16 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // Prisma Migrate can't run through Neon's pooled (PgBouncer) endpoint —
+  // it needs a direct connection for the schema-engine operations migrate
+  // deploy performs. DATABASE_URL (pooled, via prisma.config.ts) stays the
+  // one the app's Prisma Client actually queries through at runtime;
+  // DIRECT_URL (same credentials, endpoint without the "-pooler" suffix)
+  // is only used by `prisma migrate deploy` in the build step. See
+  // docs/DEVELOPMENT_LOG.md, 2026-07-30 — this is what broke the first
+  // deploy after switching DATABASE_URL to the pooled connection string
+  // (P1001 "Can't reach database server" against the pooler host).
+  directUrl = env("DIRECT_URL")
 }
 
 // ===== Better Auth required tables =====
@@ -215,6 +225,19 @@ model ScriptVersion {
   script   Script @relation(fields: [scriptId], references: [id], onDelete: Cascade)
 
   @@map("script_version")
+}
+
+// Pre-launch email capture from the landing page's ClosingCTA form —
+// deliberately its own table rather than only living in Resend, so the list
+// survives independent of that integration (Resend sync in
+// src/lib/waitlist/actions.ts is best-effort, this table is the source of
+// truth). No workspace/user relation: these people haven't signed up yet.
+model WaitlistEntry {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("waitlist_entry")
 }
 
 model ContentItem {

@@ -81,6 +81,49 @@ export async function addToAudience({
   return response.json();
 }
 
+// Syncs a pre-launch waitlist signup (landing page ClosingCTA form) into the
+// same Resend audience as real users, tagged `plan: "waitlist"` so Phase A2
+// broadcasts (see docs/CreatorOS_Marketing_Email_Plan.docx) can segment them
+// separately from actual accounts — reuses the existing plan property rather
+// than a new custom property, which would need configuring in Resend's
+// dashboard first (see the 2026-07-29 properties note above). No name is
+// collected on the landing form, so first_name/last_name are omitted rather
+// than sent empty. Best-effort like the other sync functions here — the
+// caller (src/lib/waitlist/actions.ts) treats the WaitlistEntry DB row as
+// the source of truth and this as a nice-to-have.
+export async function addWaitlistContact(email: string) {
+  const apiKey = process.env.RESEND_AUDIENCE_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+
+  if (!apiKey || !audienceId) {
+    return;
+  }
+
+  const response = await fetch(audienceContactsUrl(), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      unsubscribed: false,
+      properties: {
+        plan: "waitlist",
+        signupDate: new Date().toISOString().slice(0, 10),
+        channelConnected: "false",
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Resend contacts API error: ${response.status} - ${body}`);
+  }
+
+  return response.json();
+}
+
 // Updates a subset of an existing contact's properties without touching the
 // rest — used for lifecycle events after signup (channel connected, last
 // active) rather than only ever writing properties once at signup time, so

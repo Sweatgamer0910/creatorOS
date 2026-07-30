@@ -1,18 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import { joinWaitlist } from "@/lib/waitlist/actions";
 
-// Client-side only, ported exactly as authored in the approved prototype
-// (no backend call — just the button label swapping to confirm the
-// submission was received). If this needs to actually persist an email
-// somewhere, that's a follow-up, not something invented here.
+// Persists to the WaitlistEntry table + syncs to Resend (src/lib/waitlist/
+// actions.ts) so pre-launch content has somewhere real to send people —
+// this used to just flip the button label with no backend call (see git
+// history), which was a deliberate placeholder, not a design decision.
 export default function ClosingCTA() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
+    setError("");
+    setLoading(true);
+    const result = await joinWaitlist(email);
+    setLoading(false);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setSubmitted(true);
+    }
   }
 
   return (
@@ -45,7 +56,12 @@ export default function ClosingCTA() {
       </p>
       <form
         onSubmit={handleSubmit}
-        style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}
+        style={{
+          display: "flex",
+          gap: 10,
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
       >
         <input
           type="email"
@@ -53,6 +69,7 @@ export default function ClosingCTA() {
           required
           aria-label="Email address"
           value={email}
+          disabled={submitted || loading}
           onChange={(e) => setEmail(e.target.value)}
           style={{
             padding: "14px 18px",
@@ -63,11 +80,13 @@ export default function ClosingCTA() {
             fontFamily: "var(--font-body)",
             fontSize: 14,
             minWidth: 260,
+            opacity: submitted ? 0.6 : 1,
           }}
         />
         <button
           type="submit"
           className="glow-interactive"
+          disabled={submitted || loading}
           style={{
             padding: "14px 26px",
             background: "#F5A623",
@@ -76,13 +95,21 @@ export default function ClosingCTA() {
             fontSize: 15,
             borderRadius: 10,
             border: "none",
-            cursor: "pointer",
+            cursor: submitted || loading ? "default" : "pointer",
             fontFamily: "inherit",
+            opacity: loading ? 0.7 : 1,
           }}
         >
-          {submitted ? "Thanks — we'll be in touch" : "Get in touch"}
+          {submitted
+            ? "Thanks — we'll be in touch"
+            : loading
+              ? "Joining…"
+              : "Get in touch"}
         </button>
       </form>
+      {error && (
+        <p style={{ color: "#e08a8a", fontSize: 13, marginTop: 12 }}>{error}</p>
+      )}
     </section>
   );
 }

@@ -3,6 +3,30 @@
 Running log of feature work on CreatorOS, newest entries first. See `DECISIONS_LOG.md` for the
 reasoning behind non-obvious technical choices made along the way.
 
+## 2026-07-30 — Landing page waitlist capture; Neon pooled-connection fix
+
+**Landing page's `ClosingCTA` form now actually persists emails.** It used to just flip its own
+button label with no backend call — the code comment there said as much. New `WaitlistEntry`
+table (`prisma/migrations/20260730050000_add_waitlist_entry`) is the source of truth;
+`src/lib/waitlist/actions.ts` rate-limits it (5/hour/IP via the existing Upstash Redis instance,
+since this is a public unauthenticated write) and best-effort syncs to the Resend audience
+(`addWaitlistContact` in `src/lib/resend-audience.ts`) tagged `plan: "waitlist"` so Phase A2
+broadcasts can segment pre-launch signups from real accounts.
+
+**Switched `DATABASE_URL` to Neon's pooled connection string**, prompted by a quota/headroom
+review ahead of the planned content push — the app was connecting through Neon's direct endpoint,
+which Vercel's serverless functions can exhaust under concurrent load since each invocation opens
+its own connection with no shared pool. Plausibly the cause of intermittent 503s seen during the
+2026-07-29 live QA pass.
+
+**That change broke the next deploy — `prisma migrate deploy` can't run through Neon's pooled
+(PgBouncer) endpoint.** Build failed with `P1001: Can't reach database server` against the
+`-pooler` host. Standard Prisma+Neon fix: added a `directUrl` field to the `datasource db` block
+in `schema.prisma`, reading a new `DIRECT_URL` env var — the schema engine uses `directUrl` for
+migrations, the generated Client keeps using the pooled `DATABASE_URL` (set via
+`prisma.config.ts`) for everything at runtime. `DIRECT_URL` is the same credentials as
+`DATABASE_URL`, just without the `-pooler` suffix on the hostname.
+
 ## 2026-07-29 — Live QA pass on production; two findings fixed
 
 **First live click-through of the deployed app** (creatoros.onl), as opposed to the prior QA
