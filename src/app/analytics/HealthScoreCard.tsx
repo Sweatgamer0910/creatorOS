@@ -61,7 +61,7 @@ export default function HealthScoreCard({
           fontStyle: "italic",
         }}
       >
-        This is an AI-generated estimate based on recent trends, not a
+        This is a rule-based estimate from your recent view trends, not a
         guaranteed metric.
       </p>
     </Card>

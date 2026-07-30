@@ -3,6 +3,32 @@
 Running log of feature work on CreatorOS, newest entries first. See `DECISIONS_LOG.md` for the
 reasoning behind non-obvious technical choices made along the way.
 
+## 2026-07-29 — Live QA pass on production; two findings fixed
+
+**First live click-through of the deployed app** (creatoros.onl), as opposed to the prior QA
+pass which was a static code read only (`docs/03-engineering/qa-security-review.md`). Walked
+dashboard, analytics, coach, ideas, scripts, pipeline, settings, login, signup, forgot-password,
+privacy, and terms while authenticated — all render with zero console errors, real YouTube data
+flowing correctly, legal pages present and accurate.
+
+Two real findings, both fixed:
+
+- **`HealthScoreCard.tsx` called the Health Score "AI-generated,"** contradicting the fact that
+  it's rule-based (see `src/lib/health-score/scorer.ts`) and the project's own honest-labeling
+  standard. Copy changed to "rule-based estimate from your recent view trends."
+- **`/login` and `/signup` didn't redirect an already-authenticated visitor** — hitting either
+  route while signed in just rendered the form instead of bouncing to `/dashboard`, unlike `/`
+  which already had this handled. Split both into a server component wrapper (session check +
+  redirect, same pattern as `src/app/page.tsx`) plus a client form component (`LoginForm.tsx`,
+  `SignupForm.tsx`) so the check runs server-side before any client JS loads.
+
+One non-blocking observation, not acted on: intermittent 503s on Next.js's background RSC
+prefetch requests for a few routes — never on an actual page load/navigation, always recovered
+on retry. Worth watching once real traffic hits, not worth chasing on a QA pass with n=1.
+
+`pnpm audit` and a full signed-out/fresh-signup click-through are still outstanding — see
+`docs/05-roadmap/v1-production-checklist.md`.
+
 ## 2026-07-29 — 90-day chart "Week of" labels; marketing email Phase A0/A1 shipped
 
 **Analytics 90-day chart buckets now group by real calendar week (Sunday-start) instead of an
