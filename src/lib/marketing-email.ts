@@ -10,10 +10,10 @@ import { getAudienceContact } from "@/lib/resend-audience";
 
 const RESEND_API_URL = "https://api.resend.com/emails";
 
-// TODO(ayaan): CAN-SPAM requires a real physical mailing address in the
-// footer of marketing email (a PO box is fine) — placeholder until you
-// give me one. Don't let real sends go out with this still a placeholder.
-const MAILING_ADDRESS = "CreatorOS — mailing address not yet configured";
+// CAN-SPAM-required physical mailing address, shown in every marketing
+// email's footer (see withFooter below). Set 2026-07-30.
+const MAILING_ADDRESS =
+  "CreatorOS — 817 Water Hyacinth Loop, Leander, TX 78641";
 
 function appUrl() {
   return process.env.NEXT_PUBLIC_APP_URL || "https://creatoros.onl";
