@@ -38,16 +38,19 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: APP_URL,
     siteName: "CreatorOS",
-    // A proper 1200x630 social card isn't cut yet — the logo mark is a
-    // reasonable placeholder in the meantime rather than nothing at all.
-    images: ["/logo.png"],
+    // No `images` override here — Next's file-convention `opengraph-image.tsx`
+    // (proper 1200x630 card, built from the same brand tokens as the rest
+    // of the site) is picked up automatically and takes precedence over the
+    // old 512x512 logo-only placeholder.
     type: "website",
   },
   twitter: {
-    card: "summary",
+    // large-image card now that there's a real 1200x630 image to show —
+    // "summary" (small square) was the honest choice while the only
+    // available image was the square logo.
+    card: "summary_large_image",
     title: "CreatorOS",
     description: DESCRIPTION,
-    images: ["/logo.png"],
   },
 };
 
