@@ -25,7 +25,10 @@ export default async function ScriptsPage({
   ]);
 
   return (
-    <div style={{ padding: "24px 40px 48px", maxWidth: 900, margin: "0 auto" }}>
+    <div
+      className="px-4 sm:px-10"
+      style={{ paddingTop: 24, paddingBottom: 48, maxWidth: 900, margin: "0 auto" }}
+    >
       <div className="flex items-center justify-between">
         <div>
           <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>

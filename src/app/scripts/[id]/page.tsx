@@ -21,7 +21,10 @@ export default async function ScriptPage({
   if (!script) notFound();
 
   return (
-    <div style={{ padding: "20px 40px 40px", maxWidth: 800, margin: "0 auto" }}>
+    <div
+      className="px-4 sm:px-10"
+      style={{ paddingTop: 20, paddingBottom: 40, maxWidth: 800, margin: "0 auto" }}
+    >
       <ScriptEditor script={script} ideas={ideas} />
     </div>
   );

@@ -23,6 +23,7 @@ import {
 import { signOut } from "@/lib/auth-client";
 import Spinner from "./Spinner";
 import Button from "@/components/ui/button";
+import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -32,6 +33,17 @@ const navItems = [
   { href: "/scripts", label: "Script Studio", icon: FileText },
   { href: "/pipeline", label: "Pipeline", icon: Kanban },
 ];
+
+// Short, single-word labels for the mobile bottom bar — six tabs in a
+// ~390px-wide row leaves roughly 65px per label, and a two-word label
+// ("Growth Coach", "Idea Lab", "Script Studio") wraps or clips at that
+// width. The desktop dock keeps the full labels (used only in its hover
+// tooltips, which have room).
+const mobileLabels: Record<string, string> = {
+  "/coach": "Coach",
+  "/ideas": "Ideas",
+  "/scripts": "Scripts",
+};
 
 function Tooltip({ label, show }: { label: string; show: boolean }) {
   return (
@@ -144,6 +156,7 @@ export default function NotchNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const isNarrow = useIsNarrowViewport();
 
   function handleNavigate(href: string) {
     setPendingKey(href);
@@ -168,6 +181,131 @@ export default function NotchNav() {
     pathname === "/"
   )
     return null;
+
+  // The desktop dock below only ever shows its icons on `onMouseEnter` —
+  // there's no touch equivalent, so on a phone it's a permanently collapsed
+  // 68px dot with no way to reach Dashboard/Analytics/Coach/Ideas/Scripts/
+  // Pipeline, Home, Settings, or Log out at all. Below the same 760px
+  // breakpoint the landing page already uses for its own mobile fallback,
+  // swap to a fixed top bar (home/settings/logout) + bottom tab bar (the
+  // six tools) — both always visible, tap-only, no hover state anywhere.
+  // The desktop branch after this one is untouched.
+  if (isNarrow) {
+    return (
+      <>
+        <div
+          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4"
+          style={{
+            height: 60,
+            backgroundColor: "var(--color-surface)",
+            borderBottom: "1px solid var(--color-border)",
+          }}
+        >
+          <button
+            onClick={() => handleNavigate("/dashboard")}
+            aria-label="CreatorOS home"
+            style={{
+              width: 36,
+              height: 36,
+              padding: 0,
+              border: "none",
+              background: "transparent",
+              borderRadius: 10,
+              overflow: "hidden",
+            }}
+          >
+            <Image
+              src="/logo.png"
+              alt="CreatorOS"
+              width={36}
+              height={36}
+              priority
+              style={{ borderRadius: 10 }}
+            />
+          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleNavigate("/settings")}
+              aria-label="Settings"
+              className="flex items-center justify-center rounded-full"
+              style={{
+                width: 40,
+                height: 40,
+                border: "none",
+                backgroundColor:
+                  pathname === "/settings"
+                    ? "var(--color-surface-hover)"
+                    : "transparent",
+              }}
+            >
+              {isPending && pendingKey === "/settings" ? (
+                <Spinner size={16} />
+              ) : (
+                <Settings size={20} color="var(--color-text-muted)" />
+              )}
+            </button>
+            <button
+              onClick={handleLogout}
+              aria-label="Log out"
+              className="flex items-center justify-center rounded-full"
+              style={{
+                width: 40,
+                height: 40,
+                border: "none",
+                backgroundColor: "var(--color-surface-hover)",
+              }}
+            >
+              {isPending && pendingKey === "logout" ? (
+                <Spinner size={16} />
+              ) : (
+                <LogOut size={20} color="var(--color-text-muted)" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        <div
+          className="fixed bottom-0 left-0 right-0 z-50 flex items-stretch justify-around"
+          style={{
+            backgroundColor: "var(--color-surface)",
+            borderTop: "1px solid var(--color-border)",
+            paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          }}
+        >
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            const isItemPending = isPending && pendingKey === item.href;
+            const tint = isActive ? "var(--color-accent)" : "var(--color-text-muted)";
+            return (
+              <button
+                key={item.href}
+                onClick={() => handleNavigate(item.href)}
+                aria-label={item.label}
+                className="flex flex-col items-center justify-center gap-1"
+                style={{
+                  flex: 1,
+                  minHeight: 56,
+                  padding: "8px 4px",
+                  border: "none",
+                  background: "transparent",
+                }}
+              >
+                {isItemPending ? (
+                  <Spinner size={18} />
+                ) : (
+                  <Icon size={22} color={tint} />
+                )}
+                <span style={{ fontSize: 10, color: tint, whiteSpace: "nowrap" }}>
+                  {mobileLabels[item.href] ?? item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </>
+    );
+  }
 
   return (
     <div className="fixed top-6 left-0 right-0 flex justify-center z-50">
