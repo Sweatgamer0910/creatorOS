@@ -20,6 +20,13 @@ const selectStyle: React.CSSProperties = {
   padding: `${spacing.sm}px ${spacing.md}px`,
   outline: "none",
   fontSize: 14,
+  // Without this, the flex row gives the <select> a content-based min-width
+  // instead of letting it shrink to the space actually left after "Link to:"
+  // — on a narrow card that pushed the select's own box (the "None" text +
+  // arrow) past the card's right edge instead of wrapping or shrinking.
+  flex: "1 1 0%",
+  minWidth: 0,
+  width: "100%",
 };
 
 export default function NewItemForm({
