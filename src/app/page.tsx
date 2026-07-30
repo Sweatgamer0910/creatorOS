@@ -10,6 +10,7 @@ import WorkspaceAssembly from "@/components/landing/WorkspaceAssembly";
 import Manifesto from "@/components/landing/Manifesto";
 import FeatureGrid from "@/components/landing/FeatureGrid";
 import ConfidenceSystem from "@/components/landing/ConfidenceSystem";
+import ClosingCTA from "@/components/landing/ClosingCTA";
 import LandingFooter from "@/components/landing/LandingFooter";
 
 export default async function LandingPage({
@@ -48,6 +49,7 @@ export default async function LandingPage({
         <Manifesto />
         <FeatureGrid />
         <ConfidenceSystem />
+        <ClosingCTA />
         <LandingFooter />
       </div>
     </div>
