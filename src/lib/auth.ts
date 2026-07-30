@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { authSecondaryStorage } from "@/lib/auth-rate-limit-storage";
 import { addToAudience } from "@/lib/resend-audience";
 import { sendEmail } from "@/lib/email";
+import { inngest } from "@/lib/inngest";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -174,6 +175,24 @@ export const auth = betterAuth({
           } catch (err) {
             console.error(
               "[auth] Failed to sync new user to Resend audience:",
+              err,
+            );
+          }
+
+          // Kicks off the Phase A1 lifecycle email sequence (see
+          // docs/CreatorOS_Marketing_Email_Plan.docx) — a single Inngest
+          // function (src/lib/inngest/activationSequence.ts) that spans
+          // signup through day 14. Same best-effort try/catch reasoning as
+          // the audience sync above: an Inngest outage shouldn't block
+          // account creation.
+          try {
+            await inngest.send({
+              name: "app/user.signed_up",
+              data: { userId: user.id, email: user.email, name: user.name },
+            });
+          } catch (err) {
+            console.error(
+              "[auth] Failed to trigger activation email sequence:",
               err,
             );
           }

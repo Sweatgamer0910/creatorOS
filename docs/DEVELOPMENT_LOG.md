@@ -3,6 +3,31 @@
 Running log of feature work on CreatorOS, newest entries first. See `DECISIONS_LOG.md` for the
 reasoning behind non-obvious technical choices made along the way.
 
+## 2026-07-29 — 90-day chart "Week of" labels; marketing email Phase A0/A1 shipped
+
+**Analytics 90-day chart buckets now group by real calendar week (Sunday-start) instead of an
+arbitrary 7-day chunk**, labeled "Week of [date]" (`src/lib/analytics/buckets.ts` +
+`buckets.test.ts`). Same "real calendar unit" reasoning already used for 1Y's month grouping,
+just applied to weeks.
+
+**Shipped the first two phases of the marketing email plan** (full plan in
+`docs/CreatorOS_Marketing_Email_Plan.docx`, reasoning in today's `DECISIONS_LOG.md` entry):
+
+- Fixed a real bug in `resend-audience.ts` (contact sync was silently failing on every signup —
+  wrong API URL shape).
+- New `src/lib/marketing-email.ts` — a separate, CAN-SPAM-compliant send path for
+  non-transactional email (unsubscribe footer + `List-Unsubscribe` headers), distinct from the
+  existing transactional `src/lib/email.ts`.
+- New `/unsubscribe` page + `/api/unsubscribe` route (one-click + human-facing).
+- New `src/lib/inngest/activationSequence.ts` + `src/app/api/inngest/route.ts` — the Phase A1
+  behavior-triggered welcome/activation sequence (signup → day 14), the first real use of the
+  previously-unused `inngest` dependency.
+- Added `signupDate`, `channelConnected`, `lastActiveAt` custom contact properties in Resend's
+  dashboard for future segmentation.
+
+Phase A2 (paid upsell broadcast) and Track B (renewal/win-back) are still blocked on a pricing/
+billing decision — not started, per the plan doc.
+
 ## 2026-07-29 — Fixed Health Score / Growth Coach false-signal bug; email/password auth restored
 
 **Health Score and Growth Coach were reporting confident "Excellent"/"At Risk" verdicts (and

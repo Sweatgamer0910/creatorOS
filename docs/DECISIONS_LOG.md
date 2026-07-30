@@ -2,6 +2,62 @@
 
 Non-obvious technical decisions, newest first, with the reasoning behind them.
 
+## 2026-07-29 — Phase A1 marketing email sequence (activation) + unsubscribe infra
+
+**Built the first two phases (A0, A1) of `docs/CreatorOS_Marketing_Email_Plan.docx`** — the
+free-to-paid conversion plan researched and written up earlier the same day. Full plan/reasoning
+is in that document; this entry covers implementation choices not obvious from the code alone.
+
+**Found and fixed a real bug while wiring this up:** `resend-audience.ts` was POSTing to a flat
+`https://api.resend.com/contacts`, but Resend's actual API is
+`POST /audiences/{audience_id}/contacts` — contacts belong to a specific audience/segment.
+Every signup before this fix likely never actually landed in Resend (confirmed live: the
+"General" segment showed 0 contacts despite real signups having happened). The whole call was
+wrapped in a try/catch that only logs, so this failed silently the entire time. Added
+`RESEND_AUDIENCE_ID` (the "General" segment's real id, `e4d1b85d-be68-44ed-bddc-fbba3caa2246`,
+looked up live in the Resend dashboard) to both `.env` and Vercel.
+
+**Marketing email is a separate send path from transactional (`src/lib/marketing-email.ts` vs.
+`src/lib/email.ts`).** Transactional (verification, password reset) is CAN-SPAM-exempt;
+marketing/lifecycle email is not, so only the marketing path adds an unsubscribe footer,
+`List-Unsubscribe`/`List-Unsubscribe-Post` headers (RFC 8058 one-click), and checks the
+contact's `unsubscribed` flag in Resend before sending (necessary because this goes through the
+plain Emails API, not Resend's Broadcasts feature, which doesn't auto-suppress unsubscribed
+contacts on its own).
+
+**One URL (`/api/unsubscribe?email=...`) serves both unsubscribe mechanisms** — the RFC 8058
+one-click POST mail clients send directly, and a plain GET when a human clicks the visible
+footer link (which redirects to `/unsubscribe` for a readable confirmation page). Kept as one
+path per RFC 8058's own recommendation rather than two divergent implementations.
+
+**Sender identity for marketing mail is a named individual, not the company name**
+(`RESEND_MARKETING_FROM_EMAIL`, "Ayaan from CreatorOS") — research backs a meaningfully higher
+open/reply rate for this over a `from: CreatorOS` company address, and with two co-founders,
+one consistent named voice was chosen over alternating, since recipients build recognition
+email-to-email. Easy one-line config change if this should be reconsidered later.
+**Caveat:** `ayaan@creatoros.onl` is not yet a real inbox — creatoros.onl's MX records point at
+Resend's bounce handler, not a mailbox — so replies currently go nowhere. Fine for now since the
+copy asks people to reply without depending on it, but worth a real inbox/forwarding setup
+before send volume grows.
+
+**Phase A1 (behavior-triggered activation sequence) runs as a single Inngest function**
+(`src/lib/inngest/activationSequence.ts`), not five separate scheduled jobs — `step.sleep`
+between stages lets one function represent the whole 14-day arc per user, durably (Inngest
+persists progress between steps, so a redeploy mid-sequence doesn't lose anyone's place). This
+is also the first real use of the `inngest` dependency/client that's existed since 2026-07-28
+with nothing built on it — `src/app/api/inngest/route.ts` (the registration endpoint) didn't
+exist before this pass either.
+
+**Contact properties (`signupDate`, `channelConnected`, `lastActiveAt`) added live in the Resend
+dashboard**, all string-typed since Resend's custom properties only support string/number, not
+boolean/date — `channelConnected` is stored as the literal string `"true"`/`"false"`.
+`channelConnected` gets re-synced back to Resend mid-sequence (day-3 check) so Phase A2's future
+segmentation reflects real, current state rather than only what was true at signup.
+
+**A real physical mailing address (CAN-SPAM requirement) is still a placeholder** in
+`marketing-email.ts` (`MAILING_ADDRESS`) — no address exists to put there yet. Flagged with a
+`TODO(ayaan)` in the code; don't let a real send volume go out with it still unset.
+
 ## 2026-07-29 — `/request-password-reset` gets its own tight rate limit
 
 **Added a `max: 3, window: 60` custom rule for `/request-password-reset`, tighter than the

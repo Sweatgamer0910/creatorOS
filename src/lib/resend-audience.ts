@@ -6,7 +6,19 @@
 // Uses a separate API key/env var from RESEND_API_KEY (which is "Sending
 // access" only, scoped to transactional email) because writing contacts
 // needs "Full access" — see docs/DECISIONS_LOG.md, 2026-07-28.
-const RESEND_API_URL = "https://api.resend.com/contacts";
+const RESEND_API_BASE = "https://api.resend.com";
+
+// 2026-07-29: contacts belong to a specific Audience/Segment — Resend's API
+// is POST /audiences/{audience_id}/contacts, not a flat POST /contacts.
+// The flat-URL version silently 404'd (caught by the try/catch in auth.ts's
+// signup hook, which only logs) so every real signup before this fix likely
+// never actually landed in Resend. RESEND_AUDIENCE_ID is the "General"
+// segment's id from the Resend dashboard (Audience > Segments).
+function audienceContactsUrl(email?: string) {
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+  const base = `${RESEND_API_BASE}/audiences/${audienceId}/contacts`;
+  return email ? `${base}/${encodeURIComponent(email)}` : base;
+}
 
 export async function addToAudience({
   email,
@@ -18,9 +30,10 @@ export async function addToAudience({
   plan: string;
 }) {
   const apiKey = process.env.RESEND_AUDIENCE_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
 
-  if (!apiKey) {
-    // Not configured yet (e.g. local dev without this var set) — no-op
+  if (!apiKey || !audienceId) {
+    // Not configured yet (e.g. local dev without these vars set) — no-op
     // rather than throw, since audience sync should never block sign-up.
     return;
   }
@@ -28,7 +41,7 @@ export async function addToAudience({
   const [firstName, ...rest] = name.trim().split(" ");
   const lastName = rest.join(" ") || undefined;
 
-  const response = await fetch(RESEND_API_URL, {
+  const response = await fetch(audienceContactsUrl(), {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -39,9 +52,12 @@ export async function addToAudience({
       first_name: firstName,
       last_name: lastName,
       unsubscribed: false,
-      // Custom contact property — configured in Resend's Audience >
-      // Properties tab (string, fallback "free"). Lets broadcasts be
-      // segmented by plan once paid tiers exist.
+      // Custom contact properties — configured in Resend's Audience >
+      // Properties tab (all string-typed; Resend only supports
+      // string/number property types, no boolean/date, so channelConnected
+      // is the literal string "true"/"false" and signupDate is an ISO
+      // date string). Lets broadcasts in Phase A1/A2 (see
+      // CreatorOS_Marketing_Email_Plan.docx) segment by lifecycle stage.
       //
       // `properties` is a flat object (a "record"), NOT an array of
       // {key, value} pairs — the array shape looked right from the docs'
@@ -49,8 +65,110 @@ export async function addToAudience({
       // "422 Invalid input: expected record, received array" (caught via
       // the first real signup test, 2026-07-29). Confirmed against
       // Resend's current API reference.
-      properties: { plan },
+      properties: {
+        plan,
+        signupDate: new Date().toISOString().slice(0, 10),
+        channelConnected: "false",
+      },
     }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Resend contacts API error: ${response.status} - ${body}`);
+  }
+
+  return response.json();
+}
+
+// Updates a subset of an existing contact's properties without touching the
+// rest — used for lifecycle events after signup (channel connected, last
+// active) rather than only ever writing properties once at signup time, so
+// segmentation in Phase A1/A2 reflects real, current behavior.
+export async function updateAudienceContact(
+  email: string,
+  properties: Record<string, string>,
+) {
+  const apiKey = process.env.RESEND_AUDIENCE_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+
+  if (!apiKey || !audienceId) {
+    return;
+  }
+
+  const response = await fetch(audienceContactsUrl(email), {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ properties }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Resend contacts API error: ${response.status} - ${body}`);
+  }
+
+  return response.json();
+}
+
+// Looks up a contact's current state — used before sending a marketing
+// (non-transactional) email to skip anyone who's already unsubscribed,
+// since we send lifecycle emails through the plain Emails API (not Resend's
+// Broadcasts feature), which doesn't auto-suppress unsubscribed contacts.
+// Returns null if the contact isn't found or audience sync isn't
+// configured, which callers should treat as "don't skip, but proceed
+// carefully" — see sendMarketingEmail in src/lib/marketing-email.ts.
+export async function getAudienceContact(email: string): Promise<{
+  unsubscribed: boolean;
+  properties?: Record<string, unknown>;
+} | null> {
+  const apiKey = process.env.RESEND_AUDIENCE_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+
+  if (!apiKey || !audienceId) {
+    return null;
+  }
+
+  const response = await fetch(audienceContactsUrl(email), {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Resend contacts API error: ${response.status} - ${body}`);
+  }
+
+  return response.json();
+}
+
+// Sets the contact's unsubscribed flag — a top-level field on the contact,
+// not a custom property, so it's a separate call from updateAudienceContact.
+// Used by the /unsubscribe route (one-click footer link + List-Unsubscribe
+// header) so opt-outs take effect immediately, well inside CAN-SPAM's
+// 10-business-day requirement.
+export async function setAudienceUnsubscribed(
+  email: string,
+  unsubscribed: boolean,
+) {
+  const apiKey = process.env.RESEND_AUDIENCE_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+
+  if (!apiKey || !audienceId) {
+    return;
+  }
+
+  const response = await fetch(audienceContactsUrl(email), {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ unsubscribed }),
   });
 
   if (!response.ok) {
