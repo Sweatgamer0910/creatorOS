@@ -43,7 +43,7 @@ export default function PrivacyPage() {
       >
         Privacy Policy
       </h1>
-      <p style={{ ...pStyle, marginTop: 8 }}>Last updated July 2026.</p>
+      <p style={{ ...pStyle, marginTop: 8 }}>Last updated July 30, 2026.</p>
 
       <p style={pStyle}>
         CreatorOS (&ldquo;we&rdquo;, &ldquo;us&rdquo;) is a tool for planning,
@@ -73,11 +73,75 @@ export default function PrivacyPage() {
         show them back to you across sessions.
       </p>
 
+      <h2 style={h2Style}>YouTube API Services</h2>
+      <p style={pStyle}>
+        CreatorOS uses YouTube API Services. By connecting a YouTube channel,
+        you also agree to the{" "}
+        <a
+          href="https://www.youtube.com/t/terms"
+          className="glow-text"
+          style={{ color: "var(--color-accent)" }}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          YouTube Terms of Service
+        </a>
+        . CreatorOS&rsquo;s use and transfer of information received from
+        Google APIs adheres to the{" "}
+        <a
+          href="https://developers.google.com/terms/api-services-user-data-policy"
+          className="glow-text"
+          style={{ color: "var(--color-accent)" }}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Google API Services User Data Policy
+        </a>
+        , including the Limited Use requirements. You can review or revoke
+        CreatorOS&rsquo;s access to your Google account at any time from{" "}
+        <a
+          href="https://myaccount.google.com/permissions"
+          className="glow-text"
+          style={{ color: "var(--color-accent)" }}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Google&rsquo;s security settings
+        </a>{" "}
+        or from{" "}
+        <Link
+          href="/settings"
+          className="glow-text"
+          style={{ color: "var(--color-accent)" }}
+        >
+          CreatorOS Settings
+        </Link>
+        , and Google&rsquo;s own handling of your data is described in the{" "}
+        <a
+          href="https://policies.google.com/privacy"
+          className="glow-text"
+          style={{ color: "var(--color-accent)" }}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Google Privacy Policy
+        </a>
+        .
+      </p>
+
       <h2 style={h2Style}>What we don&rsquo;t do</h2>
       <p style={pStyle}>
         We don&rsquo;t sell your data, share it with advertisers, or use it to
         train any model outside of generating your own in-app recommendations.
         YouTube data is never shown to anyone but you.
+      </p>
+
+      <h2 style={h2Style}>Cookies</h2>
+      <p style={pStyle}>
+        CreatorOS uses a single essential cookie to keep you signed in. We
+        don&rsquo;t use advertising or cross-site tracking cookies, and we
+        don&rsquo;t sell or share data for cross-context behavioral
+        advertising.
       </p>
 
       <h2 style={h2Style}>How we protect your data</h2>
@@ -110,12 +174,47 @@ export default function PrivacyPage() {
         there is no recovery period.
       </p>
 
+      <h2 style={h2Style}>Children&rsquo;s privacy</h2>
+      <p style={pStyle}>
+        CreatorOS is not directed to children under 13, and we don&rsquo;t
+        knowingly collect personal information from anyone under 13. If you
+        believe a child under 13 has given us information, contact us below
+        and we&rsquo;ll delete it.
+      </p>
+
+      <h2 style={h2Style}>Your rights</h2>
+      <p style={pStyle}>
+        You can access, correct, export, or delete your data at any time from{" "}
+        <Link
+          href="/settings"
+          className="glow-text"
+          style={{ color: "var(--color-accent)" }}
+        >
+          Settings
+        </Link>
+        , or by emailing us. If you&rsquo;re a California resident, you may
+        have additional rights under the CCPA, including the right to know
+        what personal information we hold about you and to request its
+        deletion — as stated above, we don&rsquo;t sell or share personal
+        information. To exercise any of these rights, contact us below; we
+        won&rsquo;t discriminate against you for doing so.
+      </p>
+
       <h2 style={h2Style}>Third parties</h2>
       <p style={pStyle}>
-        We use Google OAuth for authentication and YouTube data access, and
-        standard infrastructure providers (hosting, database, transactional
-        email) to run the app. None of these providers use your data for
+        We use Google OAuth (and optionally Discord) for authentication and
+        YouTube data access, and standard infrastructure providers — hosting
+        (Vercel), database (Neon), rate-limiting/session storage (Upstash),
+        transactional and marketing email (Resend), and error monitoring
+        (Sentry) — to run the app. None of these providers use your data for
         anything beyond operating CreatorOS on our behalf.
+      </p>
+
+      <h2 style={h2Style}>Changes to this policy</h2>
+      <p style={pStyle}>
+        We may update this policy as the app changes. If a change is
+        material, we&rsquo;ll make reasonable efforts to let existing users
+        know (e.g. email or an in-app notice) before it takes effect.
       </p>
 
       <h2 style={h2Style}>Contact</h2>

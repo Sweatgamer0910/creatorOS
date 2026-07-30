@@ -2,6 +2,40 @@
 
 Non-obvious technical decisions, newest first, with the reasoning behind them.
 
+## 2026-07-30 — Security patch pass + Terms/Privacy hardened to what a lawyer would flag
+
+**Fresh `pnpm audit` (not the stale 2026-07-29 log entry) found `next` was still on 16.2.10** —
+one patch behind 16.2.11, which fixes several high-severity CVEs including a Turbopack
+middleware/proxy-bypass bug directly relevant to `proxy.ts` (this app's whole auth gate), plus
+SSRF and DoS issues in Server Actions. The earlier "bumped and deployed" note was either wrong or
+got reverted; either way, production was exposed. Bumped `next` to 16.2.12 and
+`eslint-config-next` to match. Also found Next itself still bundles `sharp@0.34.5` (libvips CVEs,
+reachable via `/​_next/image` at runtime) and `postcss@8.4.31` (build-time only) as its own nested
+optionalDependencies, unaffected by the Next version bump — added `overrides` in
+`pnpm-workspace.yaml` forcing `sharp >=0.35.3` and `postcss >=8.5.25` since upstream hasn't moved
+its own range yet. `pnpm audit` went from 18 findings (9 high) to 5 (all in Prisma's dev-only CLI
+tooling, never runs in the deployed app). Lockfile regenerated and verified to pass
+`--frozen-lockfile` (what Vercel's install step uses) before this was committed.
+
+**Live Sentry check turned up an unresolved, unhandled `THREE.WebGLRenderer: Error creating WebGL
+context` on `/` — 51 events over 21 hours on real production traffic**, no error boundary or
+fallback for it in `LandingScene.tsx`. Low blast radius (the canvas is `aria-hidden`,
+non-interactive, z-index 0 behind the real page content, so affected visitors just don't see the
+3D hero, nothing else breaks) but real and worth a follow-up fix — not addressed in this pass.
+
+**`/terms` and `/privacy` were honest but not built to withstand a lawyer's checklist — added
+what was missing:** eligibility/13+ and a COPPA-style children's-privacy statement, a disclaimer
+of warranties, a limitation-of-liability clause (capped at the greater of $100 or 12 months'
+payment), an indemnification clause, Texas governing law, and a binding-arbitration + class-action
+waiver clause with a 30-day opt-out window (Ayaan's call, asked directly rather than assumed).
+Also added the disclosures Google's own YouTube API Services Terms require and that were
+previously missing entirely — a "this app uses YouTube API Services" statement, a link to the
+Google Privacy Policy, a link to revoke access from Google's own security settings, and the
+Limited Use Policy adherence statement — plus a lightweight CCPA rights section and a cookies
+disclosure. None of this is a substitute for an actual lawyer's review before charging money or
+scaling past a small free beta; it closes the gap between "present" and "what's commonly expected,"
+not a certified legal opinion.
+
 ## 2026-07-29 — Phase A1 marketing email sequence (activation) + unsubscribe infra
 
 **Built the first two phases (A0, A1) of `docs/CreatorOS_Marketing_Email_Plan.docx`** — the

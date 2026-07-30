@@ -8,3 +8,15 @@ allowBuilds:
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
+# Next.js 16.2.12 still requests sharp@^0.34.5 as an optionalDependency for its
+# built-in Image Optimization, but 0.34.5 inherits libvips CVE-2026-33327/28/33590/91
+# (pnpm audit, 2026-07-30). Next hasn't bumped its own range yet, so forcing the
+# resolution here is the only way to get the patched sharp without waiting on
+# an upstream Next release.
+overrides:
+  sharp: ">=0.35.3"
+  # Same situation as sharp above: next@16.2.12 still bundles postcss@8.4.31
+  # internally, vulnerable to a sourceMappingURL arbitrary-file-read (patched
+  # >=8.5.12). Build-time only in this app's architecture (CSS is compiled to
+  # static output, not processed per-request), but free to pin correctly.
+  postcss: ">=8.5.25"

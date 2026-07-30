@@ -17,13 +17,17 @@ async function getSession() {
 async function revokeGoogleToken(accessToken: string | null) {
   if (!accessToken) return;
   try {
-    await fetch(
-      `https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(accessToken)}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      },
-    );
+    // Token goes in the POST body, not the URL: Sentry's HTTP
+    // instrumentation (sentry.server.config.ts) records outgoing
+    // request URLs as breadcrumb/span data, and query strings also land
+    // in reverse-proxy access logs — either would ship this access
+    // token to a third party or on-disk log in plaintext. The body isn't
+    // captured that way. 2026-07-30 security pass.
+    await fetch("https://oauth2.googleapis.com/revoke", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `token=${encodeURIComponent(accessToken)}`,
+    });
   } catch (e) {
     console.error(
       "[settings] Failed to revoke Google token (continuing anyway):",
