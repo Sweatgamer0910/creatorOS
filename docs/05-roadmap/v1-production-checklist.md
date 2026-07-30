@@ -62,11 +62,19 @@ unbuilt, needs a provider decision and budget, not required to ship honestly as-
   launching free/beta by explicit decision. Revisit once there's a pricing decision to build
   against (see `CreatorOS Pricing Strategy.md` for the standing recommendation).
 
+## Resolved — SEO/social basics
+
+- **`robots.ts` and `sitemap.ts` already existed** (dated 2026-07-27) despite this doc previously
+  saying they didn't — third stale claim caught in one day (alongside the `pnpm audit` and
+  security-header entries above), worth an audit pass of this whole file at some point rather
+  than trusting it at face value.
+- **Real 1200x630 OG/Twitter card image added** (`opengraph-image.tsx`, via `next/og`), replacing
+  the 512x512 `logo.png` fallback `layout.tsx` was using for both — switched Twitter to
+  `summary_large_image` now that there's a real landscape image. Not yet visually confirmed
+  against a live social-preview debugger — worth checking once deployed.
+
 ## Worth doing, not launch-blocking
 
-- **SEO/social basics.** `layout.tsx`'s `metadata` is just a title + description — no Open
-  Graph/Twitter card image, no `robots.ts`/`sitemap.ts`. Cheap to add, matters once you're
-  sharing links.
 - **No CI, no end-to-end tests.** Vitest unit tests exist (7 files) but Playwright is a listed
   dependency with nothing written against it, and there's no GitHub Actions (or similar) running
   anything automatically on push — every check so far has been a manual pass. Fine at current
