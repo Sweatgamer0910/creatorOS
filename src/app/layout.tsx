@@ -38,10 +38,15 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: APP_URL,
     siteName: "CreatorOS",
-    // No `images` override here — Next's file-convention `opengraph-image.tsx`
+    // No `images` override here — Next's file-convention `opengraph-image.png`
     // (proper 1200x630 card, built from the same brand tokens as the rest
-    // of the site) is picked up automatically and takes precedence over the
-    // old 512x512 logo-only placeholder.
+    // of the site) is picked up automatically. Static file rather than the
+    // dynamic opengraph-image.tsx it started as: LinkedIn's Post Inspector
+    // reproducibly reported "no image found" against the on-demand
+    // ImageResponse route (title/description came through fine, just not
+    // the image) — a static file removes any function cold-start/runtime
+    // variable from the equation entirely. Pre-rendered once via next/og's
+    // ImageResponse from the exact same JSX, so the visual is unchanged.
     type: "website",
   },
   twitter: {
