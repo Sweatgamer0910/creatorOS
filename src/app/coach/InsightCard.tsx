@@ -108,13 +108,38 @@ export default function InsightCard({
         </p>
       )}
       {insight.trendData && insight.trendData.length >= 2 && (
-        <div style={{ marginTop: 10, maxWidth: 220 }}>
+        // The chart itself is real data, but too small to read in detail —
+        // clicking it (not just a separate nearby link) takes you to
+        // Analytics for the full, labeled version of the same trend.
+        <Link
+          href="/analytics"
+          className="glow-text"
+          style={{
+            display: "block",
+            marginTop: 10,
+            maxWidth: 220,
+            textDecoration: "none",
+          }}
+        >
           <Sparkline
             data={insight.trendData}
             color={typeColors[insight.type]}
             height={24}
           />
-        </div>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 4,
+              marginTop: 4,
+              fontSize: 11,
+              color: "var(--color-text-muted)",
+            }}
+          >
+            View full analytics
+            <ArrowRight size={10} />
+          </span>
+        </Link>
       )}
       {action && (
         <Link

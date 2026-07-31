@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { HealthScore } from "@/lib/health-score";
 import { labelColors } from "@/app/analytics/HealthScoreCard";
 import Card from "@/components/ui/Card";
@@ -59,18 +61,39 @@ export default function CoachSummaryHeader({
         </div>
       </div>
       {trendData.length >= 2 && (
-        <div style={{ flex: "1 1 200px", minWidth: 160, maxWidth: 320 }}>
+        // Whole trend block (caption + chart) is a link — this is a
+        // glance-sized sparkline, not the real chart; clicking it goes to
+        // Analytics for the full, labeled version.
+        <Link
+          href="/analytics"
+          className="glow-text"
+          style={{
+            display: "block",
+            flex: "1 1 200px",
+            minWidth: 160,
+            maxWidth: 320,
+            textDecoration: "none",
+          }}
+        >
           <div
+            className="flex items-center justify-between gap-2"
             style={{
               fontSize: 11,
               color: "var(--color-text-muted)",
               marginBottom: 4,
             }}
           >
-            Views, last 30 days
+            <span>Views, last 30 days</span>
+            <span
+              className="flex items-center gap-1"
+              style={{ color: "var(--color-accent)", flexShrink: 0 }}
+            >
+              Full analytics
+              <ArrowRight size={10} />
+            </span>
           </div>
           <Sparkline data={trendData} color="#f5a623" height={40} />
-        </div>
+        </Link>
       )}
     </Card>
   );
