@@ -1,4 +1,8 @@
-import { HealthScore } from "@/lib/health-score";
+import {
+  HealthScore,
+  HealthScoreType,
+  HealthScoreConfidence,
+} from "@/lib/health-score";
 import Card from "@/components/ui/Card";
 
 // Exported so Dashboard's compact health-score tile can color its label
@@ -12,6 +16,31 @@ export const labelColors: Record<HealthScore["label"], string> = {
   "Insufficient Data": "var(--color-text-muted)",
 };
 
+// Same type/confidence vocabulary and visual treatment as
+// src/app/coach/InsightCard.tsx (typeLabels/typeColors/confidenceLabels) —
+// kept as its own copy rather than a shared import since Health Score and
+// Coach insights are different domain types that happen to share a label
+// set, not the same object.
+const typeLabels: Record<HealthScoreType, string> = {
+  fact: "Fact",
+  pattern: "Pattern",
+  recommendation: "Recommendation",
+  hypothesis: "Hypothesis",
+};
+
+const typeColors: Record<HealthScoreType, string> = {
+  fact: "var(--color-text-muted)",
+  pattern: "var(--color-accent-teal)",
+  recommendation: "var(--color-accent)",
+  hypothesis: "#e0a020",
+};
+
+const confidenceLabels: Record<HealthScoreConfidence, string> = {
+  high: "High confidence",
+  medium: "Medium confidence",
+  exploratory: "Exploratory",
+};
+
 export default function HealthScoreCard({
   healthScore,
 }: {
@@ -20,47 +49,34 @@ export default function HealthScoreCard({
   return (
     <Card
       accentBorder={labelColors[healthScore.label]}
-      style={{ maxWidth: 500, marginTop: 20, marginBottom: 20 }}
+      className="mt-5 mb-5 max-w-[500px]"
     >
-      <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+      <div className="mb-2 flex flex-wrap items-center gap-3">
         <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 36,
-            fontWeight: 700,
-            color: "var(--color-text)",
-          }}
+          className="text-[11px] font-bold tracking-[0.5px] uppercase"
+          style={{ color: typeColors[healthScore.type] }}
         >
+          {typeLabels[healthScore.type]}
+        </span>
+        <span className="text-xs text-[var(--color-text-muted)]">
+          {confidenceLabels[healthScore.confidence]}
+        </span>
+      </div>
+      <div className="flex items-baseline gap-3">
+        <span className="font-mono text-4xl font-bold text-[var(--color-text)]">
           {healthScore.score}
         </span>
         <span
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: 16,
-            fontWeight: 600,
-            color: labelColors[healthScore.label],
-          }}
+          className="font-display text-base font-semibold"
+          style={{ color: labelColors[healthScore.label] }}
         >
           {healthScore.label}
         </span>
       </div>
-      <p
-        style={{
-          marginTop: 8,
-          fontSize: 14,
-          color: "var(--color-text)",
-        }}
-      >
+      <p className="mt-2 text-sm text-[var(--color-text)]">
         {healthScore.summary}
       </p>
-      <p
-        style={{
-          marginTop: 8,
-          fontSize: 12,
-          color: "var(--color-text-muted)",
-          fontStyle: "italic",
-        }}
-      >
+      <p className="mt-2 text-xs text-[var(--color-text-muted)] italic">
         This is a rule-based estimate from your recent view trends, not a
         guaranteed metric.
       </p>

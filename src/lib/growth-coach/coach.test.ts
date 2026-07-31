@@ -24,7 +24,14 @@ function makeAnalytics(dailyViews: number[]): ChannelAnalytics {
 }
 
 function makeHealthScore(label: HealthScore["label"], score = 60): HealthScore {
-  return { score, label, summary: "test", isEstimate: true };
+  return {
+    score,
+    label,
+    summary: "test",
+    isEstimate: true,
+    type: label === "Insufficient Data" ? "fact" : "pattern",
+    confidence: "high",
+  };
 }
 
 const flat30 = Array(30).fill(100);

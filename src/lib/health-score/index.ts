@@ -8,4 +8,8 @@ export async function getHealthScore(
   return computeHealthScore(data);
 }
 
-export type { HealthScore } from "./types";
+export type {
+  HealthScore,
+  HealthScoreType,
+  HealthScoreConfidence,
+} from "./types";
