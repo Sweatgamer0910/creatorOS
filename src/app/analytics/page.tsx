@@ -8,6 +8,7 @@ import HealthScoreCard from "./HealthScoreCard";
 import StatCard from "./StatCard";
 import ConnectYouTubePrompt from "@/components/ConnectYouTubePrompt";
 import ReconnectYouTubeNotice from "@/components/ReconnectYouTubeNotice";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default async function AnalyticsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -27,35 +28,13 @@ export default async function AnalyticsPage() {
   }
 
   return (
-    <div
-      className="px-4 sm:px-10"
-      style={{ paddingTop: 24, paddingBottom: 64, maxWidth: 1160, margin: "0 auto" }}
-    >
-      <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>
-        Analytics
-      </p>
-      <h1
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(30px, 3.5vw, 38px)",
-          marginTop: 6,
-        }}
-      >
-        {data?.channelTitle ?? "Analytics"}
-      </h1>
-      <p
-        style={{
-          color: "var(--color-text-muted)",
-          fontSize: 16,
-          marginTop: 10,
-          marginBottom: 20,
-          maxWidth: 640,
-          lineHeight: 1.6,
-        }}
-      >
-        Real performance data pulled directly from your connected YouTube
-        channel.
-      </p>
+    <div className="mx-auto max-w-[1160px] px-4 pt-6 pb-16 sm:px-10">
+      <PageHeader
+        eyebrow="Analytics"
+        title={data?.channelTitle ?? "Analytics"}
+        description="Real performance data pulled directly from your connected YouTube channel."
+        className="mb-5"
+      />
 
       {!connected && <ConnectYouTubePrompt callbackURL="/analytics" />}
       {connected && fetchFailed && (
@@ -86,7 +65,7 @@ export default async function AnalyticsPage() {
               <AnalyticsCharts data={data.history} />
             </div>
           ) : (
-            <p style={{ color: "var(--color-text-muted)", marginTop: 40 }}>
+            <p className="mt-10 text-[var(--color-text-muted)]">
               No historical data yet for this channel.
             </p>
           )}

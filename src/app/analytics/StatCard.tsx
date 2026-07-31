@@ -14,17 +14,8 @@ export default function StatCard({
 
   return (
     <InteractiveCard className="p-4">
-      <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
-        {label}
-      </div>
-      <div
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 24,
-          fontWeight: 700,
-          marginTop: 4,
-        }}
-      >
+      <div className="text-[13px] text-[var(--color-text-muted)]">{label}</div>
+      <div className="font-mono mt-1 text-2xl font-bold">
         {animated.toLocaleString()}
       </div>
     </InteractiveCard>

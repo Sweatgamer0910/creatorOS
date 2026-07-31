@@ -13,6 +13,7 @@ import SignalBar from "./SignalBar";
 import QuickAccessCard from "./QuickAccessCard";
 import ResumeWork from "./ResumeWork";
 import InteractiveCard from "@/components/ui/InteractiveCard";
+import PageHeader from "@/components/ui/PageHeader";
 import { labelColors } from "@/app/analytics/HealthScoreCard";
 import type { HealthScore } from "@/lib/health-score";
 
@@ -42,35 +43,12 @@ export default async function DashboardPage() {
   const firstName = session.user.name.split(" ")[0];
 
   return (
-    <div
-      className="px-4 sm:px-10"
-      style={{ paddingTop: 24, paddingBottom: 48, maxWidth: 1160, margin: "0 auto" }}
-    >
-      <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>
-        {workspace?.name ?? "Your workspace"}
-      </p>
-      <h1
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(30px, 3.5vw, 38px)",
-          marginTop: 6,
-        }}
-      >
-        Good to see you, {firstName}
-      </h1>
-      <p
-        style={{
-          color: "var(--color-text-muted)",
-          fontSize: 16,
-          marginTop: 10,
-          maxWidth: 640,
-          lineHeight: 1.6,
-        }}
-      >
-        Here&apos;s where your channel stands right now, plus quick access to
-        every tool — analytics, coaching, ideas, scripts, and your upload
-        pipeline.
-      </p>
+    <div className="mx-auto max-w-[1160px] px-4 pt-6 pb-12 sm:px-10">
+      <PageHeader
+        eyebrow={workspace?.name ?? "Your workspace"}
+        title={`Good to see you, ${firstName}`}
+        description="Here's where your channel stands right now, plus quick access to every tool — analytics, coaching, ideas, scripts, and your upload pipeline."
+      />
 
       {/* Compact "quick glance" tile linking out to Analytics, which owns
           the full detailed/disclaimer-annotated version
@@ -88,59 +66,24 @@ export default async function DashboardPage() {
         <ReconnectYouTubeNotice callbackURL="/dashboard" />
       )}
       {connected && healthScore && (
-        <Link
-          href="/analytics"
-          className="mt-8 block"
-          style={{ textDecoration: "none" }}
-        >
+        <Link href="/analytics" className="mt-8 block no-underline">
           <InteractiveCard className="flex items-center justify-between">
             <div>
-              <div
-                style={{
-                  fontSize: 14,
-                  color: "var(--color-text-muted)",
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                }}
-              >
+              <div className="text-sm tracking-[1px] text-[var(--color-text-muted)] uppercase">
                 Channel Health
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "baseline",
-                  gap: 10,
-                  marginTop: 6,
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 34,
-                    fontWeight: 700,
-                  }}
-                >
+              <div className="mt-[6px] flex items-baseline gap-[10px]">
+                <span className="font-mono text-[34px] font-bold">
                   {healthScore.score}
                 </span>
                 <span
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: 16,
-                    fontWeight: 600,
-                    color: labelColors[healthScore.label],
-                  }}
+                  className="font-display text-base font-semibold"
+                  style={{ color: labelColors[healthScore.label] }}
                 >
                   {healthScore.label}
                 </span>
               </div>
-              <div
-                style={{
-                  fontSize: 13,
-                  color: "var(--color-accent)",
-                  marginTop: 10,
-                  fontWeight: 500,
-                }}
-              >
+              <div className="mt-[10px] text-[13px] font-medium text-[var(--color-accent)]">
                 View details →
               </div>
             </div>
@@ -151,19 +94,10 @@ export default async function DashboardPage() {
 
       <ResumeWork items={recentWork} />
 
-      <h2
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: 22,
-          marginTop: 48,
-          marginBottom: 16,
-        }}
-      >
-        Quick access
-      </h2>
+      <h2 className="font-display mt-12 mb-4 text-[22px]">Quick access</h2>
       <div
         data-tour="quick-access"
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3"
       >
         <QuickAccessCard
           href="/analytics"
