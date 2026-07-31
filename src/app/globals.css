@@ -178,3 +178,36 @@ body {
     box-shadow: 0 0 16px 3px rgba(var(--glow-amber-rgb), 0.55);
   }
 }
+
+/* Page-level loading skeletons (src/components/ui/Skeleton.tsx,
+   consumed by src/app/dashboard/loading.tsx and
+   src/app/analytics/loading.tsx). A slow left-to-right shimmer, subtle
+   and amber-tinted rather than a stark black/white sweep, so it reads as
+   part of the same premium/glassmorphism visual language instead of a
+   generic placeholder. Rendered before hydration, so this is a plain CSS
+   animation rather than a Framer Motion one. */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+.skeleton-shimmer {
+  background-color: var(--color-surface-hover);
+  background-image: linear-gradient(
+    100deg,
+    var(--color-surface-hover) 35%,
+    rgba(245, 166, 35, 0.14) 50%,
+    var(--color-surface-hover) 65%
+  );
+  background-size: 250% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+    background-image: none;
+  }
+}
