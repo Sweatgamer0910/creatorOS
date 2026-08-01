@@ -148,7 +148,7 @@ export default function IdeaForm({
             <select
               value={seriesChoice}
               onChange={(e) => setSeriesChoice(e.target.value)}
-              style={inputStyle}
+              style={{ ...inputStyle, width: "100%", minWidth: 0 }}
             >
               <option value="">Not part of a series</option>
               {seriesList.map((series) => (
