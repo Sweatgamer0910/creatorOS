@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { redis } from "@/lib/redis";
 import { addWaitlistContact } from "@/lib/resend-audience";
+import { inngest } from "@/lib/inngest";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -47,11 +48,17 @@ export async function joinWaitlist(email: string): Promise<{ error?: string }> {
   // stage script using raw `pg` (see docs/DECISIONS_LOG.md, 2026-07-23).
   // ON CONFLICT DO NOTHING makes a repeat submission from the same email a
   // harmless no-op instead of an error.
-  await prisma.$executeRaw`
+  // RETURNING "id" (empty result on a conflict) is how we tell a genuinely
+  // new signup apart from a repeat submission — the nurture sequence below
+  // should only ever start once per email, not restart every time someone
+  // re-submits the same address.
+  const inserted = await prisma.$queryRaw<{ id: string }[]>`
     INSERT INTO "waitlist_entry" ("id", "email")
     VALUES (${crypto.randomUUID()}, ${trimmed})
     ON CONFLICT ("email") DO NOTHING
+    RETURNING "id"
   `;
+  const isNewSignup = inserted.length > 0;
 
   // Resend sync is best-effort — the table above is the source of truth,
   // same pattern as addToAudience being fire-and-forget from the signup
@@ -61,6 +68,20 @@ export async function joinWaitlist(email: string): Promise<{ error?: string }> {
   } catch {
     // Swallow — a failed Resend sync shouldn't make the form look broken
     // to the visitor when their email was actually saved.
+  }
+
+  // Kicks off src/lib/inngest/waitlistNurture.ts — best-effort, same
+  // reasoning as the Resend sync above, and only on a genuinely new row.
+  if (isNewSignup) {
+    try {
+      await inngest.send({
+        name: "app/waitlist.joined",
+        data: { email: trimmed },
+      });
+    } catch {
+      // Swallow — a failed event send shouldn't make the form look broken
+      // to the visitor when their email was actually saved.
+    }
   }
 
   return {};
