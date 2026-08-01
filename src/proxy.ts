@@ -18,7 +18,17 @@ const PUBLIC_PATHS = [
   "/reset-password",
   "/privacy",
   "/terms",
+  "/channel-health",
 ];
+
+// Prefix-matched rather than exact-matched, unlike PUBLIC_PATHS above —
+// /blog has real sub-routes (/blog/[slug], one per post) that an exact-path
+// allowlist can't cover without listing every slug by hand. Added
+// alongside /channel-health to PUBLIC_PATHS 2026-07-31: both are public,
+// no-login growth pages built after this file, and neither was in the
+// allowlist — every anonymous visitor to either one was silently bounced
+// to /login instead of seeing the actual page.
+const PUBLIC_PATH_PREFIXES = ["/blog"];
 
 // Any request for a file with an extension (.glb, .svg, .png, .woff2, ...)
 // is a static asset from public/, never a protected page or API route —
@@ -37,6 +47,7 @@ export function proxy(request: NextRequest) {
 
   if (
     PUBLIC_PATHS.includes(pathname) ||
+    PUBLIC_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
