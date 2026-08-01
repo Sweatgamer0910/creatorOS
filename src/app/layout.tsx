@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import NotchNav from "@/components/NotchNav";
@@ -77,6 +78,7 @@ export default function RootLayout({
             <MainShell>{children}</MainShell>
           </OnboardingTourProvider>
         </LenisProvider>
+        <Analytics />
       </body>
     </html>
   );
