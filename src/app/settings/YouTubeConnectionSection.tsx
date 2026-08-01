@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { disconnectYouTube } from "@/lib/settings/actions";
+import posthog from "posthog-js";
 import ConnectYouTubeButton from "@/components/ConnectYouTubeButton";
 import Button from "@/components/ui/button";
 
@@ -23,6 +24,7 @@ export default function YouTubeConnectionSection({
     startTransition(async () => {
       try {
         await disconnectYouTube();
+        posthog.capture("youtube_disconnected");
         setConfirming(false);
       } catch (err) {
         console.error("[Settings] Failed to disconnect YouTube:", err);

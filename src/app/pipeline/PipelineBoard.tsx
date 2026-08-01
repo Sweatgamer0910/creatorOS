@@ -19,6 +19,7 @@ import Button from "@/components/ui/button";
 import SeriesBadge from "@/components/SeriesBadge";
 import { radius, spacing } from "@/lib/design-tokens";
 import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
+import posthog from "posthog-js";
 
 interface ContentItem {
   id: string;
@@ -86,6 +87,7 @@ function ItemCard({
     startDelete(async () => {
       try {
         await deleteContentItem(item.id);
+        posthog.capture("pipeline_item_deleted");
       } catch (e) {
         console.error("[PipelineBoard] Failed to delete item:", e);
         reportCardError("Couldn't delete — try again.");
@@ -373,6 +375,10 @@ export default function PipelineBoard({
     startTransition(async () => {
       try {
         await updateContentItemStatus(id, status);
+        posthog.capture("pipeline_item_moved", {
+          from_status: previousStatus,
+          to_status: status,
+        });
       } catch {
         // Without this, a failed save left the card visually in the new
         // column even though nothing persisted — silently out of sync with

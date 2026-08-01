@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Sparkles } from "lucide-react";
 import { createIdea } from "@/lib/ideas/actions";
+import posthog from "posthog-js";
 import { createSeries, SeriesCadence } from "@/lib/series/actions";
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/Card";
@@ -65,6 +66,10 @@ export default function IdeaForm({
         }),
         500,
       );
+      posthog.capture("idea_created", {
+        has_series: Boolean(seriesId),
+        has_episode_number: parsedEpisode !== undefined && !Number.isNaN(parsedEpisode),
+      });
       setTitle("");
       setNotes("");
       setShowSeries(false);

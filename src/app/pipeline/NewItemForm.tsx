@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { createContentItem } from "@/lib/pipeline/actions";
+import posthog from "posthog-js";
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/Card";
 import { radius, spacing } from "@/lib/design-tokens";
@@ -63,6 +64,9 @@ export default function NewItemForm({
 
     startTransition(async () => {
       await minDelay(createContentItem(title, linkedSource), 500);
+      posthog.capture("content_item_created", {
+        source_type: kind || "none",
+      });
       setTitle("");
       setSource("");
     });

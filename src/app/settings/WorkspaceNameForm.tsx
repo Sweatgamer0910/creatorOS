@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateWorkspaceName } from "@/lib/settings/actions";
+import posthog from "posthog-js";
 import Button from "@/components/ui/button";
 import { radius, spacing } from "@/lib/design-tokens";
 
@@ -32,6 +33,7 @@ export default function WorkspaceNameForm({
     startTransition(async () => {
       try {
         await updateWorkspaceName(name);
+        posthog.capture("workspace_name_updated");
         setStatus("saved");
         setTimeout(() => setStatus("idle"), 2500);
       } catch (err) {
