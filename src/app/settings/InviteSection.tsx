@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Button from "@/components/ui/button";
-import posthog from "posthog-js";
+import posthog from "@/lib/posthog";
 import { radius, spacing } from "@/lib/design-tokens";
 
 const inputStyle: React.CSSProperties = {
