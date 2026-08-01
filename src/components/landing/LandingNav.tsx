@@ -93,6 +93,9 @@ export default function LandingNav() {
         >
           How AI works here
         </a>
+        <Link href="/channel-health" className="glow-text">
+          Free Health Check
+        </Link>
       </div>
       <div style={{ display: "flex", gap: 10 }}>
         <Link

@@ -178,6 +178,7 @@ export default function NotchNav() {
     pathname === "/signup" ||
     pathname === "/forgot-password" ||
     pathname === "/reset-password" ||
+    pathname === "/channel-health" ||
     pathname === "/"
   )
     return null;

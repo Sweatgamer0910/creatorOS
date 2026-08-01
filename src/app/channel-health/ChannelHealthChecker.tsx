@@ -1,0 +1,249 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { previewChannelHealth } from "@/lib/channel-health-preview/actions";
+import { ChannelHealthPreview, PreviewInsight } from "@/lib/channel-health-preview/types";
+import Card from "@/components/ui/Card";
+
+const typeLabels: Record<PreviewInsight["type"], string> = {
+  fact: "Fact",
+  pattern: "Pattern",
+  recommendation: "Recommendation",
+  hypothesis: "Hypothesis",
+};
+
+const typeColors: Record<PreviewInsight["type"], string> = {
+  fact: "var(--color-text-muted)",
+  pattern: "var(--color-accent-teal)",
+  recommendation: "var(--color-accent)",
+  hypothesis: "#e0a020",
+};
+
+const confidenceLabels: Record<PreviewInsight["confidence"], string> = {
+  high: "High confidence",
+  medium: "Medium confidence",
+  exploratory: "Exploratory",
+};
+
+function formatCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
+
+export default function ChannelHealthChecker() {
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [result, setResult] = useState<ChannelHealthPreview | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setResult(null);
+    setLoading(true);
+    const { data, error } = await previewChannelHealth(input);
+    setLoading(false);
+    if (error) setError(error);
+    else if (data) setResult(data);
+  }
+
+  return (
+    <div
+      style={{
+        maxWidth: 680,
+        margin: "0 auto",
+        padding: "64px 24px 120px",
+      }}
+    >
+      <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <span
+          style={{
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: 12,
+            letterSpacing: 2,
+            color: "var(--color-accent)",
+            textTransform: "uppercase",
+          }}
+        >
+          Free preview · No login
+        </span>
+        <h1
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(28px,4.5vw,44px)",
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
+            margin: "12px 0",
+            color: "var(--color-text)",
+          }}
+        >
+          What&rsquo;s your channel&rsquo;s Health Check?
+        </h1>
+        <p
+          style={{
+            color: "var(--color-text-muted)",
+            fontSize: 15,
+            maxWidth: 480,
+            margin: "0 auto",
+            lineHeight: 1.6,
+          }}
+        >
+          Paste any YouTube channel&rsquo;s @handle or URL — yours or one you&rsquo;re
+          curious about — and get a free, honest read using only public
+          data: upload cadence, recent performance, and where to focus
+          next.
+        </p>
+      </div>
+
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}
+      >
+        <input
+          type="text"
+          placeholder="@yourchannel or youtube.com/@yourchannel"
+          required
+          aria-label="YouTube channel handle or URL"
+          value={input}
+          disabled={loading}
+          onChange={(e) => setInput(e.target.value)}
+          style={{
+            flex: "1 1 320px",
+            padding: "14px 16px",
+            borderRadius: 10,
+            border: "1px solid rgba(245,243,238,0.1)",
+            background: "rgba(255,255,255,0.03)",
+            color: "var(--color-text)",
+            fontFamily: "var(--font-body)",
+            fontSize: 14,
+          }}
+        />
+        <button
+          type="submit"
+          className="glow-interactive"
+          disabled={loading}
+          style={{
+            padding: "14px 28px",
+            background: "var(--color-accent)",
+            color: "#030304",
+            fontWeight: 600,
+            fontSize: 15,
+            borderRadius: 10,
+            border: "none",
+            cursor: loading ? "default" : "pointer",
+            fontFamily: "inherit",
+            opacity: loading ? 0.7 : 1,
+          }}
+        >
+          {loading ? "Checking…" : "Check my channel"}
+        </button>
+      </form>
+
+      {error && (
+        <p style={{ color: "#e08a8a", fontSize: 13, textAlign: "center", marginTop: 16 }}>
+          {error}
+        </p>
+      )}
+
+      {result && (
+        <div style={{ marginTop: 48 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 14,
+              marginBottom: 24,
+            }}
+          >
+            {result.channelThumbnail && (
+              // eslint-disable-next-line @next/next/no-img-element -- external YouTube CDN thumbnail, not worth a next/image remote-pattern config for one small avatar
+              <img
+                src={result.channelThumbnail}
+                alt=""
+                width={56}
+                height={56}
+                style={{ borderRadius: "50%" }}
+              />
+            )}
+            <div>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: "var(--color-text)" }}>
+                {result.channelTitle}
+              </h2>
+              <p style={{ margin: "2px 0 0", fontSize: 13, color: "var(--color-text-muted)" }}>
+                {result.subscriberCount !== null
+                  ? `${formatCount(result.subscriberCount)} subscribers · `
+                  : ""}
+                {formatCount(result.viewCount)} views · {formatCount(result.videoCount)} videos
+              </p>
+            </div>
+          </div>
+
+          <Card padding="lg" style={{ textAlign: "center", marginBottom: 24 }}>
+            <span style={{ fontSize: 12, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: 1 }}>
+              Preview Score
+            </span>
+            <div style={{ fontSize: 48, fontWeight: 700, color: "var(--color-accent)", lineHeight: 1.1 }}>
+              {result.score}
+            </div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: "var(--color-text)" }}>
+              {result.label}
+            </div>
+            <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginTop: 10, maxWidth: 380, marginInline: "auto" }}>
+              This is a preview built from public data only. Your real Health
+              Score (available once you connect your channel) uses private
+              analytics this preview can&rsquo;t see — watch time, traffic
+              sources, and day-by-day growth.
+            </p>
+          </Card>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {result.insights.map((insight, i) => (
+              <Card key={i} padding="sm" accentBorder={typeColors[insight.type]}>
+                <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
+                  <span
+                    style={{
+                      color: typeColors[insight.type],
+                      fontWeight: 700,
+                      fontSize: 11,
+                      textTransform: "uppercase",
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    {typeLabels[insight.type]}
+                  </span>
+                  <span style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
+                    {confidenceLabels[insight.confidence]}
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "var(--color-text)" }}>
+                  {insight.message}
+                </p>
+              </Card>
+            ))}
+          </div>
+
+          <div style={{ textAlign: "center", marginTop: 40 }}>
+            <Link
+              href="/signup"
+              className="glow-interactive"
+              style={{
+                display: "inline-block",
+                padding: "14px 32px",
+                background: "var(--color-accent)",
+                color: "#030304",
+                fontWeight: 600,
+                fontSize: 15,
+                borderRadius: 10,
+                textDecoration: "none",
+              }}
+            >
+              Get your real Health Score — free
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
