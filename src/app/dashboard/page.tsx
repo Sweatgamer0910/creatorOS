@@ -67,7 +67,7 @@ export default async function DashboardPage() {
       )}
       {connected && healthScore && (
         <Link href="/analytics" className="mt-8 block no-underline">
-          <InteractiveCard className="flex items-center justify-between">
+          <InteractiveCard className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <div className="text-sm tracking-[1px] text-[var(--color-text-muted)] uppercase">
                 Channel Health

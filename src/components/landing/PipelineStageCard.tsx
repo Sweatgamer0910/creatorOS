@@ -1,6 +1,7 @@
 "use client";
 
 import { confidenceMeta, type PipelineStage } from "./pipelineStages";
+import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
 
 export default function PipelineStageCard({
   stage,
@@ -14,6 +15,13 @@ export default function PipelineStageCard({
   reducedMotion: boolean;
 }) {
   const confidence = confidenceMeta[stage.confidence];
+  // The left/right alternation exists to read as "orbiting" the WebGL
+  // scene's centered 3D object (rings/tile/Nova) — LandingScene.tsx doesn't
+  // mount that scene at all below the mobile breakpoint, so on a phone
+  // there's nothing for these cards to alternate around. Centering them
+  // instead is the more intentional-looking choice once that visual
+  // context is gone, not a workaround for a bug.
+  const isNarrow = useIsNarrowViewport();
 
   return (
     <section
@@ -21,7 +29,11 @@ export default function PipelineStageCard({
         minHeight: "100svh",
         display: "flex",
         alignItems: "center",
-        justifyContent: side === "left" ? "flex-start" : "flex-end",
+        justifyContent: isNarrow
+          ? "center"
+          : side === "left"
+            ? "flex-start"
+            : "flex-end",
         padding: "0 32px",
       }}
     >
@@ -34,9 +46,10 @@ export default function PipelineStageCard({
           border: `1px solid ${isActive ? "rgba(245,166,35,0.35)" : "rgba(245,243,238,0.08)"}`,
           backdropFilter: "blur(20px) saturate(140%)",
           WebkitBackdropFilter: "blur(20px) saturate(140%)",
-          textAlign: side === "right" ? "right" : "left",
+          textAlign: isNarrow ? "left" : side === "right" ? "right" : "left",
           opacity: isActive ? 1 : 0.35,
-          transform: isActive || reducedMotion ? "translateY(0)" : "translateY(14px)",
+          transform:
+            isActive || reducedMotion ? "translateY(0)" : "translateY(14px)",
           boxShadow: isActive ? "0 0 40px -12px rgba(245,166,35,0.55)" : "none",
           transition: reducedMotion
             ? "opacity 0.3s ease, border-color 0.3s ease"
@@ -67,7 +80,14 @@ export default function PipelineStageCard({
         >
           {stage.title}
         </h3>
-        <p style={{ color: "#9AA0AC", fontSize: 15, marginBottom: 18, lineHeight: 1.5 }}>
+        <p
+          style={{
+            color: "#9AA0AC",
+            fontSize: 15,
+            marginBottom: 18,
+            lineHeight: 1.5,
+          }}
+        >
           {stage.body}
         </p>
         <span

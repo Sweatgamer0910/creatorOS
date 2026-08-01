@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
 
 // Scrolls smoothly to a section per click, instead of relying on a
 // document-wide `html { scroll-behavior: smooth }` — see the comment in
@@ -21,6 +22,17 @@ function handleAnchorClick(e: React.MouseEvent<HTMLAnchorElement>, id: string) {
 }
 
 export default function LandingNav() {
+  // Below this width, the logo + wordmark + Login + Sign up buttons don't
+  // all fit in one row at the desktop padding/sizing — on a 320-360px
+  // phone (the narrow end of what's still common) that pushed the Sign up
+  // button's edge past the viewport instead of wrapping, since this nav has
+  // no flex-wrap and every child has a fixed size. Same underlying overflow
+  // pattern as the "link to idea" dropdown bug, different screen. Fixed by
+  // trimming to logo-only + tighter button padding below the breakpoint,
+  // not by wrapping — a nav bar that wraps to two rows reads as broken, a
+  // nav bar that just gets more compact doesn't.
+  const isNarrow = useIsNarrowViewport();
+
   return (
     <nav
       style={{
@@ -32,7 +44,7 @@ export default function LandingNav() {
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "20px 32px",
+        padding: isNarrow ? "16px 16px" : "20px 32px",
         background: "rgba(3,3,4,0.55)",
         backdropFilter: "blur(16px) saturate(140%)",
         WebkitBackdropFilter: "blur(16px) saturate(140%)",
@@ -53,7 +65,7 @@ export default function LandingNav() {
       >
         <Image
           src="/logo.png"
-          alt=""
+          alt="CreatorOS"
           width={26}
           height={26}
           priority
@@ -63,7 +75,10 @@ export default function LandingNav() {
             flexShrink: 0,
           }}
         />
-        CreatorOS
+        {/* Wordmark text drops below the breakpoint — the logo image gets
+            alt="CreatorOS" above (was alt="") so the brand name is still
+            present for screen readers even without the visible text. */}
+        {!isNarrow && "CreatorOS"}
       </div>
       <div
         className="hidden sm:flex"
@@ -97,18 +112,19 @@ export default function LandingNav() {
           Free Health Check
         </Link>
       </div>
-      <div style={{ display: "flex", gap: 10 }}>
+      <div style={{ display: "flex", gap: isNarrow ? 6 : 10 }}>
         <Link
           href="/login"
           className="glow-interactive"
           style={{
             fontSize: 13,
             fontWeight: 600,
-            padding: "9px 18px",
+            padding: isNarrow ? "8px 12px" : "9px 18px",
             borderRadius: 8,
             border: "1px solid rgba(245,243,238,0.14)",
             color: "#F5F3EE",
             textDecoration: "none",
+            whiteSpace: "nowrap",
           }}
         >
           Log in
@@ -119,11 +135,12 @@ export default function LandingNav() {
           style={{
             fontSize: 13,
             fontWeight: 600,
-            padding: "9px 18px",
+            padding: isNarrow ? "8px 12px" : "9px 18px",
             borderRadius: 8,
             background: "#F5A623",
             color: "#030304",
             textDecoration: "none",
+            whiteSpace: "nowrap",
           }}
         >
           Sign up

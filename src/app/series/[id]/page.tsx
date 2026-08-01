@@ -37,7 +37,12 @@ export default async function SeriesDetailPage({
   return (
     <div
       className="px-4 sm:px-10"
-      style={{ paddingTop: 24, paddingBottom: 48, maxWidth: 900, margin: "0 auto" }}
+      style={{
+        paddingTop: 24,
+        paddingBottom: 48,
+        maxWidth: 900,
+        margin: "0 auto",
+      }}
     >
       <Link
         href="/series"
@@ -112,7 +117,7 @@ export default async function SeriesDetailPage({
               <Card
                 key={idea.id}
                 padding="sm"
-                className="flex items-center justify-between"
+                className="flex items-center justify-between gap-2 flex-wrap"
               >
                 <div className="flex items-center gap-3">
                   {idea.episodeNumber != null && (

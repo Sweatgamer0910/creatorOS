@@ -5,6 +5,7 @@ import ReactECharts from "echarts-for-react";
 import { DailyDataPoint } from "@/lib/analytics";
 import Card from "@/components/ui/Card";
 import RangePicker from "@/components/RangePicker";
+import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
 import {
   chartColors,
   chartTooltipTheme,
@@ -31,14 +32,19 @@ const METRICS: Record<MetricKey, { label: string; color: string }> = {
   watchTimeMinutes: { label: "Watch Time (hrs)", color: "#5fb3e0" },
 };
 
-const selectStyle: React.CSSProperties = {
-  background: "var(--color-surface-hover)",
-  border: "1px solid var(--color-border)",
-  borderRadius: 8,
-  color: "var(--color-text)",
-  fontSize: 12,
-  padding: "5px 8px",
-};
+// Both take `isNarrow` because these are mouse-cursor-era hit targets
+// (~24px tall) — fine with a pointer, cramped for a fingertip. Bumped only
+// below the mobile breakpoint; desktop's denser sizing is unchanged.
+function selectStyle(isNarrow: boolean): React.CSSProperties {
+  return {
+    background: "var(--color-surface-hover)",
+    border: "1px solid var(--color-border)",
+    borderRadius: 8,
+    color: "var(--color-text)",
+    fontSize: 12,
+    padding: isNarrow ? "10px 10px" : "5px 8px",
+  };
+}
 
 const segmentWrapStyle: React.CSSProperties = {
   display: "flex",
@@ -47,9 +53,12 @@ const segmentWrapStyle: React.CSSProperties = {
   overflow: "hidden",
 };
 
-function segmentButtonStyle(active: boolean): React.CSSProperties {
+function segmentButtonStyle(
+  active: boolean,
+  isNarrow: boolean,
+): React.CSSProperties {
   return {
-    padding: "5px 10px",
+    padding: isNarrow ? "10px 12px" : "5px 10px",
     fontSize: 12,
     fontWeight: 500,
     background: active ? "var(--color-accent)" : "transparent",
@@ -71,6 +80,7 @@ function MetricChartCard({
   dataTourId?: string;
 }) {
   const pickerId = useId();
+  const isNarrow = useIsNarrowViewport();
   const availableRanges = (Object.keys(RANGE_DAYS) as RangePreset[]).filter(
     (r) => data.length >= RANGE_DAYS[r],
   );
@@ -152,7 +162,7 @@ function MetricChartCard({
           <select
             value={metric}
             onChange={(e) => setMetric(e.target.value as MetricKey)}
-            style={selectStyle}
+            style={selectStyle(isNarrow)}
           >
             {(
               Object.entries(METRICS) as [
@@ -170,7 +180,7 @@ function MetricChartCard({
               <button
                 key={s}
                 onClick={() => setStyle(s)}
-                style={segmentButtonStyle(style === s)}
+                style={segmentButtonStyle(style === s, isNarrow)}
               >
                 {s[0].toUpperCase() + s.slice(1)}
               </button>

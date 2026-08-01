@@ -23,7 +23,12 @@ export default async function SeriesListPage() {
   return (
     <div
       className="px-4 sm:px-10"
-      style={{ paddingTop: 24, paddingBottom: 48, maxWidth: 900, margin: "0 auto" }}
+      style={{
+        paddingTop: 24,
+        paddingBottom: 48,
+        maxWidth: 900,
+        margin: "0 auto",
+      }}
     >
       <Link
         href="/ideas"
@@ -81,7 +86,7 @@ export default async function SeriesListPage() {
               href={`/series/${series.id}`}
               style={{ textDecoration: "none" }}
             >
-              <InteractiveCard className="flex items-center justify-between">
+              <InteractiveCard className="flex items-center justify-between gap-3 flex-wrap">
                 <div>
                   <div
                     style={{

@@ -42,7 +42,12 @@ export default function ConfidenceSystem() {
     >
       <div
         className="grid grid-cols-1 lg:grid-cols-2"
-        style={{ maxWidth: 1180, margin: "0 auto", gap: 64, alignItems: "center" }}
+        style={{
+          maxWidth: 1180,
+          margin: "0 auto",
+          gap: 64,
+          alignItems: "center",
+        }}
       >
         <div>
           <div
@@ -70,9 +75,9 @@ export default function ConfidenceSystem() {
             AI outputs don&apos;t get to look more certain than they are.
           </h2>
           <p style={{ color: "#9AA0AC", fontSize: 16, maxWidth: 460 }}>
-            Every AI-generated insight in CreatorOS — today and in every
-            future version — is labeled with what kind of claim it&apos;s
-            making, and how confident the system actually is in it.
+            Every AI-generated insight in CreatorOS — today and in every future
+            version — is labeled with what kind of claim it&apos;s making, and
+            how confident the system actually is in it.
           </p>
         </div>
 
@@ -83,6 +88,7 @@ export default function ConfidenceSystem() {
               style={{
                 display: "flex",
                 alignItems: "center",
+                flexWrap: "wrap",
                 gap: 14,
                 padding: "16px 18px",
                 borderRadius: 12,
@@ -106,7 +112,22 @@ export default function ConfidenceSystem() {
               >
                 {row.label}
               </span>
-              <p style={{ fontSize: 13, color: "#9AA0AC" }}>{row.description}</p>
+              {/* Three competing widths in one un-wrapped row (a fixed
+                  118px label, this text, and a nowrap tier pinned right)
+                  is exactly the shape that's overflowed elsewhere in this
+                  app on a narrow phone — flex-wrap above plus a real
+                  flex-basis here (instead of no sizing hint at all) is the
+                  same fix pattern as the idea/script dropdowns. */}
+              <p
+                style={{
+                  fontSize: 13,
+                  color: "#9AA0AC",
+                  flex: "1 1 160px",
+                  minWidth: 0,
+                }}
+              >
+                {row.description}
+              </p>
               <span
                 style={{
                   marginLeft: "auto",

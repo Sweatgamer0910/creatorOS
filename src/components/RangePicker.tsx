@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { motion as motionTokens } from "@/lib/design-tokens";
+import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
 
 // Segmented pill control with a highlight that slides/resizes to the
 // active option (Framer Motion's `layoutId` shared-layout animation) —
@@ -24,6 +25,12 @@ export default function RangePicker<T extends string>({
   layoutId: string;
 }) {
   const reducedMotion = usePrefersReducedMotion();
+  // Touch targets everywhere this control appears (Analytics/Coach chart
+  // filters) were sized for a mouse cursor — 5px/12px padding at 12px font
+  // is roughly a 24px tall hit target, well under the ~40px comfortable
+  // minimum for a fingertip. Bumped on narrow viewports only; desktop's
+  // denser, mouse-precise sizing is unchanged.
+  const isNarrow = useIsNarrowViewport();
 
   return (
     <div
@@ -45,7 +52,7 @@ export default function RangePicker<T extends string>({
             aria-pressed={isActive}
             style={{
               position: "relative",
-              padding: "5px 12px",
+              padding: isNarrow ? "10px 14px" : "5px 12px",
               fontSize: 12,
               fontWeight: 600,
               border: "none",

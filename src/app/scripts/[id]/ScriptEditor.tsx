@@ -212,7 +212,7 @@ export default function ScriptEditor({
           {isNavigatingBack ? <Spinner size={14} /> : <ArrowLeft size={14} />}
           Back to scripts
         </Button>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button
             variant="ghost"
             size="sm"
