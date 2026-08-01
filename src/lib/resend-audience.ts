@@ -124,6 +124,47 @@ export async function addWaitlistContact(email: string) {
   return response.json();
 }
 
+// Syncs a free Channel Health check opt-in (src/app/channel-health) into
+// the same Resend audience, tagged `plan: "channel-check-lead"` so it's
+// segmentable separately from both real accounts and landing-page waitlist
+// signups. Only the properties already configured in Resend's dashboard
+// (see the 2026-07-29 note above) are set here — the channel/score details
+// live in the ChannelCheckLead table and the Inngest event payload, not as
+// Resend contact properties, so this doesn't depend on adding new custom
+// properties in Resend's dashboard first.
+export async function addChannelCheckLead(email: string) {
+  const apiKey = process.env.RESEND_AUDIENCE_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+
+  if (!apiKey || !audienceId) {
+    return;
+  }
+
+  const response = await fetch(audienceContactsUrl(), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      unsubscribed: false,
+      properties: {
+        plan: "channel-check-lead",
+        signupDate: new Date().toISOString().slice(0, 10),
+        channelConnected: "false",
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Resend contacts API error: ${response.status} - ${body}`);
+  }
+
+  return response.json();
+}
+
 // Updates a subset of an existing contact's properties without touching the
 // rest — used for lifecycle events after signup (channel connected, last
 // active) rather than only ever writing properties once at signup time, so

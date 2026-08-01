@@ -240,6 +240,24 @@ model WaitlistEntry {
   @@map("waitlist_entry")
 }
 
+// One row per free Channel Health check where the visitor opted in for
+// follow-up tips (src/app/channel-health) — email is deliberately NOT
+// unique, since the same person can reasonably check multiple channels
+// over time and each check is worth recording for lead context. The
+// nurture sequence itself (src/lib/inngest/channelCheckNurture.ts) is
+// deduped at the application layer instead (only fires once per email —
+// see src/lib/channel-health-preview/leadCapture.ts), so checking a
+// second channel doesn't start a second overlapping email sequence.
+model ChannelCheckLead {
+  id           String   @id @default(cuid())
+  email        String
+  channelTitle String
+  score        Int
+  createdAt    DateTime @default(now())
+
+  @@map("channel_check_lead")
+}
+
 model ContentItem {
   id        String    @id @default(cuid())
   title     String

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { previewChannelHealth } from "@/lib/channel-health-preview/actions";
+import { captureChannelCheckLead } from "@/lib/channel-health-preview/leadCapture";
 import { ChannelHealthPreview, PreviewInsight } from "@/lib/channel-health-preview/types";
 import Card from "@/components/ui/Card";
 
@@ -38,15 +39,38 @@ export default function ChannelHealthChecker() {
   const [error, setError] = useState("");
   const [result, setResult] = useState<ChannelHealthPreview | null>(null);
 
+  const [leadEmail, setLeadEmail] = useState("");
+  const [leadSubmitting, setLeadSubmitting] = useState(false);
+  const [leadSubmitted, setLeadSubmitted] = useState(false);
+  const [leadError, setLeadError] = useState("");
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setResult(null);
+    setLeadEmail("");
+    setLeadSubmitted(false);
+    setLeadError("");
     setLoading(true);
     const { data, error } = await previewChannelHealth(input);
     setLoading(false);
     if (error) setError(error);
     else if (data) setResult(data);
+  }
+
+  async function handleLeadSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!result) return;
+    setLeadError("");
+    setLeadSubmitting(true);
+    const { error } = await captureChannelCheckLead({
+      email: leadEmail,
+      channelTitle: result.channelTitle,
+      score: result.score,
+    });
+    setLeadSubmitting(false);
+    if (error) setLeadError(error);
+    else setLeadSubmitted(true);
   }
 
   return (
@@ -241,6 +265,81 @@ export default function ChannelHealthChecker() {
             >
               Get your real Health Score — free
             </Link>
+          </div>
+
+          <div
+            style={{
+              marginTop: 32,
+              paddingTop: 24,
+              borderTop: "1px solid rgba(245,243,238,0.08)",
+              textAlign: "center",
+            }}
+          >
+            {leadSubmitted ? (
+              <p style={{ color: "var(--color-text-muted)", fontSize: 13 }}>
+                Got it — we&rsquo;ll send a few tips based on what we just saw.
+              </p>
+            ) : (
+              <>
+                <p style={{ color: "#6B7280", fontSize: 13, marginBottom: 14 }}>
+                  Not ready to sign up? Get a few tips based on this specific
+                  score, sent to your inbox.
+                </p>
+                <form
+                  onSubmit={handleLeadSubmit}
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                  }}
+                >
+                  <input
+                    type="email"
+                    placeholder="you@channel.com"
+                    required
+                    aria-label="Email address"
+                    value={leadEmail}
+                    disabled={leadSubmitting}
+                    onChange={(e) => setLeadEmail(e.target.value)}
+                    style={{
+                      padding: "10px 14px",
+                      borderRadius: 8,
+                      border: "1px solid rgba(245,243,238,0.08)",
+                      background: "rgba(255,255,255,0.03)",
+                      color: "var(--color-text)",
+                      fontFamily: "var(--font-body)",
+                      fontSize: 13,
+                      minWidth: 220,
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    className="glow-text"
+                    disabled={leadSubmitting}
+                    style={{
+                      padding: "10px 18px",
+                      background: "transparent",
+                      border: "1px solid rgba(245,243,238,0.14)",
+                      color: "#9AA0AC",
+                      fontWeight: 500,
+                      fontSize: 13,
+                      borderRadius: 8,
+                      cursor: leadSubmitting ? "default" : "pointer",
+                      fontFamily: "inherit",
+                      opacity: leadSubmitting ? 0.7 : 1,
+                    }}
+                  >
+                    {leadSubmitting ? "Sending…" : "Email me tips"}
+                  </button>
+                </form>
+                {leadError && (
+                  <p style={{ color: "#e08a8a", fontSize: 12, marginTop: 10 }}>
+                    {leadError}
+                  </p>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}
