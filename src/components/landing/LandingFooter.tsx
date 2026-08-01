@@ -53,6 +53,9 @@ export default function LandingFooter() {
         <a href="#confidence" className="glow-text">
           How AI works here
         </a>
+        <Link href="/blog" className="glow-text">
+          Blog
+        </Link>
         <Link href="/privacy" className="glow-text">
           Privacy
         </Link>
