@@ -43,7 +43,7 @@ export default function PrivacyPage() {
       >
         Privacy Policy
       </h1>
-      <p style={{ ...pStyle, marginTop: 8 }}>Last updated July 30, 2026.</p>
+      <p style={{ ...pStyle, marginTop: 8 }}>Last updated August 1, 2026.</p>
 
       <p style={pStyle}>
         CreatorOS (&ldquo;we&rdquo;, &ldquo;us&rdquo;) is a tool for planning,
@@ -136,13 +136,17 @@ export default function PrivacyPage() {
         YouTube data is never shown to anyone but you.
       </p>
 
-      <h2 style={h2Style}>Cookies</h2>
-      <p style={pStyle}>
-        CreatorOS uses a single essential cookie to keep you signed in. We
-        don&rsquo;t use advertising or cross-site tracking cookies, and we
-        don&rsquo;t sell or share data for cross-context behavioral
-        advertising.
-      </p>
+      <h2 style={h2Style}>Cookies and analytics</h2>
+      <p style={pStyle}>CreatorOS uses a single essential cookie to keep you signed in, plus
+              analytics cookies from PostHog, which we use to see aggregate feature
+              usage and, for signed-in sessions, a recording of on-screen activity
+              (clicks, scrolling, navigation) to help us find bugs and understand
+              what&rsquo;s actually useful. Session recordings mask all on-screen
+              text and images so the content you view or type is never visible in
+              a recording. We also use Vercel Analytics for basic, cookieless
+              pageview counts. We don&rsquo;t use advertising cookies, and we
+              don&rsquo;t sell or share data for cross-context behavioral
+              advertising.</p>
 
       <h2 style={h2Style}>How we protect your data</h2>
       <p style={pStyle}>
@@ -201,14 +205,13 @@ export default function PrivacyPage() {
       </p>
 
       <h2 style={h2Style}>Third parties</h2>
-      <p style={pStyle}>
-        We use Google OAuth (and optionally Discord) for authentication and
-        YouTube data access, and standard infrastructure providers — hosting
-        (Vercel), database (Neon), rate-limiting/session storage (Upstash),
-        transactional and marketing email (Resend), and error monitoring
-        (Sentry) — to run the app. None of these providers use your data for
-        anything beyond operating CreatorOS on our behalf.
-      </p>
+      <p style={pStyle}>We use Google OAuth (and optionally Discord) for authentication and
+              YouTube data access, and standard infrastructure providers &mdash; hosting
+              and pageview analytics (Vercel), database (Neon), rate-limiting/session
+              storage (Upstash), transactional and marketing email (Resend), product
+              analytics and session recording (PostHog), and error monitoring
+              (Sentry) &mdash; to run the app. None of these providers use your data for
+              anything beyond operating CreatorOS on our behalf.</p>
 
       <h2 style={h2Style}>Changes to this policy</h2>
       <p style={pStyle}>
