@@ -9,7 +9,7 @@ import {
   PreviewInsight,
 } from "@/lib/channel-health-preview/types";
 import Card from "@/components/ui/Card";
-import posthog from "posthog-js";
+import posthog from "@/lib/posthog";
 
 const typeLabels: Record<PreviewInsight["type"], string> = {
   fact: "Fact",
