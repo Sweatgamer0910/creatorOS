@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Sparkles } from "lucide-react";
 import { createIdea } from "@/lib/ideas/actions";
-import posthog from "posthog-js";
+import posthog from "@/lib/posthog";
 import { createSeries, SeriesCadence } from "@/lib/series/actions";
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/Card";

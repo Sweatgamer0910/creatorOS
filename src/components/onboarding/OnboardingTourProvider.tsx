@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
-import posthog from "posthog-js";
+import posthog from "@/lib/posthog";
 import { completeOnboarding } from "@/lib/onboarding/actions";
 import { TOUR_STEPS } from "@/lib/onboarding/steps";
 import {

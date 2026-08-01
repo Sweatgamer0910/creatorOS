@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { disconnectYouTube } from "@/lib/settings/actions";
-import posthog from "posthog-js";
+import posthog from "@/lib/posthog";
 import ConnectYouTubeButton from "@/components/ConnectYouTubeButton";
 import Button from "@/components/ui/button";
 

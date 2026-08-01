@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createScript } from "@/lib/scripts/actions";
-import posthog from "posthog-js";
+import posthog from "@/lib/posthog";
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/Card";
 import { radius, spacing } from "@/lib/design-tokens";

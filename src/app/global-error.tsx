@@ -1,7 +1,7 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
-import posthog from "posthog-js";
+import posthog from "@/lib/posthog";
 import { useEffect } from "react";
 
 // Only triggers for errors in the root layout itself, which is the one

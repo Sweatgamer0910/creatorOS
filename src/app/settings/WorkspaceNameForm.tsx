@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateWorkspaceName } from "@/lib/settings/actions";
-import posthog from "posthog-js";
+import posthog from "@/lib/posthog";
 import Button from "@/components/ui/button";
 import { radius, spacing } from "@/lib/design-tokens";
 
