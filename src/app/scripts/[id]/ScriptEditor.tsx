@@ -25,7 +25,7 @@ import Button from "@/components/ui/button";
 import { motion as motionTokens, radius, spacing } from "@/lib/design-tokens";
 import Teleprompter from "./Teleprompter";
 import VersionHistoryPanel from "./VersionHistoryPanel";
-import posthog from "posthog-js";
+import posthog from "@/lib/posthog";
 
 interface Script extends ScriptSections {
   id: string;
