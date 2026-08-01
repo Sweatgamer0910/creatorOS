@@ -19,7 +19,7 @@ import Button from "@/components/ui/button";
 import SeriesBadge from "@/components/SeriesBadge";
 import { radius, spacing } from "@/lib/design-tokens";
 import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
-import posthog from "posthog-js";
+import posthog from "@/lib/posthog";
 
 interface ContentItem {
   id: string;
