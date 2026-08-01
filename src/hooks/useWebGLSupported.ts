@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 // Mirrors the exact capability check three.js's WebGLRenderer makes
 // internally. If this returns false, mounting <Canvas> would otherwise
@@ -24,20 +24,25 @@ function supportsWebGL(): boolean {
   }
 }
 
+// WebGL support never changes over a page's lifetime, so there is nothing
+// to subscribe to — the store is static and this is a no-op unsubscribe.
+function subscribe() {
+  return () => {};
+}
+
 /**
  * Client-only WebGL capability check, same SSR-safe shape as
- * useIsNarrowViewport: defaults to `true` (render the real scene) until the
- * check runs on mount, so the vast majority of visitors who do support
- * WebGL never see a flash of the fallback. Only covers context-creation
- * failure, not context loss after a successful creation (a rarer, separate
- * failure mode — GPU reset mid-session — not addressed here).
+ * useIsNarrowViewport: defaults to `true` (render the real scene) on the
+ * server and during the first client render, so the vast majority of
+ * visitors who do support WebGL never see a flash of the fallback.
+ * useSyncExternalStore (rather than useState+useEffect) is the correct
+ * primitive here — this is exactly the "read a value from an external,
+ * browser-only system, once, safely across SSR/hydration" case it exists
+ * for, and it avoids the extra render pass a setState-in-effect causes.
+ * Only covers context-creation failure, not context loss after a
+ * successful creation (a rarer, separate failure mode — GPU reset
+ * mid-session — not addressed here).
  */
 export function useWebGLSupported() {
-  const [supported, setSupported] = useState(true);
-
-  useEffect(() => {
-    setSupported(supportsWebGL());
-  }, []);
-
-  return supported;
+  return useSyncExternalStore(subscribe, supportsWebGL, () => true);
 }
