@@ -1,12 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { joinWaitlist } from "@/lib/waitlist/actions";
 
-// Persists to the WaitlistEntry table + syncs to Resend (src/lib/waitlist/
-// actions.ts) so pre-launch content has somewhere real to send people —
-// this used to just flip the button label with no backend call (see git
-// history), which was a deliberate placeholder, not a design decision.
+// The app is live and self-serve (Google/Discord sign-in, one click), so
+// the primary path here is a direct link to /signup — same button style
+// as Hero.tsx's — rather than routing everyone through an email-capture
+// form first. The smaller form below is now explicitly secondary: an
+// opt-in to occasional updates for people not ready to connect a channel
+// yet, not the main call to action. Still writes to the same WaitlistEntry
+// table + Resend audience (src/lib/waitlist/actions.ts) — nothing about
+// the backend changed, only which action is presented as primary.
 export default function ClosingCTA() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -50,66 +55,96 @@ export default function ClosingCTA() {
       >
         Your channel deserves an operating system, not a pile of tabs
       </h2>
-      <p style={{ color: "#9AA0AC", fontSize: 16, marginBottom: 40 }}>
-        Email us if you&apos;d like to learn more about CreatorOS and
-        what&apos;s next for your channel.
+      <p style={{ color: "#9AA0AC", fontSize: 16, marginBottom: 32 }}>
+        Free to start, no credit card — connect your channel and see your
+        real Health Score in minutes.
       </p>
-      <form
-        onSubmit={handleSubmit}
+
+      <Link
+        href="/signup"
+        className="glow-interactive"
         style={{
-          display: "flex",
-          gap: 10,
-          flexWrap: "wrap",
-          justifyContent: "center",
+          padding: "14px 32px",
+          background: "#F5A623",
+          color: "#030304",
+          fontWeight: 600,
+          fontSize: 16,
+          borderRadius: 10,
+          boxShadow:
+            "0 0 0 1px rgba(245,166,35,0.4), 0 8px 24px -8px rgba(245,166,35,0.55)",
+          textDecoration: "none",
         }}
       >
-        <input
-          type="email"
-          placeholder="you@channel.com"
-          required
-          aria-label="Email address"
-          value={email}
-          disabled={submitted || loading}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{
-            padding: "14px 18px",
-            borderRadius: 10,
-            border: "1px solid rgba(245,243,238,0.08)",
-            background: "rgba(255,255,255,0.03)",
-            color: "#F5F3EE",
-            fontFamily: "var(--font-body)",
-            fontSize: 14,
-            minWidth: 260,
-            opacity: submitted ? 0.6 : 1,
-          }}
-        />
-        <button
-          type="submit"
-          className="glow-interactive"
-          disabled={submitted || loading}
-          style={{
-            padding: "14px 26px",
-            background: "#F5A623",
-            color: "#030304",
-            fontWeight: 600,
-            fontSize: 15,
-            borderRadius: 10,
-            border: "none",
-            cursor: submitted || loading ? "default" : "pointer",
-            fontFamily: "inherit",
-            opacity: loading ? 0.7 : 1,
-          }}
-        >
-          {submitted
-            ? "Thanks — we'll be in touch"
-            : loading
-              ? "Joining…"
-              : "Get in touch"}
-        </button>
-      </form>
-      {error && (
-        <p style={{ color: "#e08a8a", fontSize: 13, marginTop: 12 }}>{error}</p>
-      )}
+        Sign up free
+      </Link>
+
+      <div style={{ marginTop: 56, paddingTop: 32, borderTop: "1px solid rgba(245,243,238,0.08)" }}>
+        {submitted ? (
+          <p style={{ color: "#9AA0AC", fontSize: 13 }}>
+            You&apos;re on the list — we&apos;ll keep you posted.
+          </p>
+        ) : (
+          <>
+            <p style={{ color: "#6B7280", fontSize: 13, marginBottom: 14 }}>
+              Not ready to connect a channel yet? Get occasional updates
+              instead.
+            </p>
+            <form
+              onSubmit={handleSubmit}
+              style={{
+                display: "flex",
+                gap: 8,
+                flexWrap: "wrap",
+                justifyContent: "center",
+              }}
+            >
+              <input
+                type="email"
+                placeholder="you@channel.com"
+                required
+                aria-label="Email address"
+                value={email}
+                disabled={loading}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(245,243,238,0.08)",
+                  background: "rgba(255,255,255,0.03)",
+                  color: "#F5F3EE",
+                  fontFamily: "var(--font-body)",
+                  fontSize: 13,
+                  minWidth: 220,
+                }}
+              />
+              <button
+                type="submit"
+                className="glow-text"
+                disabled={loading}
+                style={{
+                  padding: "10px 18px",
+                  background: "transparent",
+                  border: "1px solid rgba(245,243,238,0.14)",
+                  color: "#9AA0AC",
+                  fontWeight: 500,
+                  fontSize: 13,
+                  borderRadius: 8,
+                  cursor: loading ? "default" : "pointer",
+                  fontFamily: "inherit",
+                  opacity: loading ? 0.7 : 1,
+                }}
+              >
+                {loading ? "Joining…" : "Get updates"}
+              </button>
+            </form>
+            {error && (
+              <p style={{ color: "#e08a8a", fontSize: 12, marginTop: 10 }}>
+                {error}
+              </p>
+            )}
+          </>
+        )}
+      </div>
     </section>
   );
 }
