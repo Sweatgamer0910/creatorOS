@@ -21,7 +21,7 @@ import {
   Settings,
 } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
-import posthog from "posthog-js";
+import posthog from "@/lib/posthog";
 import Spinner from "./Spinner";
 import Button from "@/components/ui/button";
 import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
