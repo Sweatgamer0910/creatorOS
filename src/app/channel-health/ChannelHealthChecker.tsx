@@ -4,7 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { previewChannelHealth } from "@/lib/channel-health-preview/actions";
 import { captureChannelCheckLead } from "@/lib/channel-health-preview/leadCapture";
-import { ChannelHealthPreview, PreviewInsight } from "@/lib/channel-health-preview/types";
+import {
+  ChannelHealthPreview,
+  PreviewInsight,
+} from "@/lib/channel-health-preview/types";
 import Card from "@/components/ui/Card";
 
 const typeLabels: Record<PreviewInsight["type"], string> = {
@@ -33,16 +36,53 @@ function formatCount(n: number): string {
   return String(n);
 }
 
-export default function ChannelHealthChecker() {
+export default function ChannelHealthChecker({
+  shared,
+}: {
+  /** Present when a visitor landed via a shared result link (?channel=&score=)
+   *  — see page.tsx's generateMetadata for the OG-card side of this loop. */
+  shared?: { channel: string; score: string } | null;
+}) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<ChannelHealthPreview | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const [leadEmail, setLeadEmail] = useState("");
   const [leadSubmitting, setLeadSubmitting] = useState(false);
   const [leadSubmitted, setLeadSubmitted] = useState(false);
   const [leadError, setLeadError] = useState("");
+
+  function buildShareUrl(r: ChannelHealthPreview): string {
+    const params = new URLSearchParams({
+      channel: r.channelTitle,
+      score: String(r.score),
+      label: r.label,
+    });
+    return `${window.location.origin}/channel-health?${params.toString()}`;
+  }
+
+  async function handleCopyLink() {
+    if (!result) return;
+    try {
+      await navigator.clipboard.writeText(buildShareUrl(result));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API can fail in some embedded/in-app browsers — the
+      // share link itself is still visible/copyable via "Share on X" so
+      // this isn't a dead end, just a missed convenience.
+    }
+  }
+
+  function handleShareToX() {
+    if (!result) return;
+    const text = `"${result.channelTitle}" scored ${result.score}/100 on the CreatorOS Channel Health Check. What's yours?`;
+    const url = buildShareUrl(result);
+    const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(intent, "_blank", "noopener,noreferrer");
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -114,16 +154,43 @@ export default function ChannelHealthChecker() {
             lineHeight: 1.6,
           }}
         >
-          Paste any YouTube channel&rsquo;s @handle or URL — yours or one you&rsquo;re
-          curious about — and get a free, honest read using only public
-          data: upload cadence, recent performance, and where to focus
+          Paste any YouTube channel&rsquo;s @handle or URL — yours or one
+          you&rsquo;re curious about — and get a free, honest read using only
+          public data: upload cadence, recent performance, and where to focus
           next.
         </p>
       </div>
 
+      {shared && !result && (
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <span
+            style={{
+              display: "inline-block",
+              padding: "10px 18px",
+              borderRadius: 999,
+              background: "rgba(245,166,35,0.1)",
+              border: "1px solid rgba(245,166,35,0.25)",
+              color: "var(--color-text)",
+              fontSize: 13,
+            }}
+          >
+            <strong>{shared.channel}</strong> scored{" "}
+            <strong style={{ color: "var(--color-accent)" }}>
+              {shared.score}/100
+            </strong>{" "}
+            — check yours below
+          </span>
+        </div>
+      )}
+
       <form
         onSubmit={handleSubmit}
-        style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}
+        style={{
+          display: "flex",
+          gap: 8,
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
       >
         <input
           type="text"
@@ -166,7 +233,14 @@ export default function ChannelHealthChecker() {
       </form>
 
       {error && (
-        <p style={{ color: "#e08a8a", fontSize: 13, textAlign: "center", marginTop: 16 }}>
+        <p
+          style={{
+            color: "#e08a8a",
+            fontSize: 13,
+            textAlign: "center",
+            marginTop: 16,
+          }}
+        >
           {error}
         </p>
       )}
@@ -192,40 +266,138 @@ export default function ChannelHealthChecker() {
               />
             )}
             <div>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: "var(--color-text)" }}>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: 18,
+                  fontWeight: 600,
+                  color: "var(--color-text)",
+                }}
+              >
                 {result.channelTitle}
               </h2>
-              <p style={{ margin: "2px 0 0", fontSize: 13, color: "var(--color-text-muted)" }}>
+              <p
+                style={{
+                  margin: "2px 0 0",
+                  fontSize: 13,
+                  color: "var(--color-text-muted)",
+                }}
+              >
                 {result.subscriberCount !== null
                   ? `${formatCount(result.subscriberCount)} subscribers · `
                   : ""}
-                {formatCount(result.viewCount)} views · {formatCount(result.videoCount)} videos
+                {formatCount(result.viewCount)} views ·{" "}
+                {formatCount(result.videoCount)} videos
               </p>
             </div>
           </div>
 
           <Card padding="lg" style={{ textAlign: "center", marginBottom: 24 }}>
-            <span style={{ fontSize: 12, color: "var(--color-text-muted)", textTransform: "uppercase", letterSpacing: 1 }}>
+            <span
+              style={{
+                fontSize: 12,
+                color: "var(--color-text-muted)",
+                textTransform: "uppercase",
+                letterSpacing: 1,
+              }}
+            >
               Preview Score
             </span>
-            <div style={{ fontSize: 48, fontWeight: 700, color: "var(--color-accent)", lineHeight: 1.1 }}>
+            <div
+              style={{
+                fontSize: 48,
+                fontWeight: 700,
+                color: "var(--color-accent)",
+                lineHeight: 1.1,
+              }}
+            >
               {result.score}
             </div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: "var(--color-text)" }}>
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 600,
+                color: "var(--color-text)",
+              }}
+            >
               {result.label}
             </div>
-            <p style={{ fontSize: 12, color: "var(--color-text-muted)", marginTop: 10, maxWidth: 380, marginInline: "auto" }}>
+            <p
+              style={{
+                fontSize: 12,
+                color: "var(--color-text-muted)",
+                marginTop: 10,
+                maxWidth: 380,
+                marginInline: "auto",
+              }}
+            >
               This is a preview built from public data only. Your real Health
               Score (available once you connect your channel) uses private
               analytics this preview can&rsquo;t see — watch time, traffic
               sources, and day-by-day growth.
             </p>
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                justifyContent: "center",
+                flexWrap: "wrap",
+                marginTop: 18,
+              }}
+            >
+              <button
+                type="button"
+                onClick={handleShareToX}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(245,243,238,0.14)",
+                  background: "transparent",
+                  color: "var(--color-text)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                }}
+              >
+                Share on X
+              </button>
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(245,243,238,0.14)",
+                  background: "transparent",
+                  color: "var(--color-text)",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                }}
+              >
+                {copied ? "Link copied" : "Copy link"}
+              </button>
+            </div>
           </Card>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {result.insights.map((insight, i) => (
-              <Card key={i} padding="sm" accentBorder={typeColors[insight.type]}>
-                <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
+              <Card
+                key={i}
+                padding="sm"
+                accentBorder={typeColors[insight.type]}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    alignItems: "center",
+                    marginBottom: 6,
+                    flexWrap: "wrap",
+                  }}
+                >
                   <span
                     style={{
                       color: typeColors[insight.type],
@@ -237,11 +409,20 @@ export default function ChannelHealthChecker() {
                   >
                     {typeLabels[insight.type]}
                   </span>
-                  <span style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
+                  <span
+                    style={{ fontSize: 12, color: "var(--color-text-muted)" }}
+                  >
                     {confidenceLabels[insight.confidence]}
                   </span>
                 </div>
-                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "var(--color-text)" }}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 14,
+                    lineHeight: 1.6,
+                    color: "var(--color-text)",
+                  }}
+                >
                   {insight.message}
                 </p>
               </Card>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -7,6 +8,7 @@ import BodyBackgroundSync from "@/components/BodyBackgroundSync";
 import LenisProvider from "@/components/providers/LenisProvider";
 import MainShell from "@/components/MainShell";
 import OnboardingTourProvider from "@/components/onboarding/OnboardingTourProvider";
+import ReferralCapture from "@/components/ReferralCapture";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -71,6 +73,9 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} ${manrope.variable} ${jetbrainsMono.variable}`}
         style={{ fontFamily: "var(--font-body)" }}
       >
+        <Suspense fallback={null}>
+          <ReferralCapture />
+        </Suspense>
         <LenisProvider>
           <BodyBackgroundSync />
           <OnboardingTourProvider>

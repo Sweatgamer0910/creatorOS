@@ -2,6 +2,82 @@
 
 Non-obvious technical decisions, newest first, with the reasoning behind them.
 
+## 2026-07-31 — Static OG image file instead of fixing the dynamic generator
+
+**Replaced the on-demand `opengraph-image.tsx` (Satori/`next/og`, rendered per-crawl by a serverless
+function) with a static PNG, rather than debugging the serverless path further.** LinkedIn's Post
+Inspector reproducibly returned "no image found" on a cache-busted URL — title/description fine, image
+missing — and this wasn't a one-off. A cold or slow serverless invocation hitting a crawler's tight
+fetch timeout was the most likely cause, but that's hard to prove or fully rule out without direct
+access to LinkedIn's crawler infrastructure. Since the card's content doesn't change per-request
+(same brand tokens, same copy) there was no real benefit to generating it dynamically in the first
+place — a static file removes the failure mode entirely instead of chasing a timeout that might
+recur intermittently. Re-rendered at 2400x1260 (2x, still 1.91:1) in a same-day follow-up rather than
+1920x1080 — 16:9 is narrower than the actual OG/Twitter standard and would get cropped.
+
+## 2026-07-31 — Public Channel Health checker deliberately scoped below the real Health Score, not presented as equivalent
+
+**`/channel-health` (no login, public YouTube Data API only) uses a distinct label set — Strong
+Public Signals / Steady / Room To Grow / Insufficient Data — instead of the real in-app Health
+Score's Excellent/Good/Needs Attention/At Risk, and the results page says explicitly that it's a
+lighter preview.** The real score needs a signed-in user's private Analytics API data (watch time,
+traffic sources, day-by-day growth) that isn't available for an arbitrary public channel URL: giving
+the public checker the same labels as the real score would imply an equivalence that doesn't exist
+and could read as a bait-and-switch once someone signs up and sees a different-looking number. Also
+backed the checker's optional email capture with a new `ChannelCheckLead` table rather than reusing
+`WaitlistEntry` — email isn't unique here since the same person could reasonably check more than one
+channel over time, and every check is worth recording as separate lead context.
+
+## 2026-07-30 — Mobile Pipeline: additive move-control instead of touch DnD; overflow fix applied everywhere, not just mobile
+
+**Touch has no drag-and-drop equivalent, so mobile got an additive "Move to" control rather than
+a touch reimplementation of the existing drag gesture.** `PipelineBoard.tsx` now accepts an
+`onMove` callback, passed only from the mobile branch — desktop's `ItemCard` usage is completely
+unchanged and still relies on drag-and-drop exclusively. Both paths funnel through one shared
+`moveItem()` function (optimistic update, rollback + error banner on failure) instead of two
+separate implementations of the same state transition, so the desktop and mobile code can't drift
+out of sync on what "moving a card" actually does.
+
+**Stage discoverability used the same mobile-gating pattern already established for the nav fix
+earlier the same day** (`useIsNarrowViewport()`, same breakpoint) rather than inventing a new
+convention: wrapped tabs with per-stage counts replace the single stacked column, so a new user
+sees all 5 stages exist without having to scroll past every "Idea" card first.
+
+**The dropdown-overflow fix (`flex: 1`, `minWidth: 0`, `width: 100%` on the "Link to:" selects)
+was applied unconditionally, not gated to mobile.** Unlike the other two fixes, this one is a
+genuine CSS correctness bug — flex children get a content-based min-width by default, so a long
+enough option could in principle overflow on desktop too, just less likely there given more
+available width. No reason to gate a real bug fix behind a viewport check when it doesn't change
+desktop's rendered result today.
+
+## 2026-07-30 — Mobile redesign plan recommends a page-level device branch, not a new route tree or a native app
+
+**Drafted `docs/03-engineering/mobile-web-redesign-plan.md` (research + architecture proposal
+only — nothing implemented) recommending a server-side device branch inside each existing
+`page.tsx`, choosing between two presentational component trees per screen, over three
+alternatives considered:**
+
+- **A separate route tree (e.g. `/m/dashboard`) with a middleware rewrite** — functionally
+  similar, but adds URL complexity and more logic to `proxy.ts`, which is already the app's
+  security-critical auth gate; no caching benefit here to justify it since none of these app
+  screens are statically cached today (every one already checks the session per-request).
+- **A native iOS/Android app** — a genuinely separate codebase, tech stack, and app-store review
+  process; ruled out as out of scope for a redesign, flagged as a distinct future decision instead.
+- **Staying with pure responsive (what shipped in today's nav/padding fix)** — functional now, but
+  still fundamentally "the desktop layout, rearranged," not a purpose-built mobile UI, and doesn't
+  solve Pipeline's drag-and-drop problem, which needs an actually different interaction model on
+  touch, not just a CSS reflow.
+
+The recommended approach leans on a container/presenter split CreatorOS already has throughout
+`src/app/*/page.tsx` (data-fetching in the Server Component, rendering handed off to presentational
+components) — a second, mobile-only presentational component per screen reuses the same data-
+fetching and props, so the data layer doesn't change at all. **Recommendation on timing: ship the
+already-fixed responsive mobile experience now, and treat the full purpose-built redesign as a
+post-launch fast-follow**, sized to real usage once Vercel/Sentry analytics show what fraction of
+actual traffic is on mobile — not built in full ahead of any data on whether it's warranted. Open
+questions (tablet treatment, nav parity, landing-page hero investment, native app) are left for
+Ayaan to decide later, explicitly not defaulted.
+
 ## 2026-07-30 — Mobile nav was effectively unusable; fixed, desktop untouched. Re-confirmed Google verification.
 
 **Re-checked Google OAuth verification/publishing status independently** (not trusting the earlier

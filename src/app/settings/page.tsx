@@ -3,11 +3,15 @@ import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { isYouTubeConnected } from "@/lib/analytics";
+import { countReferrals, getOrCreateReferralCode } from "@/lib/referral";
 import Card from "@/components/ui/Card";
 import WorkspaceNameForm from "./WorkspaceNameForm";
 import YouTubeConnectionSection from "./YouTubeConnectionSection";
 import ReplayTourButton from "./ReplayTourButton";
 import DeleteAccountSection from "./DeleteAccountSection";
+import InviteSection from "./InviteSection";
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 const sectionTitleStyle: React.CSSProperties = {
   fontFamily: "var(--font-display)",
@@ -27,15 +31,24 @@ export default async function SettingsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
-  const [workspace, youtubeConnected] = await Promise.all([
+  const [workspace, youtubeConnected, referralCode] = await Promise.all([
     prisma.workspace.findUnique({ where: { ownerId: session.user.id } }),
     isYouTubeConnected(session.user.id),
+    getOrCreateReferralCode(session.user.id),
   ]);
+
+  const referredCount = await countReferrals(referralCode);
+  const referralLink = `${APP_URL}/?ref=${referralCode}`;
 
   return (
     <div
       className="px-4 sm:px-10"
-      style={{ paddingTop: 24, paddingBottom: 64, maxWidth: 720, margin: "0 auto" }}
+      style={{
+        paddingTop: 24,
+        paddingBottom: 64,
+        maxWidth: 720,
+        margin: "0 auto",
+      }}
     >
       <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>Settings</p>
       <h1
@@ -82,6 +95,17 @@ export default async function SettingsPage() {
           </p>
           <div style={{ marginTop: 12 }}>
             <ReplayTourButton />
+          </div>
+        </Card>
+
+        <Card>
+          <div style={sectionTitleStyle}>Invite creators</div>
+          <p style={sectionDescStyle}>
+            Share your link — anyone who signs up through it counts toward the
+            number below.
+          </p>
+          <div style={{ marginTop: 12 }}>
+            <InviteSection link={referralLink} referredCount={referredCount} />
           </div>
         </Card>
 

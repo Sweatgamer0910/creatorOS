@@ -1,10 +1,12 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "@better-auth/prisma-adapter";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { authSecondaryStorage } from "@/lib/auth-rate-limit-storage";
 import { addToAudience } from "@/lib/resend-audience";
 import { sendEmail } from "@/lib/email";
 import { inngest } from "@/lib/inngest";
+import { assignReferralCode } from "@/lib/referral";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -153,6 +155,41 @@ export const auth = betterAuth({
               ownerId: user.id,
             },
           });
+
+          // Referral loop (src/lib/referral.ts): give every new user their
+          // own shareable code, and attribute this signup to whoever
+          // referred them if a `co_ref` cookie is present (set client-side
+          // by src/components/ReferralCapture.tsx when they arrived via
+          // someone else's link). Same "never block signup" reasoning as
+          // the Resend/Inngest calls below applies to both of these.
+          try {
+            await assignReferralCode(user.id);
+          } catch (err) {
+            console.error("[auth] Failed to assign referral code:", err);
+          }
+
+          try {
+            const cookieStore = await cookies();
+            const refCode = cookieStore.get("co_ref")?.value;
+            if (refCode) {
+              const referrer = await prisma.user.findUnique({
+                where: { referralCode: refCode },
+                select: { id: true },
+              });
+              // Ignore unknown codes (stale/tampered cookie) and
+              // self-referrals — the latter shouldn't be reachable
+              // normally, but it's a cheap guard against a coincidence
+              // where someone's own old cookie is still set.
+              if (referrer && referrer.id !== user.id) {
+                await prisma.user.update({
+                  where: { id: user.id },
+                  data: { referredByCode: refCode },
+                });
+              }
+            }
+          } catch (err) {
+            console.error("[auth] Failed to attribute referral:", err);
+          }
 
           // Best-effort sync into the Resend audience for marketing/product
           // emails. Never throw from here: a Resend outage or missing env

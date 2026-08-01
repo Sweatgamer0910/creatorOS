@@ -3,6 +3,184 @@
 Running log of feature work on CreatorOS, newest entries first. See `DECISIONS_LOG.md` for the
 reasoning behind non-obvious technical choices made along the way.
 
+## 2026-07-31 — Health Score labeling parity, UI polish pass, public Channel Health checker + blog, growth infrastructure
+
+Biggest single day since launch — 20 commits spanning a product-consistency fix, a full loading-state
+polish pass, two new public (no-login) surfaces with their own lead-nurture infrastructure, and
+launch-week bug fixes found via live testing.
+
+**Channel Health Score now carries the same type/confidence labeling as Growth Coach insights.** It
+was the one AI-generated insight in the product without Fact/Pattern/Recommendation/Hypothesis +
+confidence-tier labeling, breaking the standing project rule that every AI-generated insight must
+carry both. `HealthScore` now has `type` and `confidence` fields alongside score/label/summary/
+isEstimate, mirroring `CoachInsight`'s shape; `computeHealthScore` assigns per branch.
+
+**UI polish pass: skeleton loading everywhere, inline styles removed.** Dashboard and Analytics
+swapped their spinner-only loading states for layout-mirroring skeletons (new shared
+`Skeleton.tsx` primitives — `SkeletonBlock`, `SkeletonCard`), then the same treatment was extended
+to every remaining app page (Growth Coach, Idea Lab, Script Studio, Series, Content Pipeline,
+Settings). Alongside that, Dashboard/Analytics/StatCard/HealthScoreCard had their inline
+`style={{...}}` props replaced with Tailwind classes, and a new shared `PageHeader.tsx` replaced a
+near-verbatim duplicated header block on Dashboard and Analytics.
+
+**Growth Coach's trend charts now click through to Analytics.** The sparklines (summary-header
+"Views, last 30 days" chart and per-insight Pattern trend charts) were static, unlabeled pictures
+despite being glance-sized previews of a chart Analytics already has the full version of —
+`CoachSummaryHeader.tsx`'s trend block is now a link with a "Full analytics →" label.
+
+**Custom 404 page.** No `not-found.tsx` existed anywhere, so a broken or mistyped link — likely
+during a Product Hunt launch, when a wave of new links circulates — fell through to Next's generic
+default instead of anything on-brand. New `src/app/not-found.tsx` matches the app's visual system.
+
+**OG image switched from dynamic generation to a static file, then re-rendered at 2x.** LinkedIn's
+Post Inspector reproducibly reported "no image found" for creatoros.onl on a cache-busted URL — title
+and description came through, the image didn't. The old `opengraph-image.tsx` generated the PNG on
+demand via a serverless function on every crawl; a cold/slow invocation is the likely culprit for a
+crawler with a tight fetch timeout. Replaced with a static `opengraph-image.png`, then re-rendered at
+2400x1260 (2x pixel density, same 1.91:1 aspect ratio) since the first pass looked soft on retina
+displays.
+
+**Landing page closing CTA redesigned: direct signup primary, waitlist secondary.** The primary CTA
+now links straight to `/signup`, matching how the rest of the app funnels visitors; the waitlist
+email-capture form is demoted to a smaller secondary "Get updates" option. Backend unchanged.
+
+**Pre-signup waitlist lead nurture email sequence.** New Inngest function
+(`waitlistNurtureSequence`) fires on a genuinely new waitlist row (`joinWaitlist()` now uses
+`INSERT ... RETURNING` to avoid re-firing on a repeat submission): immediate welcome, then
+feature-spotlight emails roughly every 5 days, ending in a signup nudge — every step re-checks
+whether the email has since converted to a real account and stops if so.
+
+**Vercel Analytics added; lockfile drift fixed the same night.** `@vercel/analytics` installed and
+mounted in the root layout (zero-config on Vercel). A follow-up commit fixed `pnpm-lock.yaml` drift
+the Analytics commit left behind — `package.json`'s specifier moved but the lockfile's didn't, which
+fails Vercel's `--frozen-lockfile` install hard on every deploy since.
+
+**Public, no-login Channel Health preview checker shipped, plus an in-app build-in-public blog.**
+New `/channel-health`: paste a YouTube handle or channel URL, get a free preview from public YouTube
+Data API data only (no OAuth) — upload cadence, recent-vs-lifetime view performance, channel age.
+New `/blog` + `/blog/[slug]`: static content in `src/lib/blog/posts.ts`, seeded with 5 posts adapted
+from real `DEVELOPMENT_LOG.md`/`DECISIONS_LOG.md` entries. Both were then found, via live testing, to
+redirect every visitor to `/login` — `src/proxy.ts`'s `PUBLIC_PATHS` allowlist predated both routes
+and never got updated to include them; fixed. Both were also added to `sitemap.ts` (one entry per
+blog post, pulled from the same posts data so new posts show up automatically) since both exist
+specifically to be found via search.
+
+**Founder-only activation tracking dashboard.** New `/internal/activation` (unlinked, URL-only,
+gated by a new `ADMIN_EMAIL` env var) answers how many signups reached real activation (connected a
+channel), how many went further, and how many are "active" — reusing the same workspace-state logic
+the day-14 upsell email already uses, aggregated across all users.
+
+**Landing page: Blog and free Health Check sections added.** Both features previously only had a
+small nav/footer link. New `HealthCheckPromo` (static example score card, CTA to `/channel-health`)
+and `BlogTeaser` (pulls the 3 most recent posts from the same data the blog reads) sections placed
+between the confidence-system section and the closing CTA.
+
+**Channel Health checker: email capture + follow-up sequence.** An optional "Email me tips" opt-in
+below the results (doesn't gate the score) backs onto a new `ChannelCheckLead` table rather than
+reusing `WaitlistEntry`, since email isn't unique here. A new Inngest function
+(`channelCheckNurtureSequence`) sends 4 emails referencing the visitor's actual checked channel and
+score, starting 48 hours after capture, stopping early if they sign up.
+
+Also completed: QA sweep confirming the 7/30 mobile fixes on a real phone plus Pipeline drag and
+Idea Lab CRUD, and recording the 3-5 minute full product walkthrough video.
+
+## 2026-07-30 — Security patch pass, mobile Pipeline bug fixes, launch marketing kit
+
+Later commits from the same day as the waitlist/Neon entry below — grouped here since they cover
+distinct areas (legal/security hardening, a landing-page bug, mobile Pipeline, marketing content)
+shipped across the rest of that session.
+
+**`ClosingCTA` was wired up but never actually reachable.** The waitlist form built two commits
+earlier (previous entry) had real backend logic but was never imported into `src/app/page.tsx` —
+no signed-out visitor could ever see it, because the QA pass that verified it only tested the
+component and server action in isolation, not the rendered homepage. Added the import, placed
+before `LandingFooter`.
+
+**Real CAN-SPAM mailing address; stale v1 checklist refreshed.** `MAILING_ADDRESS` in
+`src/lib/marketing-email.ts` is no longer a placeholder. `docs/05-roadmap/v1-production-checklist.md`
+was rewritten to match reality — it still listed privacy/terms, password reset, and the verified
+sending domain as blocking when all three had been resolved days earlier.
+
+**Security patch pass.** Fresh `pnpm audit` found `next` a patch behind (16.2.10 → 16.2.12,
+covering a Turbopack middleware/proxy-bypass bug relevant to `proxy.ts`'s auth gate plus Server
+Action SSRF/DoS issues) and added `pnpm-workspace.yaml` overrides forcing `sharp >=0.35.3` /
+`postcss >=8.5.25`, since Next still bundles vulnerable versions of both as its own nested
+dependencies. Also found and fixed a real leak vector while in there: the Google OAuth
+disconnect flow (`src/lib/settings/actions.ts`) was passing the access token as a URL query
+param on the revoke call instead of the POST body, where it could end up captured in Sentry's
+HTTP breadcrumbs/spans or proxy access logs. `/terms` and `/privacy` were hardened to what a
+lawyer's checklist would expect (liability/indemnification/arbitration clauses, YouTube API
+Services disclosures, CCPA and cookies sections). Full reasoning in today's `DECISIONS_LOG.md`
+entry.
+
+**WebGL context-creation crash on the landing page, fixed.** Sentry showed 51 unhandled
+`THREE.WebGLRenderer: Error creating WebGL context` events in 21 hours of real production
+traffic — flagged as an open issue in the security-patch-pass `DECISIONS_LOG.md` entry above,
+now closed. New `useWebGLSupported()` hook mirrors three.js's own `getContext` check;
+`LandingScene.tsx` skips mounting `<Canvas>` entirely when unsupported, the same pattern already
+used for the narrow-viewport case, rather than letting it throw. No separate fallback UI needed —
+the page's own background gradient (`page.tsx`) already reads as intentional without the 3D hero.
+Doesn't cover context loss after a successful creation (a rarer, separate failure mode) — out of
+scope here.
+
+**Baseline security response headers.** Confirmed live against production that only Vercel's
+automatic HSTS header was present. Added `X-Content-Type-Options`, `X-Frame-Options`,
+`Referrer-Policy`, and `Permissions-Policy` in `next.config.ts`. Deliberately not adding a CSP in
+this pass — this app loads Spline/Three.js/GSAP, reports to Sentry, and redirects through
+Google/Discord OAuth, and a wrong CSP fails silently (breaks features instead of erroring loudly)
+rather than a quick add.
+
+**Real 1200×630 OG/Twitter card image.** `layout.tsx` was falling back to the 512×512 square
+`logo.png` for both `og:image` and `twitter:image`. New `src/app/opengraph-image.tsx` uses
+`next/og`'s `ImageResponse`, built from the same brand tokens as the rest of the site; Twitter
+switched to `summary_large_image` now that a real landscape image exists. Couldn't be
+rendered/previewed locally (broken `node_modules` in this sandbox) — worth eyeballing the actual
+card at `/opengraph-image` once deployed.
+
+**SEO/social checklist correction.** `docs/05-roadmap/v1-production-checklist.md` was stale
+again — `robots.ts` and `sitemap.ts` already existed despite the doc saying otherwise.
+
+**Mobile nav and page padding fixed.** `NotchNav.tsx`'s entire navigation only expanded via
+`onMouseEnter` — a desktop-only interaction with no touch equivalent, so it was likely never
+usable on a real phone. Added a mobile-only top bar + bottom tab bar branch, plus fixed 10 pages'
+identical hardcoded `padding` inline styles that ate ~20% of a phone screen's width. See
+`DECISIONS_LOG.md`, 2026-07-30, for the full audit and reasoning (desktop's existing branch is
+untouched).
+
+**Mobile web redesign plan drafted — research and architecture proposal, not implemented.** New
+`docs/03-engineering/mobile-web-redesign-plan.md` lays out a purpose-built (Instagram/Facebook-
+style) separate mobile web UI, recommending it ship as a post-launch fast-follow rather than
+before launch, informed by real mobile usage data once available. See `DECISIONS_LOG.md`,
+2026-07-30, for the architecture reasoning.
+
+**Three mobile Pipeline bugs fixed**, found on Ayaan's own phone after the nav/padding pass:
+
+- Drag-and-drop between columns doesn't fire on touch at all. Added an explicit "Move to" select
+  on each card (mobile only, via a new `onMove` callback on `PipelineBoard.tsx`); both the mobile
+  select path and desktop's drag-and-drop now share one `moveItem()` function (optimistic update,
+  rollback + error banner on failure) instead of duplicating that logic.
+- Mobile's grid fell back to a single stacked column, so a new user had to scroll past every
+  "Idea" card before discovering "Scripted," "Filming," etc. existed. Added a mobile-only branch
+  (same `useIsNarrowViewport()` gating pattern as `NotchNav`/`MainShell`): all 5 stages render as
+  wrapped tabs with counts, tap one to filter the card list below.
+- The "Link to:" select on `NewItemForm.tsx` and the idea/script link editor could overflow past
+  a card's right edge on narrow screens. Fixed with `flex: 1`, `minWidth: 0`, `width: 100%` —
+  applied everywhere, not just mobile, since it's a genuine CSS correctness fix (a long enough
+  option could theoretically overflow on desktop too, just less likely there).
+
+See `DECISIONS_LOG.md`, 2026-07-30, for the reasoning behind these choices.
+
+**Launch marketing kit added, then corrected.** New `docs/04-business/creatoros-launch-marketing-
+kit.md` filled in the 6 "Not started" tasks from the existing Day 5 Launch Assets plan (demo/
+walkthrough video scripts, Product Hunt copy, social posts). A follow-up commit corrected a false
+premise running through it: the original kit assumed Ayaan already had an established YouTube
+channel and audience ("Victory Voyager"), when the real channel (renamed to CreatorOS) has zero
+subscribers, zero watch hours, and no video-making track record yet. Rewrote the strategy section
+(direct outreach + Product Hunt + communities first, instead of leaning on a channel that doesn't
+exist yet), the founder story across the PH copy/video intro/social posts (honestly framed as
+starting from a business opportunity, not an existing creator audience), and the "what's next"
+ordering to match.
+
 ## 2026-07-30 — Landing page waitlist capture; Neon pooled-connection fix
 
 **Landing page's `ClosingCTA` form now actually persists emails.** It used to just flip its own

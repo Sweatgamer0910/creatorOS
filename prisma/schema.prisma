@@ -33,6 +33,26 @@ model User {
   // the auto-launch check in OnboardingTourHost.
   onboardingCompletedAt DateTime?
 
+  // Referral loop (see src/lib/referral.ts). referralCode is generated once
+  // in the databaseHooks.user.create.after hook (src/lib/auth.ts) — a short
+  // random code, not the row's own cuid, so the shared URL
+  // (creatoros.onl/?ref=<code>) is shorter and doesn't leak the user's
+  // internal row id. referredByCode is set at that same signup moment from
+  // a short-lived `co_ref` cookie (src/components/ReferralCapture.tsx) if
+  // the visitor arrived via someone else's link — never changed after,
+  // even if the referrer later changes their own code (they can't, but if
+  // that ever becomes possible, attribution should stay pinned to what was
+  // true at signup).
+  // Nullable (not required + defaulted) on purpose: a required unique
+  // column with no natural default would force an interactive backfill
+  // decision the first time this migrates against a table that already has
+  // real user rows (which it does — this isn't a fresh dev database). Null
+  // just means "hasn't been lazily assigned one yet" — see
+  // getOrCreateReferralCode in src/lib/referral.ts, which every real read
+  // path goes through instead of reading the column directly.
+  referralCode   String? @unique
+  referredByCode String?
+
   sessions  Session[]
   accounts  Account[]
   workspace Workspace?

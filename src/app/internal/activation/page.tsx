@@ -28,7 +28,10 @@ export default async function ActivationDashboardPage() {
     redirect("/dashboard");
   }
 
-  const totalUsers = await prisma.user.count();
+  const [totalUsers, referredUsers] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.count({ where: { referredByCode: { not: null } } }),
+  ]);
   const workspaces = await prisma.workspace.findMany({
     select: {
       channels: { select: { id: true }, take: 1 },
@@ -46,7 +49,9 @@ export default async function ActivationDashboardPage() {
   };
 
   const totalWorkspaces = workspaces.length;
-  const connected = workspaces.filter((w: WorkspaceStats) => w.channels.length > 0);
+  const connected = workspaces.filter(
+    (w: WorkspaceStats) => w.channels.length > 0,
+  );
   const connectedCount = connected.length;
   const ideaOrScriptCount = connected.filter(
     (w: WorkspaceStats) => w.ideas.length > 0 || w.scripts.length > 0,
@@ -69,13 +74,15 @@ export default async function ActivationDashboardPage() {
       label: "Connected a YouTube channel",
       count: connectedCount,
       pct: pct(connectedCount),
-      detail: "The real activation event — everything before this is just interest.",
+      detail:
+        "The real activation event — everything before this is just interest.",
     },
     {
       label: "...and created an idea or script",
       count: ideaOrScriptCount,
       pct: pct(ideaOrScriptCount),
-      detail: "Went from seeing their data to actually doing something with it.",
+      detail:
+        "Went from seeing their data to actually doing something with it.",
     },
     {
       label: "Active (2+ features used)",
@@ -88,7 +95,12 @@ export default async function ActivationDashboardPage() {
   return (
     <div
       className="px-4 sm:px-10"
-      style={{ paddingTop: 24, paddingBottom: 64, maxWidth: 720, margin: "0 auto" }}
+      style={{
+        paddingTop: 24,
+        paddingBottom: 64,
+        maxWidth: 720,
+        margin: "0 auto",
+      }}
     >
       <PageHeader
         eyebrow="Internal · founder only"
@@ -96,13 +108,28 @@ export default async function ActivationDashboardPage() {
         description="How many signups actually reach the moment CreatorOS proves itself, not just how many signed up."
       />
 
-      <div className="mt-8">
-        <Card padding="md">
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <Card padding="md" className="flex-1">
           <div className="text-[13px] text-[var(--color-text-muted)]">
             Total signups
           </div>
           <div className="font-mono mt-1 text-3xl font-bold">
             {totalUsers.toLocaleString()}
+          </div>
+        </Card>
+        <Card padding="md" className="flex-1">
+          <div className="text-[13px] text-[var(--color-text-muted)]">
+            ...via a referral link
+          </div>
+          <div className="font-mono mt-1 text-3xl font-bold text-[var(--color-accent-teal)]">
+            {referredUsers.toLocaleString()}
+            <span className="ml-2 text-sm font-normal text-[var(--color-text-muted)]">
+              (
+              {totalUsers === 0
+                ? "—"
+                : `${Math.round((referredUsers / totalUsers) * 100)}%`}
+              )
+            </span>
           </div>
         </Card>
       </div>
