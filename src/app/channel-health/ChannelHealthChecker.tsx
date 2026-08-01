@@ -9,6 +9,7 @@ import {
   PreviewInsight,
 } from "@/lib/channel-health-preview/types";
 import Card from "@/components/ui/Card";
+import posthog from "posthog-js";
 
 const typeLabels: Record<PreviewInsight["type"], string> = {
   fact: "Fact",
@@ -67,6 +68,7 @@ export default function ChannelHealthChecker({
     if (!result) return;
     try {
       await navigator.clipboard.writeText(buildShareUrl(result));
+      posthog.capture("channel_health_shared", { method: "copy_link" });
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -81,6 +83,7 @@ export default function ChannelHealthChecker({
     const text = `"${result.channelTitle}" scored ${result.score}/100 on the CreatorOS Channel Health Check. What's yours?`;
     const url = buildShareUrl(result);
     const intent = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    posthog.capture("channel_health_shared", { method: "x" });
     window.open(intent, "_blank", "noopener,noreferrer");
   }
 
@@ -95,7 +98,13 @@ export default function ChannelHealthChecker({
     const { data, error } = await previewChannelHealth(input);
     setLoading(false);
     if (error) setError(error);
-    else if (data) setResult(data);
+    else if (data) {
+      posthog.capture("channel_health_check_completed", {
+        score: data.score,
+        label: data.label,
+      });
+      setResult(data);
+    }
   }
 
   async function handleLeadSubmit(e: React.FormEvent) {

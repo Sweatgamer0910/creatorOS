@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { joinWaitlist } from "@/lib/waitlist/actions";
+import posthog from "posthog-js";
 
 // The app is live and self-serve (Google/Discord sign-in, one click), so
 // the primary path here is a direct link to /signup — same button style
@@ -27,6 +28,7 @@ export default function ClosingCTA() {
     if (result.error) {
       setError(result.error);
     } else {
+      posthog.capture("waitlist_joined");
       setSubmitted(true);
     }
   }

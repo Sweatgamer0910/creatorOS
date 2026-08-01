@@ -21,6 +21,7 @@ import {
   Settings,
 } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
+import posthog from "posthog-js";
 import Spinner from "./Spinner";
 import Button from "@/components/ui/button";
 import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
@@ -168,6 +169,7 @@ export default function NotchNav() {
   function handleLogout() {
     setPendingKey("logout");
     startTransition(async () => {
+      posthog.reset();
       await signOut();
       router.push("/login");
     });
