@@ -80,9 +80,37 @@ export const cardSurfaceStyle: Record<"flat" | "glass", CSSProperties> = {
     border: "1px solid var(--color-border)",
   },
   glass: {
-    backgroundColor: "rgba(255, 255, 255, 0.04)",
-    backdropFilter: "blur(20px)",
-    WebkitBackdropFilter: "blur(20px)",
-    border: "1px solid rgba(255, 255, 255, 0.08)",
+    backgroundColor: "rgba(18, 20, 25, 0.58)",
+    backdropFilter: "blur(28px) saturate(190%)",
+    WebkitBackdropFilter: "blur(28px) saturate(190%)",
+    border: "1px solid rgba(255, 255, 255, 0.10)",
+    boxShadow:
+      "inset 0 1px 0 rgba(255,255,255,0.16), inset 0 -1px 0 rgba(255,255,255,0.04), 0 24px 60px -16px rgba(0,0,0,0.55)",
   },
 };
+
+// Liquid Glass — the floating-chrome material used for nav, modals,
+// popovers, and tooltips across the app, modeled on Apple's iOS 26/macOS
+// Tahoe "Liquid Glass" material (WWDC 2025): a translucent surface that
+// catches light at its edges rather than a flat frosted panel, and on
+// Linear's own 2026 adaptation of it for a floating tab bar (semi-
+// transparent, reacts to what's behind it, active state reads as a glass
+// capsule rather than a flat fill). True optical refraction (SVG
+// feDisplacementMap warping the backdrop) is Chrome-only today and too
+// expensive to keep animated at 60fps in something that moves with the
+// mouse every frame (the nav's magnification dock), so this fakes the same
+// *read* with plain CSS that works everywhere: heavy blur+saturate,
+// asymmetric inset highlight (bright top edge / soft bottom edge, like
+// light catching a curved glass rim), and a faint diagonal sheen layer.
+// See components/LiquidGlass.tsx for the reusable layered wrapper that
+// applies these.
+export const glass = {
+  backdrop: "blur(28px) saturate(190%)",
+  surface: "rgba(18, 20, 25, 0.58)",
+  surfaceHover: "rgba(26, 29, 36, 0.68)",
+  borderTop: "rgba(255,255,255,0.16)",
+  borderBottom: "rgba(255,255,255,0.04)",
+  sheen:
+    "linear-gradient(128deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 24%, rgba(255,255,255,0) 45%)",
+  shadow: "0 24px 60px -16px rgba(0,0,0,0.55), 0 2px 10px -2px rgba(0,0,0,0.35)",
+} as const;

@@ -24,6 +24,7 @@ import { signOut } from "@/lib/auth-client";
 import Spinner from "./Spinner";
 import Button from "@/components/ui/button";
 import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
+import { glass } from "@/lib/design-tokens";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -200,8 +201,10 @@ export default function NotchNav() {
           className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4"
           style={{
             height: 60,
-            backgroundColor: "var(--color-surface)",
-            borderBottom: "1px solid var(--color-border)",
+            backgroundColor: glass.surface,
+            backdropFilter: glass.backdrop,
+            WebkitBackdropFilter: glass.backdrop,
+            boxShadow: `inset 0 -1px 0 ${glass.borderTop}`,
           }}
         >
           <button
@@ -270,8 +273,10 @@ export default function NotchNav() {
         <div
           className="fixed bottom-0 left-0 right-0 z-50 flex items-stretch justify-around"
           style={{
-            backgroundColor: "var(--color-surface)",
-            borderTop: "1px solid var(--color-border)",
+            backgroundColor: glass.surface,
+            backdropFilter: glass.backdrop,
+            WebkitBackdropFilter: glass.backdrop,
+            boxShadow: `inset 0 1px 0 ${glass.borderTop}`,
             paddingBottom: "env(safe-area-inset-bottom, 0px)",
           }}
         >
@@ -339,11 +344,38 @@ export default function NotchNav() {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="flex items-center gap-3 h-17 rounded-full overflow-visible"
-        style={{
-          backgroundColor: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-        }}
+        style={{ position: "relative", isolation: "isolate" }}
       >
+        {/* Liquid Glass material, inlined rather than the shared
+            LiquidGlass.tsx wrapper: this element is itself a motion.div
+            that Framer Motion animates (width/padding), so the glass
+            layers have to live as absolute-positioned siblings inside it
+            rather than in a separate wrapping element. */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: 999,
+            backdropFilter: glass.backdrop,
+            WebkitBackdropFilter: glass.backdrop,
+            backgroundColor: glass.surface,
+            boxShadow: `inset 0 1px 0 ${glass.borderTop}, inset 0 -1px 0 ${glass.borderBottom}, ${glass.shadow}`,
+            zIndex: 0,
+          }}
+        />
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: 999,
+            background: glass.sheen,
+            mixBlendMode: "overlay",
+            pointerEvents: "none",
+            zIndex: 1,
+          }}
+        />
         <AnimatePresence mode="wait">
           {!expanded ? (
             <motion.div
@@ -353,7 +385,11 @@ export default function NotchNav() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, delay: 0.1 }}
               className="w-full h-full rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "var(--color-accent)" }}
+              style={{
+                backgroundColor: "var(--color-accent)",
+                position: "relative",
+                zIndex: 2,
+              }}
             >
               <div
                 className="w-3 h-3 rounded-full"
@@ -361,7 +397,11 @@ export default function NotchNav() {
               />
             </motion.div>
           ) : (
-            <motion.div key="items" className="flex items-center gap-3">
+            <motion.div
+              key="items"
+              className="flex items-center gap-3"
+              style={{ position: "relative", zIndex: 2 }}
+            >
               <div
                 style={{ position: "relative" }}
                 onMouseEnter={() => setLogoHovered(true)}
