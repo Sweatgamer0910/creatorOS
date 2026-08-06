@@ -48,6 +48,20 @@ export const motion = {
   slow: 0.25,
 } as const;
 
+// Cubic-bezier curves shared with the Remotion motion-graphics kit
+// (creatoros-motion-kit/src/theme.ts) so in-app/landing-page motion and
+// marketing-video motion read as the same product. premiumOut is the
+// general-purpose deceleration curve for content settling into place;
+// overshoot adds a small bounce past the resting value before settling
+// back — used sparingly, for elements that should feel like they "land"
+// (e.g. a CTA button on entrance), not for anything that repeats or
+// loops; soft is a gentler symmetric ease for ambient/background motion.
+export const easing = {
+  premiumOut: [0.16, 1, 0.3, 1],
+  overshoot: [0.34, 1.56, 0.64, 1],
+  soft: [0.25, 0.1, 0.25, 1],
+} as const;
+
 // The two card surface treatments (Card.tsx's `variant`, and GlassPanel,
 // which reuses `flat` without rendering Card itself). Lives here — a plain
 // module with no "use client" — rather than in Card.tsx itself: Card.tsx

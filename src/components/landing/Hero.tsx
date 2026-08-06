@@ -1,32 +1,89 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { easing } from "@/lib/design-tokens";
 
 // Ported verbatim from the approved prototype (creatoros-landing.html) —
 // copy, structure, and CTAs are not up for reinterpretation here. The
 // prototype's WebGL canvas (rings/tile/particles/Nova) now lives in
 // LandingScene.tsx, mounted once behind the whole page rather than
 // per-section, so this component is DOM-only.
+//
+// Entrance motion added on top of that untouched copy/structure: a
+// staggered blur-to-focus reveal (badge -> headline -> subtext -> CTAs),
+// using the same technique documented in the Remotion motion kit
+// (creatoros-motion-kit README §5b) so the first thing a visitor sees
+// feels like the same product as the marketing videos.
+//
+// This can't use a plain initial/animate pair on mount: there's a known
+// Framer Motion + Next.js 16/Turbopack/React 19 bug where a motion
+// element that's freshly mounted on first paint renders pre-settled at
+// its final state instead of animating from `initial` (see
+// InsightList.tsx and PageTransition.tsx for two other places this bit
+// us). The one mechanism proven to actually animate in this app is a
+// `key` change on an already-mounted AnimatePresence, so — same as
+// InsightList — this renders a static "loading" (held-hidden) pass
+// first, then flips to a "content" key one tick later via an effect.
 export default function Hero() {
   const reducedMotion = usePrefersReducedMotion();
+  const [revealed, setRevealed] = useState(false);
 
-  return (
-    <section
-      style={{
-        minHeight: "100svh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
-        padding: "120px 32px 80px",
-        position: "relative",
-        zIndex: 1,
-      }}
-    >
-      <span
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setRevealed(true);
+  }, []);
+
+  const wrapperStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  };
+
+  const container: Variants = {
+    hidden: {},
+    visible: {
+      transition: { staggerChildren: 0.12, delayChildren: 0.05 },
+    },
+  };
+
+  const fadeUp: Variants = {
+    hidden: { opacity: 0, y: 16, filter: "blur(8px)" },
+    visible: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.7, ease: easing.premiumOut },
+    },
+  };
+
+  const headlineReveal: Variants = {
+    hidden: { opacity: 0, y: 20, filter: "blur(14px)" },
+    visible: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: { duration: 0.9, ease: easing.premiumOut },
+    },
+  };
+
+  const ctaReveal: Variants = {
+    hidden: { opacity: 0, y: 12, scale: 0.96, filter: "blur(6px)" },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      filter: "blur(0px)",
+      transition: { duration: 0.6, ease: easing.overshoot },
+    },
+  };
+
+  const heroContent = (
+    <>
+      <motion.span
+        variants={fadeUp}
         style={{
           fontFamily: "var(--font-mono)",
           fontSize: 12,
@@ -49,9 +106,10 @@ export default function Hero() {
           }}
         />
         AI operating system for YouTube creators
-      </span>
+      </motion.span>
 
-      <h1
+      <motion.h1
+        variants={headlineReveal}
         style={{
           fontFamily: "var(--font-display)",
           fontWeight: 600,
@@ -66,9 +124,10 @@ export default function Hero() {
         One system for
         <br />
         every stage of <span style={{ color: "#F5A623" }}>the channel</span>.
-      </h1>
+      </motion.h1>
 
-      <p
+      <motion.p
+        variants={fadeUp}
         style={{
           fontSize: "clamp(15px,2vw,19px)",
           color: "#9AA0AC",
@@ -79,9 +138,12 @@ export default function Hero() {
         CreatorOS unifies planning, production, publishing, and analytics
         into a single premium workspace — so the next video is always
         obvious, not overwhelming.
-      </p>
+      </motion.p>
 
-      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
+      <motion.div
+        variants={ctaReveal}
+        style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}
+      >
         <Link
           href="/signup"
           className="glow-interactive"
@@ -115,7 +177,51 @@ export default function Hero() {
         >
           Log in
         </Link>
-      </div>
+      </motion.div>
+    </>
+  );
+
+  return (
+    <section
+      style={{
+        minHeight: "100svh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        padding: "120px 32px 80px",
+        position: "relative",
+        zIndex: 1,
+      }}
+    >
+      {reducedMotion ? (
+        <div style={wrapperStyle}>{heroContent}</div>
+      ) : (
+        <AnimatePresence mode="wait" initial={false}>
+          {!revealed ? (
+            <motion.div
+              key="loading"
+              style={wrapperStyle}
+              variants={container}
+              initial="hidden"
+              animate="hidden"
+            >
+              {heroContent}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="content"
+              style={wrapperStyle}
+              variants={container}
+              initial="hidden"
+              animate="visible"
+            >
+              {heroContent}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
 
       <div
         style={{
