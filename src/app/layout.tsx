@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
-import { Space_Grotesk, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import NotchNav from "@/components/NotchNav";
 import BodyBackgroundSync from "@/components/BodyBackgroundSync";
@@ -9,21 +8,6 @@ import LenisProvider from "@/components/providers/LenisProvider";
 import MainShell from "@/components/MainShell";
 import OnboardingTourProvider from "@/components/onboarding/OnboardingTourProvider";
 import ReferralCapture from "@/components/ReferralCapture";
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-});
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
-});
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const DESCRIPTION =
@@ -69,10 +53,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body
-        className={`${spaceGrotesk.variable} ${manrope.variable} ${jetbrainsMono.variable}`}
-        style={{ fontFamily: "var(--font-body)" }}
-      >
+      <body style={{ fontFamily: "var(--font-body)" }}>
         <Suspense fallback={null}>
           <ReferralCapture />
         </Suspense>

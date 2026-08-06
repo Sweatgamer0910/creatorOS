@@ -10,9 +10,26 @@
   --color-text-muted: #8b93a1;
   --color-border: #262b34;
 
-  --font-display: var(--font-space-grotesk);
-  --font-body: var(--font-manrope);
-  --font-mono: var(--font-jetbrains-mono);
+  /* System font stack, not a webfont: -apple-system/BlinkMacSystemFont
+     resolve to literal San Francisco on every Mac, iPhone, and iPad — the
+     exact typeface (and Apple's own Text/Display optical-size switching,
+     handled by the OS, not by naming "SF Pro Display" ourselves) every
+     native Apple app uses. That's the point: this isn't "a font that looks
+     similar," it's the real thing, on the devices most of this app's
+     audience is actually using. Non-Apple visitors fall through to each
+     platform's own native UI font (Segoe UI on Windows, Roboto on
+     Android/ChromeOS) rather than a third-party face, which reads as
+     equally native there instead of foreign everywhere.  ui-monospace/
+     "SF Mono" is the same idea for the mono token — Apple's own
+     code/data typeface (Terminal, Xcode), not a webfont standing in for
+     it. See DECISIONS_LOG.md for why this replaced Space Grotesk/
+     Manrope/JetBrains Mono outright rather than a hybrid split. */
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Monaco, "Cascadia Code",
+    "Roboto Mono", monospace;
 }
 
 /* RGB triplets of the two accent colors, for use inside rgba() glows below.

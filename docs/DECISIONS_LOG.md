@@ -2,6 +2,22 @@
 
 Non-obvious technical decisions, newest first, with the reasoning behind them.
 
+## 2026-08-06 — System font stack (SF Pro on Apple devices) instead of Space Grotesk/Manrope/JetBrains Mono
+
+**`--font-display`/`--font-body`/`--font-mono` now resolve to `-apple-system, BlinkMacSystemFont, ...`
+stacks instead of the three Google-hosted webfonts.** This is the start of an app-wide push to make
+CreatorOS read as genuinely Apple-native rather than "inspired by" — most of this app's creator
+audience is on Mac/iPhone, and `-apple-system`/`BlinkMacSystemFont` resolve to literal San Francisco
+there, with the OS handling the Text/Display optical-size switch itself rather than us naming "SF Pro
+Display" outright (which doesn't behave consistently across browsers/OSes). `ui-monospace`/`"SF Mono"`
+does the same job for the mono token — Apple's own Terminal/Xcode typeface, not a stand-in. Non-Apple
+visitors fall through to their own platform's native UI font (Segoe UI on Windows, Roboto on
+Android/ChromeOS), which reads as native there too instead of foreign everywhere. This was a deliberate
+trade against Space Grotesk's distinct geometric personality on the display headlines — decided in
+favor of maximal platform-native authenticity over a custom brand typeface, per direct product
+direction. Removed the three `next/font/google` loads from `layout.tsx` entirely rather than leaving
+them installed-but-unused.
+
 ## 2026-08-06 — Growth Coach fade-in: drop opacity from the animation instead of chasing the transition bug again
 
 **`InsightList.tsx`'s reveal animation no longer animates opacity at all — it starts and stays at 1,
