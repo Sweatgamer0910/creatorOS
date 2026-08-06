@@ -57,10 +57,22 @@ const OFFSETS: Record<Variant, { axis: "x" | "y"; offset: number }> = {
 // mounted. Without this, the outgoing page's exit direction reflected how
 // IT entered, not the direction of the transition actually happening —
 // caught by live QA, not by the (still-necessary) unit tests on classify().
+// `initial` no longer animates opacity from 0 - caught live on the
+// Script Studio list -> editor transition rendering the ENTIRE new page
+// invisible (computed opacity stuck at 0, offset transform stuck
+// mid-slide) well after the 0.2s transition should have settled. Same
+// underlying Framer Motion + Turbopack "freshly-mounted element doesn't
+// reliably reach its animate target" issue documented in InsightList.tsx
+// and Hero.tsx - and the same fix: opacity is no longer part of what
+// animates on entry, so a stuck transition can only ever cost the
+// cosmetic slide-in, never make a whole page disappear. This is the
+// highest-traffic instance of the bug (every in-app navigation runs
+// through this component), so it gets fixed here rather than patched
+// per-route.
 const pageVariants: Variants = {
   initial: (variantKey: Variant) => {
     const { axis, offset } = OFFSETS[variantKey];
-    return { opacity: 0, [axis]: offset };
+    return { opacity: 1, [axis]: offset };
   },
   animate: { opacity: 1, x: 0, y: 0 },
   exit: (variantKey: Variant) => {
