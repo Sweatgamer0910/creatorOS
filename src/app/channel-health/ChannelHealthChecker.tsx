@@ -30,9 +30,21 @@ const confidenceLabels: Record<PreviewInsight["confidence"], string> = {
   exploratory: "Exploratory",
 };
 
+// Trims insignificant trailing zeros before the unit suffix (21.0M -> 21M,
+// 5.50B -> 5.5B, 5.00B -> 5B) while keeping real precision (21.1M, 5.52B).
+function trimTrailingZero(s: string): string {
+  return s.replace(/(\.\d*?)0+(?=[A-Z]$)/, "$1").replace(/\.(?=[A-Z]$)/, "");
+}
+
 function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  // Large, well-established channels (MKBHD-scale and up) clear a billion
+  // total views — the old M-only formatter had no ceiling above that, so
+  // it rendered a channel with 5.52B views as "5520.0M views" instead of
+  // rolling over to a B suffix. Caught in live QA against a real channel.
+  if (n >= 1_000_000_000)
+    return trimTrailingZero(`${(n / 1_000_000_000).toFixed(2)}B`);
+  if (n >= 1_000_000) return trimTrailingZero(`${(n / 1_000_000).toFixed(1)}M`);
+  if (n >= 1_000) return trimTrailingZero(`${(n / 1_000).toFixed(1)}K`);
   return String(n);
 }
 

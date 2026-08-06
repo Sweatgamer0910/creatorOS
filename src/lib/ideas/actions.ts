@@ -35,6 +35,16 @@ export async function createIdea(
   revalidatePath("/ideas");
 }
 
+export async function updateIdea(id: string, title: string, notes: string) {
+  const workspaceId = await getWorkspaceId();
+  const { count } = await prisma.idea.updateMany({
+    where: { id, workspaceId },
+    data: { title, notes },
+  });
+  if (count === 0) throw new Error("Not found");
+  revalidatePath("/ideas");
+}
+
 export async function deleteIdea(id: string) {
   const workspaceId = await getWorkspaceId();
   const { count } = await prisma.idea.deleteMany({

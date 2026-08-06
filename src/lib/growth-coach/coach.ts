@@ -9,11 +9,16 @@ export function computeCoachResponse(
 ): CoachResponse {
   const insights: CoachInsight[] = [];
 
+  const subscriberCount = data.currentStats.subscriberCount;
+  const videoCount = data.currentStats.videoCount;
+  const subscriberLabel = subscriberCount === 1 ? "subscriber" : "subscribers";
+  const videoLabel = videoCount === 1 ? "video" : "videos";
+
   insights.push({
     id: "fact-overview",
     type: "fact",
     confidence: "high",
-    message: `Your channel currently has ${data.currentStats.subscriberCount.toLocaleString()} subscribers and ${data.currentStats.videoCount} published videos.`,
+    message: `Your channel currently has ${subscriberCount.toLocaleString()} ${subscriberLabel} and ${videoCount} published ${videoLabel}.`,
   });
 
   const trendData = data.last30Days.map((d) => d.views);

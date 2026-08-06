@@ -320,6 +320,18 @@ export default function NotchNav() {
           mouseX.set(Infinity);
         }}
         onMouseMove={(e) => mouseX.set(e.clientX)}
+        // Hover alone strands touchscreen-at-desktop-width devices (a
+        // touchscreen laptop, or a tablet not caught by useIsNarrowViewport)
+        // with a permanently collapsed dot and no way to reach the nav at
+        // all — there's no hover event for them to fire. Only ever setting
+        // true here (never toggling) means this can't fight the mouse-hover
+        // path: a click that lands on one of the nav icons below also
+        // bubbles up to this handler, and a toggle would collapse the dock
+        // out from under a hovering mouse right as it navigates. Collapse
+        // stays owned by onMouseLeave for mouse users; touch users just get
+        // an open dock, which is a safe default (worse case: they tap it
+        // again with the same "already true" no-op).
+        onClick={() => setExpanded(true)}
         animate={{
           width: expanded ? "auto" : 68,
           paddingLeft: expanded ? 18 : 0,

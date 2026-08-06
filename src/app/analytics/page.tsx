@@ -47,18 +47,38 @@ export default async function AnalyticsPage() {
             <HealthScoreCardWrapper data={data} />
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-            <StatCard
-              label="Subscribers"
-              value={data.currentStats.subscriberCount}
-            />
-            <StatCard label="Total Views" value={data.currentStats.viewCount} />
-            <StatCard label="Videos" value={data.currentStats.videoCount} />
-            <StatCard
-              label="Watch Time (hrs)"
-              value={Math.round(data.currentStats.watchTimeMinutes / 60)}
-            />
-          </div>
+          {/* "Total Views" comes from YouTube's channel statistics (Data
+              API), while the charts below come from the Analytics API —
+              two separately-cached sources. On a brand-new/tiny channel,
+              statistics.viewCount can briefly still read 0 even after the
+              Analytics API already has a data point for this week. Rather
+              than let that look like a bug, say so. */}
+          {(() => {
+            const hasRecentViews = data.last30Days.some((d) => d.views > 0);
+            const viewsLagCaption =
+              data.currentStats.viewCount === 0 && hasRecentViews
+                ? "Chart below already shows activity — YouTube's official total just hasn't caught up yet."
+                : undefined;
+
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+                <StatCard
+                  label="Subscribers"
+                  value={data.currentStats.subscriberCount}
+                />
+                <StatCard
+                  label="Total Views"
+                  value={data.currentStats.viewCount}
+                  caption={viewsLagCaption}
+                />
+                <StatCard label="Videos" value={data.currentStats.videoCount} />
+                <StatCard
+                  label="Watch Time (hrs)"
+                  value={Math.round(data.currentStats.watchTimeMinutes / 60)}
+                />
+              </div>
+            );
+          })()}
 
           {data.history.length > 0 ? (
             <div className="mt-8">

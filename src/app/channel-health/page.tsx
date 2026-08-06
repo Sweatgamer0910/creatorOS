@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import ChannelHealthChecker from "./ChannelHealthChecker";
 
-const TITLE = "Free Channel Health Check — CreatorOS";
+// No trailing " — CreatorOS" here — the root layout's title template
+// (`%s — CreatorOS`) already appends it. Including it here too produced a
+// doubled "— CreatorOS — CreatorOS" tab title (caught in live QA).
+const TITLE = "Free Channel Health Check";
 const DESCRIPTION =
   "Paste any YouTube channel and get a free, honest preview: upload cadence, recent performance, and one thing worth focusing on next. No login required.";
 
@@ -32,7 +35,7 @@ export async function generateMetadata({
   const label = first(sp.label);
 
   if (channel && score) {
-    const title = `${channel} scored ${score}/100 — CreatorOS Channel Health Check`;
+    const title = `${channel} scored ${score}/100 — Channel Health Check`;
     const ogParams = new URLSearchParams({ channel, score });
     if (label) ogParams.set("label", label);
     const ogUrl = `/api/og/channel-health?${ogParams.toString()}`;
