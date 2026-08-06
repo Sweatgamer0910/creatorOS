@@ -18,16 +18,25 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   iconOnly?: boolean;
 }
 
+// Same top-lit-surface logic as Card's `flat` variant (design-tokens.ts)
+// applied to buttons: a subtle gradient + inset top highlight instead of a
+// flat fill, so a button reads as a pressable physical object with a top
+// edge catching light, matching every card/nav surface in the app rather
+// than looking like a leftover flat-design holdover next to them.
 const variantStyles: Record<Variant, React.CSSProperties> = {
   primary: {
-    backgroundColor: "var(--color-accent)",
+    backgroundImage:
+      "linear-gradient(180deg, #ffb84d 0%, var(--color-accent) 100%)",
     color: "#000",
     border: "1px solid transparent",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35)",
   },
   secondary: {
-    backgroundColor: "var(--color-surface-hover)",
+    backgroundImage:
+      "linear-gradient(180deg, var(--color-surface-hover) 0%, var(--color-surface) 100%)",
     color: "var(--color-text)",
     border: "1px solid var(--color-border)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
   },
   ghost: {
     backgroundColor: "transparent",
