@@ -86,7 +86,20 @@ export default function InsightList({
         <motion.div
           key="revealed"
           className="flex flex-col gap-4"
-          initial={{ opacity: 0, y: 8 }}
+          // Confirmed live (computed style, well after the 0.2s transition
+          // should have finished): this reveal gets stuck part-way —
+          // opacity settles around ~0.7 instead of reaching 1, not the
+          // "renders pre-settled" failure mode the comment above describes,
+          // but the same underlying Framer Motion/Turbopack timing issue.
+          // The FACT/PATTERN cards' already-muted text at ~70% opacity is
+          // what QA caught as "nearly invisible." Rather than keep fighting
+          // that toolchain bug, opacity is no longer part of what animates
+          // here — starting and staying at 1 makes the text unconditionally
+          // readable regardless of whether the transition ever cleanly
+          // settles. The y-offset slide is left animating for the same
+          // subtle motion as before; getting stuck on that is only ever
+          // cosmetic, never a readability problem.
+          initial={{ opacity: 1, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: motionTokens.base }}
         >
