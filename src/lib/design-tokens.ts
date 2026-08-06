@@ -75,9 +75,20 @@ export const easing = {
 // border styling and no error anywhere. Plain data modules don't have
 // this problem in either direction.
 export const cardSurfaceStyle: Record<"flat" | "glass", CSSProperties> = {
+  // Not a flat fill anymore — a very subtle top-to-bottom gradient plus an
+  // inset top highlight, the same "catches light at the edge" cue the
+  // Liquid Glass material uses, just without the blur (these sit over a
+  // solid page background, not other content, so there's nothing to
+  // refract). The read this is going for: a card looks like a distinct
+  // physical surface with a top edge facing the light, not a rectangle of
+  // flat color — the difference is subtle at a glance and exactly the kind
+  // of detail that makes native Apple UI feel like it was milled rather
+  // than drawn.
   flat: {
-    backgroundColor: "var(--color-surface)",
+    backgroundImage:
+      "linear-gradient(180deg, var(--color-surface-hover) 0%, var(--color-surface) 100%)",
     border: "1px solid var(--color-border)",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
   },
   glass: {
     backgroundColor: "rgba(18, 20, 25, 0.58)",
