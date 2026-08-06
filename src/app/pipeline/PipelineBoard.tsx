@@ -17,7 +17,7 @@ import Spinner from "@/components/Spinner";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/button";
 import SeriesBadge from "@/components/SeriesBadge";
-import { radius, spacing } from "@/lib/design-tokens";
+import { radius, spacing, cardSurfaceStyle } from "@/lib/design-tokens";
 import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
 
 interface ContentItem {
@@ -500,10 +500,10 @@ export default function PipelineBoard({
               onDrop={(e) => handleDrop(e, col.status)}
               className="p-3 flex flex-col gap-2"
               style={{
-                backgroundColor: "var(--color-surface)",
+                ...cardSurfaceStyle.flat,
                 border: isOver
                   ? "1px solid var(--color-accent)"
-                  : "1px solid var(--color-border)",
+                  : cardSurfaceStyle.flat.border,
                 borderRadius: radius.xl,
                 minHeight: 300,
                 transition: "border-color 0.15s",

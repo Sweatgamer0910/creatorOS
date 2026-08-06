@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 import { getScriptVersions, restoreScriptVersion } from "@/lib/scripts/actions";
 import Button from "@/components/ui/button";
 import Spinner from "@/components/Spinner";
-import { radius } from "@/lib/design-tokens";
+import { radius, glass } from "@/lib/design-tokens";
 import { ScriptSections } from "@/lib/scripts/wordCount";
 
 interface ScriptVersionRecord extends ScriptSections {
@@ -83,8 +83,11 @@ export default function VersionHistoryPanel({
         style={{
           width: "min(420px, 92vw)",
           height: "100%",
-          backgroundColor: "var(--color-surface)",
-          borderLeft: "1px solid var(--color-border)",
+          backgroundColor: glass.surface,
+          backdropFilter: glass.backdrop,
+          WebkitBackdropFilter: glass.backdrop,
+          borderLeft: `1px solid ${glass.borderTop}`,
+          boxShadow: glass.shadow,
           padding: 24,
           overflowY: "auto",
         }}

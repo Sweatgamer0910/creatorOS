@@ -19,11 +19,11 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  "2xl": 24,
+  sm: 10,
+  md: 14,
+  lg: 18,
+  xl: 22,
+  "2xl": 28,
   full: 999,
 } as const;
 
@@ -88,7 +88,14 @@ export const cardSurfaceStyle: Record<"flat" | "glass", CSSProperties> = {
     backgroundImage:
       "linear-gradient(180deg, var(--color-surface-hover) 0%, var(--color-surface) 100%)",
     border: "1px solid var(--color-border)",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)",
+    // Inset highlight (the "top edge catches light" cue) plus a real,
+    // soft, ambient drop shadow — large blur radius, low opacity, pushed
+    // down — so the card actually lifts off the page instead of just
+    // being a bordered rectangle sitting flush with the background. This
+    // is the single biggest visual tell separating "web app with rounded
+    // corners" from "native Apple widget with real elevation."
+    boxShadow:
+      "inset 0 1px 0 rgba(255,255,255,0.06), 0 1px 2px rgba(0,0,0,0.3), 0 16px 40px -20px rgba(0,0,0,0.55)",
   },
   glass: {
     backgroundColor: "rgba(18, 20, 25, 0.58)",

@@ -18,8 +18,8 @@ export default function QuickAccessCard({
       <InteractiveCard>
         <div className="flex flex-col gap-3">
           <div
-            className="w-9 h-9 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: "var(--color-surface-hover)" }}
+            className="w-9 h-9 flex items-center justify-center"
+            style={{ backgroundColor: "var(--color-surface-hover)", borderRadius: 10 }}
           >
             <Icon size={18} color="var(--color-accent)" />
           </div>

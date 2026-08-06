@@ -103,7 +103,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ...variantStyles[variant],
           ...sizeStyles[size],
           ...(iconOnly ? iconOnlySizeStyles[size] : {}),
-          borderRadius: iconOnly ? 999 : 12,
+          borderRadius: iconOnly ? 999 : 14,
           fontWeight: 500,
           display: "inline-flex",
           alignItems: "center",

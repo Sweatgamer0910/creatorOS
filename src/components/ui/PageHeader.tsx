@@ -19,8 +19,13 @@ export default function PageHeader({
 }) {
   return (
     <div className={className}>
-      <p className="text-[15px] text-[var(--color-text-muted)]">{eyebrow}</p>
-      <h1 className="font-display mt-[6px] text-[clamp(30px,3.5vw,38px)]">
+      <p className="text-[15px] font-medium text-[var(--color-text-muted)]">
+        {eyebrow}
+      </p>
+      <h1
+        className="font-display mt-[6px] text-[clamp(30px,3.5vw,38px)]"
+        style={{ fontWeight: 700, letterSpacing: "-0.02em" }}
+      >
         {title}
       </h1>
       {description && (

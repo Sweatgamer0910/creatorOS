@@ -53,6 +53,22 @@
    `Element.scrollIntoView({ behavior: "smooth" })` — scoped to that one
    scroll action instead of a standing document-wide mode. */
 
+/* Tailwind's preflight resets every heading's font-weight to `inherit`
+   (i.e. the body's 400), which silently left every page's <h1> title —
+   most of them 30-38px, none setting their own font-weight — rendering
+   as large *regular*-weight text instead of a real bold display
+   headline. That's a quiet but significant reason pages read as flat/
+   generic rather than premium: an Apple large-title is unmistakably
+   bold with tight tracking, not a big thin line of text. Set once here
+   rather than patched into every page's inline h1 style (most of which
+   don't use the shared PageHeader component and duplicate their own
+   markup) — an inline `fontWeight` on any specific heading still wins
+   over this, so nothing that intentionally overrides it breaks. */
+h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-text);

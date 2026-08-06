@@ -70,7 +70,7 @@ export default function Card({
       onKeyDown={isInteractive ? handleKeyDown : undefined}
       style={{
         ...baseStyle,
-        borderRadius: radius.xl,
+        borderRadius: radius["2xl"],
         padding: paddingMap[padding],
         borderLeft: accentBorder
           ? `3px solid ${accentBorder}`
