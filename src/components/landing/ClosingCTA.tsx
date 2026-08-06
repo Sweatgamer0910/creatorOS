@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { joinWaitlist } from "@/lib/waitlist/actions";
+import ScrollReveal from "./ScrollReveal";
 
 // The app is live and self-serve (Google/Discord sign-in, one click), so
 // the primary path here is a direct link to /signup — same button style
@@ -42,41 +43,43 @@ export default function ClosingCTA() {
         alignItems: "center",
       }}
     >
-      <h2
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "clamp(32px,5.5vw,64px)",
-          fontWeight: 600,
-          letterSpacing: "-0.03em",
-          maxWidth: 780,
-          marginBottom: 20,
-          color: "#F5F3EE",
-        }}
-      >
-        Your channel deserves an operating system, not a pile of tabs
-      </h2>
-      <p style={{ color: "#9AA0AC", fontSize: 16, marginBottom: 32 }}>
-        Free to start, no credit card — connect your channel and see your
-        real Health Score in minutes.
-      </p>
+      <ScrollReveal style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <h2
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(32px,5.5vw,64px)",
+            fontWeight: 600,
+            letterSpacing: "-0.03em",
+            maxWidth: 780,
+            marginBottom: 20,
+            color: "#F5F3EE",
+          }}
+        >
+          Your channel deserves an operating system, not a pile of tabs
+        </h2>
+        <p style={{ color: "#9AA0AC", fontSize: 16, marginBottom: 32 }}>
+          Free to start, no credit card — connect your channel and see your
+          real Health Score in minutes.
+        </p>
 
-      <Link
-        href="/signup"
-        className="glow-interactive"
-        style={{
-          padding: "14px 32px",
-          background: "#F5A623",
-          color: "#030304",
-          fontWeight: 600,
-          fontSize: 16,
-          borderRadius: 10,
-          boxShadow:
-            "0 0 0 1px rgba(245,166,35,0.4), 0 8px 24px -8px rgba(245,166,35,0.55)",
-          textDecoration: "none",
-        }}
-      >
-        Sign up free
-      </Link>
+        <Link
+          href="/signup"
+          className="glow-interactive"
+          style={{
+            padding: "14px 32px",
+            background: "#F5A623",
+            color: "#030304",
+            fontWeight: 600,
+            fontSize: 16,
+            borderRadius: 10,
+            boxShadow:
+              "0 0 0 1px rgba(245,166,35,0.4), 0 8px 24px -8px rgba(245,166,35,0.55)",
+            textDecoration: "none",
+          }}
+        >
+          Sign up free
+        </Link>
+      </ScrollReveal>
 
       <div style={{ marginTop: 56, paddingTop: 32, borderTop: "1px solid rgba(245,243,238,0.08)" }}>
         {submitted ? (

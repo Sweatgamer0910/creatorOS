@@ -1,4 +1,5 @@
 import TiltCard from "./TiltCard";
+import ScrollReveal from "./ScrollReveal";
 
 const features = [
   {
@@ -67,7 +68,7 @@ export default function FeatureGrid() {
   return (
     <section id="features" style={{ padding: "100px 32px 140px" }}>
       <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-        <div style={{ maxWidth: 640, marginBottom: 64 }}>
+        <ScrollReveal style={{ maxWidth: 640, marginBottom: 64 }}>
           <div
             style={{
               fontFamily: "var(--font-mono)",
@@ -95,11 +96,12 @@ export default function FeatureGrid() {
           <p style={{ color: "#9AA0AC", fontSize: 16, maxWidth: 520 }}>
             These are the pieces already working end-to-end in CreatorOS — not a roadmap slide.
           </p>
-        </div>
+        </ScrollReveal>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((f) => (
-            <TiltCard key={f.title}>
+          {features.map((f, i) => (
+            <ScrollReveal key={f.title} delay={(i % 3) * 0.08} y={16}>
+            <TiltCard>
               <div
                 className="glow-interactive"
                 style={{
@@ -172,6 +174,7 @@ export default function FeatureGrid() {
                 </p>
               </div>
             </TiltCard>
+            </ScrollReveal>
           ))}
         </div>
       </div>

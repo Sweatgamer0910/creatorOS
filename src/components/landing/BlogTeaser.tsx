@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/blog/posts";
+import ScrollReveal from "./ScrollReveal";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -20,7 +21,7 @@ export default function BlogTeaser() {
   return (
     <section style={{ padding: "120px 32px" }}>
       <div style={{ maxWidth: 1180, margin: "0 auto" }}>
-        <div
+        <ScrollReveal
           style={{
             display: "flex",
             alignItems: "flex-end",
@@ -68,15 +69,15 @@ export default function BlogTeaser() {
           >
             Read the blog →
           </Link>
-        </div>
+        </ScrollReveal>
 
         <div
           className="grid grid-cols-1 md:grid-cols-3"
           style={{ gap: 20 }}
         >
-          {posts.map((post) => (
+          {posts.map((post, i) => (
+            <ScrollReveal key={post.slug} delay={i * 0.08} y={16}>
             <Link
-              key={post.slug}
               href={`/blog/${post.slug}`}
               className="glow-interactive"
               style={{
@@ -114,6 +115,7 @@ export default function BlogTeaser() {
                 {post.excerpt}
               </p>
             </Link>
+            </ScrollReveal>
           ))}
         </div>
       </div>

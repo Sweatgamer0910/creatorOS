@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ScrollReveal from "./ScrollReveal";
 
 // Landing page promo for /channel-health — the free, no-login preview
 // checker previously only had a small link in the top nav, easy to miss.
@@ -19,7 +20,7 @@ export default function HealthCheckPromo() {
         className="grid grid-cols-1 lg:grid-cols-2"
         style={{ maxWidth: 1180, margin: "0 auto", gap: 64, alignItems: "center" }}
       >
-        <div>
+        <ScrollReveal>
           <div
             style={{
               fontFamily: "var(--font-mono)",
@@ -66,9 +67,10 @@ export default function HealthCheckPromo() {
           >
             Check your channel free
           </Link>
-        </div>
+        </ScrollReveal>
 
-        <div
+        <ScrollReveal
+          delay={0.12}
           style={{
             padding: "28px 26px",
             borderRadius: 16,
@@ -141,7 +143,7 @@ export default function HealthCheckPromo() {
               </span>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
     </section>
   );

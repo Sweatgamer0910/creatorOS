@@ -1,3 +1,5 @@
+import ScrollReveal from "./ScrollReveal";
+
 const rows = [
   {
     label: "Fact",
@@ -49,7 +51,7 @@ export default function ConfidenceSystem() {
           alignItems: "center",
         }}
       >
-        <div>
+        <ScrollReveal>
           <div
             style={{
               fontFamily: "var(--font-mono)",
@@ -79,12 +81,12 @@ export default function ConfidenceSystem() {
             version — is labeled with what kind of claim it&apos;s making, and
             how confident the system actually is in it.
           </p>
-        </div>
+        </ScrollReveal>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {rows.map((row) => (
+          {rows.map((row, i) => (
+            <ScrollReveal key={row.label} delay={i * 0.07} y={12}>
             <div
-              key={row.label}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -142,6 +144,7 @@ export default function ConfidenceSystem() {
                 {row.tier}
               </span>
             </div>
+            </ScrollReveal>
           ))}
         </div>
       </div>
