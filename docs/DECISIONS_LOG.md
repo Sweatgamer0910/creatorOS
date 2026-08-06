@@ -2,6 +2,34 @@
 
 Non-obvious technical decisions, newest first, with the reasoning behind them.
 
+## 2026-08-06 — Growth Coach fade-in: drop opacity from the animation instead of chasing the transition bug again
+
+**`InsightList.tsx`'s reveal animation no longer animates opacity at all — it starts and stays at 1,
+only the y-offset still slides.** This is the second time this same Framer Motion/Turbopack
+transition-timing issue has hit this component: computed styles confirmed live that the 0.2s opacity
+transition was settling around ~0.7 instead of reaching 1, leaving the already-muted FACT/PATTERN
+card text nearly invisible. Rather than debug the toolchain timing bug itself again, opacity was
+removed from what animates — a stuck transition can now only affect the cosmetic y-slide, never
+readability.
+
+## 2026-08-01 — Referral code is a short random string, nullable, lazily assigned — not a required column or the user's own cuid
+
+**`User.referralCode`/`referredByCode` are both nullable, and the code itself is a random
+33^8-space string generated in a hook rather than reusing the row's own cuid or making the column
+required with a default.** A required unique column with no natural default would force an
+interactive backfill decision the moment this migrates against a table that already has real user
+rows, which it does — this isn't a fresh dev database. Nullable means "hasn't been lazily assigned
+one yet," and every real read path goes through `getOrCreateReferralCode` instead of the column
+directly, so pre-existing accounts get a code on first Settings view instead of a broken invite link.
+A short human-typeable code (excluding 0/O/1/I, the characters most often misread or mistyped) was
+chosen over the user's existing cuid specifically so the shared URL is shorter and doesn't leak the
+row's internal id. Also gave the new OG-card route (`api/og/channel-health`) the Edge runtime rather
+than the default Node serverless one used by everything else, applying the same cold-start
+reasoning that took down the static root OG image below: this route can't be pre-rendered as a
+static file since the score varies per share, but Edge functions start fast enough that the crawler
+timeout problem shouldn't recur, and the response is still cached indefinitely per (channel, score)
+pair since that combination always renders the same image.
+
 ## 2026-07-31 — Static OG image file instead of fixing the dynamic generator
 
 **Replaced the on-demand `opengraph-image.tsx` (Satori/`next/og`, rendered per-crawl by a serverless
