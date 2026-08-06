@@ -384,8 +384,19 @@ export default function NotchNav() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2, delay: 0.1 }}
-              className="w-full h-full rounded-full flex items-center justify-center"
+              className="rounded-full flex items-center justify-center"
               style={{
+                // Explicit pixels, not w-full/h-full: this renders inside
+                // the same motion.div whose own width Framer is
+                // separately animating between 68 (collapsed) and "auto"
+                // (expanded) — sizing this to a percentage of that parent
+                // created a circular dependency (parent's auto-width
+                // measurement depending on a child sized as a percentage
+                // of that same not-yet-resolved width) that left the dock
+                // stuck at an arbitrary ~42px sliver instead of a clean
+                // 68x68 circle on first paint. Matches h-17 (68px) below.
+                width: 68,
+                height: 68,
                 backgroundColor: "var(--color-accent)",
                 position: "relative",
                 zIndex: 2,
