@@ -42,8 +42,22 @@ export const chartAxisPointerTheme = {
 
 // "12400" -> "12.4K", "2500000" -> "2.5M" — trims a trailing ".0" so whole
 // numbers don't show a pointless decimal.
+// T/B tiers added alongside the same fix in @/lib/format - a chart axis
+// for a channel with billions of lifetime views was rolling over into
+// "5520.0M" instead of "5.5B" with no ceiling above M, the same underlying
+// bug as the channel-health formatters just in the charting layer instead.
+// Kept as its own function (rather than switching this call site over to
+// the shared @/lib/format formatCount) because chart values can be
+// negative (deltas) and this one decimal place matches what the existing
+// axis labels/tests expect - only the missing tiers needed fixing here.
 export function formatCompactNumber(value: number): string {
   const abs = Math.abs(value);
+  if (abs >= 1_000_000_000_000) {
+    return `${(value / 1_000_000_000_000).toFixed(1).replace(/\.0$/, "")}T`;
+  }
+  if (abs >= 1_000_000_000) {
+    return `${(value / 1_000_000_000).toFixed(1).replace(/\.0$/, "")}B`;
+  }
   if (abs >= 1_000_000) {
     return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
   }

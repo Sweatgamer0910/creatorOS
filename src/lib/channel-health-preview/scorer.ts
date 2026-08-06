@@ -1,14 +1,16 @@
 import { ChannelHealthPreview, PreviewInsight, PreviewLabel } from "./types";
 import { RawChannel, RecentUpload } from "./youtube";
+// This used to have its own local formatCount capped at "M" with no
+// ceiling above a million - a big, established channel (billions of
+// lifetime views) came through here as "5520.0M total views" in the
+// narrative insight text instead of "5.52B", even after the sibling
+// formatter in ChannelHealthChecker.tsx was fixed to handle B, because
+// that fix only touched the OTHER copy of this function. Now both import
+// the same one. See @/lib/format for the full story.
+import { formatCount } from "@/lib/format";
 
 function daysBetween(a: Date, b: Date): number {
   return Math.abs(a.getTime() - b.getTime()) / 86_400_000;
-}
-
-function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return String(n);
 }
 
 // Pure scoring function — takes already-fetched public data and returns a

@@ -28,4 +28,14 @@ describe("formatCompactNumber", () => {
     expect(formatCompactNumber(-1500)).toBe("-1.5K");
     expect(formatCompactNumber(-42)).toBe("-42");
   });
+
+  it("formats billions with a B suffix instead of rolling over past M", () => {
+    expect(formatCompactNumber(1_000_000_000)).toBe("1B");
+    expect(formatCompactNumber(5_520_000_000)).toBe("5.5B");
+  });
+
+  it("formats trillions with a T suffix", () => {
+    expect(formatCompactNumber(1_000_000_000_000)).toBe("1T");
+    expect(formatCompactNumber(2_300_000_000_000)).toBe("2.3T");
+  });
 });

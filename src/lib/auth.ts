@@ -106,6 +106,14 @@ export const auth = betterAuth({
     accountLinking: {
       enabled: true,
       trustedProviders: ["google", "discord"],
+      // A creator's Discord account and their YouTube-owning Google account
+      // are very often registered under two different email addresses
+      // (Discord in particular is rarely tied to the same inbox as
+      // someone's primary Google account). Without this, /link-social
+      // silently redirects to an "email doesn't match" error for exactly
+      // the Discord-sign-up-then-connect-YouTube flow this option exists
+      // to support - see ConnectYouTubeButton.tsx.
+      allowDifferentEmails: true,
     },
   },
   user: {

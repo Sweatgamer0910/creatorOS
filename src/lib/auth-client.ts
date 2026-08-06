@@ -20,4 +20,13 @@ export const {
   requestPasswordReset,
   resetPassword,
   sendVerificationEmail,
+  // Adds a provider to the CURRENTLY signed-in user's account, hitting
+  // better-auth's /link-social endpoint. Distinct from signIn.social, which
+  // starts a fresh sign-in/sign-up flow — calling signIn.social while
+  // already authenticated (e.g. "Connect YouTube" for a user who signed up
+  // with Discord) doesn't add Google alongside the existing session, it can
+  // resolve to a different account entirely and drop the Discord link.
+  // See ConnectYouTubeButton.tsx for the one call site that needs this
+  // instead of signIn.social.
+  linkSocial,
 } = authClient;
