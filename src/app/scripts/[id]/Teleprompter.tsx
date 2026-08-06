@@ -73,10 +73,13 @@ export default function Teleprompter({
     .join("\n\n");
 
   return (
+    // No opacity in the entry animation - same Framer Motion + Turbopack
+    // mount race documented in PageTransition.tsx and VersionHistoryPanel.tsx
+    // (freshly-mounted elements can get stuck at `initial` instead of
+    // reaching `animate`); being inside AnimatePresence doesn't prevent
+    // this since the race is on entry, not exit. Keeping opacity at 1
+    // means a stuck transition never makes the whole teleprompter invisible.
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
       style={{
         position: "fixed",
         inset: 0,

@@ -60,10 +60,17 @@ export default function VersionHistoryPanel({
   }
 
   return (
+    // No AnimatePresence wraps this component (it's conditionally mounted
+    // with `{showVersions && <VersionHistoryPanel/>}`), so `exit` here is
+    // inert - only `initial`/`animate` ever run. Opacity is intentionally
+    // NOT part of what animates on entry: the same Framer Motion +
+    // Turbopack race that hit PageTransition.tsx (freshly-mounted elements
+    // sometimes get stuck at `initial` instead of reaching `animate`) hit
+    // this panel too, rendering it fully invisible while still "open"
+    // (caught in live QA - DOM showed the panel mounted at opacity 0).
+    // Keeping opacity at 1 throughout means a stuck transition can only
+    // ever cost the cosmetic fade/slide, never make the panel disappear.
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
       onClick={onClose}
       style={{
         position: "fixed",
@@ -76,9 +83,8 @@ export default function VersionHistoryPanel({
       }}
     >
       <motion.div
-        initial={{ x: 40, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        exit={{ x: 40, opacity: 0 }}
+        initial={{ x: 40 }}
+        animate={{ x: 0 }}
         onClick={(e) => e.stopPropagation()}
         style={{
           width: "min(420px, 92vw)",

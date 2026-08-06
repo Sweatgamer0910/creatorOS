@@ -3,7 +3,11 @@ import Link from "next/link";
 import { getAllPosts } from "@/lib/blog/posts";
 import Card from "@/components/ui/Card";
 
-const TITLE = "Blog — CreatorOS";
+// No trailing " — CreatorOS" here — the root layout's title template
+// (`%s — CreatorOS`) already appends it. Including it here too produced a
+// doubled "— CreatorOS — CreatorOS" tab title (caught in live QA, same
+// pattern as /channel-health).
+const TITLE = "Blog";
 const DESCRIPTION =
   "Building CreatorOS in public — real engineering notes, product decisions, and the occasional detour, as they happen.";
 

@@ -380,9 +380,12 @@ export default function NotchNav() {
           {!expanded ? (
             <motion.div
               key="dot"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              // No opacity in the entry animation - the same Framer Motion
+              // + Turbopack mount race documented in PageTransition.tsx and
+              // VersionHistoryPanel.tsx applies here too, and this dot
+              // renders on every single app page, making it the highest-
+              // traffic surface after PageTransition itself. A stuck
+              // transition should never make the whole nav disappear.
               transition={{ duration: 0.2, delay: 0.1 }}
               className="rounded-full flex items-center justify-center"
               style={{

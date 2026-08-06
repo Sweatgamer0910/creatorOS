@@ -28,7 +28,9 @@ export async function generateMetadata({
   if (!post) return {};
 
   return {
-    title: `${post.title} — CreatorOS`,
+    // No trailing " — CreatorOS" — the root layout's title template
+    // already appends it (see blog/page.tsx for the same fix).
+    title: post.title,
     description: post.excerpt,
     openGraph: { title: post.title, description: post.excerpt, type: "article" },
     twitter: { card: "summary_large_image", title: post.title, description: post.excerpt },
