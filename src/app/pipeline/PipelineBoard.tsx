@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
-import { Trash2, Link2 } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
+import { Trash2, Link2, ChevronDown, Check } from "lucide-react";
+import BottomSheet from "@/components/ui/BottomSheet";
 import {
   updateContentItemStatus,
   updateContentItemLink,
@@ -71,6 +73,7 @@ function ItemCard({
   const [isDeleting, startDelete] = useTransition();
   const [isLinking, startLinking] = useTransition();
   const [showLinkEditor, setShowLinkEditor] = useState(false);
+  const [showMoveSheet, setShowMoveSheet] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
 
   function reportCardError(message: string) {
@@ -297,34 +300,37 @@ function ItemCard({
         )}
 
         {onMove && (
-          <div
-            className="flex items-center gap-2"
-            style={{ marginTop: 8 }}
-            onClick={(e) => e.stopPropagation()}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMoveSheet(true);
+            }}
+            className="flex items-center justify-between"
+            style={{
+              marginTop: 8,
+              width: "100%",
+              padding: "8px 10px",
+              borderRadius: radius.sm,
+              border: "1px solid var(--color-border)",
+              backgroundColor: "var(--color-background)",
+              color: "var(--color-text)",
+              fontSize: 12,
+              cursor: "pointer",
+              // Real touch target - a native <select> here rendered fine
+              // functionally but with the browser's own (inconsistent
+              // between iOS/Android) picker chrome, out of step with every
+              // other tap surface in the app now that BottomSheet exists.
+              minHeight: 36,
+            }}
           >
-            <span
-              style={{
-                fontSize: 11,
-                color: "var(--color-text-muted)",
-                flexShrink: 0,
-              }}
-            >
-              Move to
+            <span style={{ color: "var(--color-text-muted)" }}>
+              Move to <strong style={{ color: "var(--color-text)", fontWeight: 500 }}>
+                {PIPELINE_STAGE_LABELS[item.status as PipelineStatus]}
+              </strong>
             </span>
-            <select
-              value={item.status}
-              onChange={(e) =>
-                onMove(item.id, e.target.value as PipelineStatus)
-              }
-              style={linkSelectStyle}
-            >
-              {PIPELINE_STAGES.map((stage) => (
-                <option key={stage.status} value={stage.status}>
-                  {stage.label}
-                </option>
-              ))}
-            </select>
-          </div>
+            <ChevronDown size={14} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
+          </button>
         )}
 
         {cardError && (
@@ -333,6 +339,54 @@ function ItemCard({
           </div>
         )}
       </Card>
+
+      {onMove && (
+        <AnimatePresence>
+          {showMoveSheet && (
+            <BottomSheet
+              onClose={() => setShowMoveSheet(false)}
+              title="Move to"
+            >
+              <div className="flex flex-col gap-1">
+                {PIPELINE_STAGES.map((stage) => {
+                  const isCurrent = stage.status === item.status;
+                  return (
+                    <button
+                      key={stage.status}
+                      type="button"
+                      onClick={() => {
+                        if (!isCurrent) onMove(item.id, stage.status);
+                        setShowMoveSheet(false);
+                      }}
+                      className="flex items-center justify-between"
+                      style={{
+                        width: "100%",
+                        padding: "14px 12px",
+                        borderRadius: radius.md,
+                        border: "none",
+                        backgroundColor: isCurrent
+                          ? "rgba(245, 166, 35, 0.12)"
+                          : "transparent",
+                        color: isCurrent
+                          ? "var(--color-accent)"
+                          : "var(--color-text)",
+                        fontSize: 15,
+                        fontWeight: isCurrent ? 600 : 400,
+                        textAlign: "left",
+                        // 44pt+ tap target for a real thumb, not a mouse.
+                        minHeight: 44,
+                      }}
+                    >
+                      {stage.label}
+                      {isCurrent && <Check size={16} />}
+                    </button>
+                  );
+                })}
+              </div>
+            </BottomSheet>
+          )}
+        </AnimatePresence>
+      )}
     </div>
   );
 }
