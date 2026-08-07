@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
-import { motion as motionTokens } from "@/lib/design-tokens";
+import { motion as motionTokens, easing } from "@/lib/design-tokens";
 
 const DRILL_ROOT = "/ideas";
 const DRILL_PREFIX = "/series";
@@ -111,7 +111,15 @@ export function TransitionFrame({
         initial="initial"
         animate="animate"
         exit="exit"
-        transition={{ duration: motionTokens.base, ease: [0.22, 1, 0.36, 1] }}
+        // Was a bespoke [0.22,1,0.36,1] bezier - close to, but not actually,
+        // easing.premiumOut ([0.16,1,0.3,1]), the "content settling into
+        // place" curve the landing page's Hero/ScrollReveal already use.
+        // Written before that shared token existed and never reconciled -
+        // this is the app's single highest-traffic motion moment (every
+        // in-app navigation runs through it), so it's the one place a
+        // slightly-off easing curve is most likely to read as "close to
+        // the landing page's feel but not quite it."
+        transition={{ duration: motionTokens.base, ease: easing.premiumOut }}
       >
         {children}
       </motion.div>

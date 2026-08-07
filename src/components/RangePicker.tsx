@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
-import { motion as motionTokens } from "@/lib/design-tokens";
+import { motion as motionTokens, easing } from "@/lib/design-tokens";
 import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
 
 // Segmented pill control with a highlight that slides/resizes to the
@@ -77,9 +77,13 @@ export default function RangePicker<T extends string>({
               ) : (
                 <motion.div
                   layoutId={layoutId}
+                  // Same bespoke pre-design-tokens bezier as PageTransition.tsx
+                  // had, same fix: this pill settling into its new position
+                  // is exactly the "content settling into place" moment
+                  // easing.premiumOut was built for.
                   transition={{
                     duration: motionTokens.base,
-                    ease: [0.22, 1, 0.36, 1],
+                    ease: easing.premiumOut,
                   }}
                   style={{
                     position: "absolute",
