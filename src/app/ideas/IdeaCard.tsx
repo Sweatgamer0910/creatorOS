@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { deleteIdea, updateIdea } from "@/lib/ideas/actions";
 import InteractiveCard from "@/components/ui/InteractiveCard";
 import Button from "@/components/ui/button";
-import Spinner from "@/components/Spinner";
+import ConfirmDeleteButton from "@/components/ui/ConfirmDeleteButton";
 import SeriesBadge from "@/components/SeriesBadge";
 import { radius, spacing } from "@/lib/design-tokens";
 
@@ -35,8 +35,7 @@ export default function IdeaCard({ idea }: { idea: Idea }) {
   const [title, setTitle] = useState(idea.title);
   const [notes, setNotes] = useState(idea.notes ?? "");
 
-  function handleDelete(e: React.MouseEvent) {
-    e.stopPropagation();
+  function handleDelete() {
     startTransition(async () => {
       await deleteIdea(idea.id);
     });
@@ -147,21 +146,11 @@ export default function IdeaCard({ idea }: { idea: Idea }) {
           >
             <Pencil size={16} />
           </Button>
-          <Button
-            variant="ghost"
-            iconOnly
-            size="sm"
-            onClick={handleDelete}
-            disabled={isPending}
-            aria-label="Delete idea"
-            style={{
-              border: "none",
-              backgroundColor: "transparent",
-              color: "var(--color-text-muted)",
-            }}
-          >
-            {isPending ? <Spinner size={14} /> : <Trash2 size={16} />}
-          </Button>
+          <ConfirmDeleteButton
+            onConfirm={handleDelete}
+            loading={isPending}
+            ariaLabel="Delete idea"
+          />
         </div>
       </div>
     </InteractiveCard>

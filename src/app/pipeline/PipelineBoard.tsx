@@ -3,8 +3,9 @@
 import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
 import { AnimatePresence } from "framer-motion";
-import { Trash2, Link2, ChevronDown, Check } from "lucide-react";
+import { Link2, ChevronDown, Check } from "lucide-react";
 import BottomSheet from "@/components/ui/BottomSheet";
+import ConfirmDeleteButton from "@/components/ui/ConfirmDeleteButton";
 import {
   updateContentItemStatus,
   updateContentItemLink,
@@ -126,21 +127,11 @@ function ItemCard({
       <Card padding="sm" style={{ backgroundColor: "var(--color-background)" }}>
         <div className="flex items-center justify-between">
           <span style={{ fontSize: 14 }}>{item.title}</span>
-          <Button
-            variant="ghost"
-            iconOnly
-            size="sm"
-            onClick={handleDelete}
-            disabled={isDeleting}
-            aria-label="Delete item"
-            style={{
-              border: "none",
-              backgroundColor: "transparent",
-              color: "var(--color-text-muted)",
-            }}
-          >
-            {isDeleting ? <Spinner size={12} /> : <Trash2 size={14} />}
-          </Button>
+          <ConfirmDeleteButton
+            onConfirm={handleDelete}
+            loading={isDeleting}
+            ariaLabel="Delete item"
+          />
         </div>
 
         {!showLinkEditor && (item.idea || item.script) && (

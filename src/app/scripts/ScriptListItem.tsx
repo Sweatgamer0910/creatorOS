@@ -3,10 +3,9 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Trash2 } from "lucide-react";
 import { deleteScript } from "@/lib/scripts/actions";
 import InteractiveCard from "@/components/ui/InteractiveCard";
-import Button from "@/components/ui/button";
+import ConfirmDeleteButton from "@/components/ui/ConfirmDeleteButton";
 import Spinner from "@/components/Spinner";
 
 interface Script {
@@ -27,8 +26,7 @@ export default function ScriptListItem({ script }: { script: Script }) {
     });
   }
 
-  function handleDelete(e: React.MouseEvent) {
-    e.stopPropagation();
+  function handleDelete() {
     startDelete(async () => {
       await deleteScript(script.id);
     });
@@ -69,21 +67,11 @@ export default function ScriptListItem({ script }: { script: Script }) {
             )}
           </div>
         </div>
-        <Button
-          variant="ghost"
-          iconOnly
-          size="sm"
-          onClick={handleDelete}
-          disabled={isDeleting}
-          aria-label="Delete script"
-          style={{
-            border: "none",
-            backgroundColor: "transparent",
-            color: "var(--color-text-muted)",
-          }}
-        >
-          {isDeleting ? <Spinner size={14} /> : <Trash2 size={16} />}
-        </Button>
+        <ConfirmDeleteButton
+          onConfirm={handleDelete}
+          loading={isDeleting}
+          ariaLabel="Delete script"
+        />
       </div>
     </InteractiveCard>
   );
