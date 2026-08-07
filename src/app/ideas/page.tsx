@@ -5,7 +5,7 @@ import Link from "next/link";
 import { getIdeas } from "@/lib/ideas/actions";
 import { getSeriesList } from "@/lib/series/actions";
 import IdeaForm from "./IdeaForm";
-import IdeaCard from "./IdeaCard";
+import IdeaList from "./IdeaList";
 import EmptyIdeas from "./EmptyIdeas";
 
 export default async function IdeasPage() {
@@ -62,12 +62,8 @@ export default async function IdeasPage() {
         <IdeaForm seriesList={seriesList} />
       </div>
 
-      <div className="mt-8 flex flex-col gap-3">
-        {ideas.length === 0 ? (
-          <EmptyIdeas />
-        ) : (
-          ideas.map((idea) => <IdeaCard key={idea.id} idea={idea} />)
-        )}
+      <div className="mt-8">
+        {ideas.length === 0 ? <EmptyIdeas /> : <IdeaList ideas={ideas} />}
       </div>
     </div>
   );

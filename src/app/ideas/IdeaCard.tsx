@@ -9,7 +9,7 @@ import ConfirmDeleteButton from "@/components/ui/ConfirmDeleteButton";
 import SeriesBadge from "@/components/SeriesBadge";
 import { radius, spacing } from "@/lib/design-tokens";
 
-interface Idea {
+export interface Idea {
   id: string;
   title: string;
   notes: string | null;

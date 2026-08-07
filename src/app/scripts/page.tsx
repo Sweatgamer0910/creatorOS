@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getScripts } from "@/lib/scripts/actions";
 import { getIdeas } from "@/lib/ideas/actions";
 import NewScriptForm from "./NewScriptForm";
-import ScriptListItem from "./ScriptListItem";
+import ScriptList from "./ScriptList";
 import EmptyScripts from "./EmptyScripts";
 import LockedFeature from "@/components/LockedFeature";
 import Button from "@/components/ui/button";
@@ -75,14 +75,8 @@ export default async function ScriptsPage({
         <NewScriptForm ideas={ideas} initialIdeaId={ideaId} />
       </div>
 
-      <div className="mt-8 flex flex-col gap-3">
-        {scripts.length === 0 ? (
-          <EmptyScripts />
-        ) : (
-          scripts.map((script) => (
-            <ScriptListItem key={script.id} script={script} />
-          ))
-        )}
+      <div className="mt-8">
+        {scripts.length === 0 ? <EmptyScripts /> : <ScriptList scripts={scripts} />}
       </div>
     </div>
   );

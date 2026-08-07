@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import Link from "next/link";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Link2, ChevronDown, Check } from "lucide-react";
 import BottomSheet from "@/components/ui/BottomSheet";
 import ConfirmDeleteButton from "@/components/ui/ConfirmDeleteButton";
@@ -20,8 +20,15 @@ import Spinner from "@/components/Spinner";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/button";
 import SeriesBadge from "@/components/SeriesBadge";
-import { radius, spacing, cardSurfaceStyle } from "@/lib/design-tokens";
+import {
+  radius,
+  spacing,
+  cardSurfaceStyle,
+  motion as motionTokens,
+  easing,
+} from "@/lib/design-tokens";
 import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 interface ContentItem {
   id: string;
@@ -396,6 +403,7 @@ export default function PipelineBoard({
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const isNarrow = useIsNarrowViewport();
+  const reducedMotion = usePrefersReducedMotion();
   const [activeStatus, setActiveStatus] = useState<PipelineStatus>(
     columns[0].status,
   );
@@ -511,15 +519,28 @@ export default function PipelineBoard({
           </p>
         ) : (
           <div className="flex flex-col gap-2">
-            {activeItems.map((item) => (
-              <ItemCard
-                key={item.id}
-                item={item}
-                ideas={ideas}
-                scripts={scripts}
-                onMove={moveItem}
-              />
-            ))}
+            <AnimatePresence initial={false}>
+              {activeItems.map((item) => (
+                <motion.div
+                  key={item.id}
+                  layout={!reducedMotion}
+                  exit={
+                    reducedMotion ? undefined : { opacity: 0, scale: 0.96 }
+                  }
+                  transition={{
+                    duration: motionTokens.base,
+                    ease: easing.premiumOut,
+                  }}
+                >
+                  <ItemCard
+                    item={item}
+                    ideas={ideas}
+                    scripts={scripts}
+                    onMove={moveItem}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
       </div>
@@ -574,14 +595,23 @@ export default function PipelineBoard({
                   {colItems.length}
                 </span>
               </div>
-              {colItems.map((item) => (
-                <ItemCard
-                  key={item.id}
-                  item={item}
-                  ideas={ideas}
-                  scripts={scripts}
-                />
-              ))}
+              <AnimatePresence initial={false}>
+                {colItems.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    layout={!reducedMotion}
+                    exit={
+                      reducedMotion ? undefined : { opacity: 0, scale: 0.96 }
+                    }
+                    transition={{
+                      duration: motionTokens.base,
+                      ease: easing.premiumOut,
+                    }}
+                  >
+                    <ItemCard item={item} ideas={ideas} scripts={scripts} />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           );
         })}

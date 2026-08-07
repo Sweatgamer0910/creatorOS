@@ -8,7 +8,7 @@ import InteractiveCard from "@/components/ui/InteractiveCard";
 import ConfirmDeleteButton from "@/components/ui/ConfirmDeleteButton";
 import Spinner from "@/components/Spinner";
 
-interface Script {
+export interface Script {
   id: string;
   title: string;
   updatedAt: Date;
