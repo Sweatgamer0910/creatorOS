@@ -6,6 +6,8 @@ import { X } from "lucide-react";
 import { getScriptVersions, restoreScriptVersion } from "@/lib/scripts/actions";
 import Button from "@/components/ui/button";
 import Spinner from "@/components/Spinner";
+import BottomSheet from "@/components/ui/BottomSheet";
+import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
 import { radius, glass } from "@/lib/design-tokens";
 import { ScriptSections } from "@/lib/scripts/wordCount";
 
@@ -28,6 +30,7 @@ export default function VersionHistoryPanel({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [restoreError, setRestoreError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+  const isNarrow = useIsNarrowViewport();
 
   useEffect(() => {
     getScriptVersions(scriptId)
@@ -59,11 +62,84 @@ export default function VersionHistoryPanel({
     });
   }
 
+  // Shared between the desktop side panel and the mobile bottom sheet so
+  // the two surfaces can never drift out of sync with each other — only
+  // the chrome around this list differs by breakpoint, not its content.
+  const listContent = (
+    <>
+      {loadError && (
+        <p style={{ color: "#e35d5d", fontSize: 14 }}>{loadError}</p>
+      )}
+      {!loadError && versions === null && (
+        <div className="flex justify-center" style={{ marginTop: 40 }}>
+          <Spinner size={28} />
+        </div>
+      )}
+      {restoreError && (
+        <p style={{ color: "#e35d5d", fontSize: 13, marginBottom: 8 }}>
+          {restoreError}
+        </p>
+      )}
+      {versions && versions.length === 0 && (
+        <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
+          No saved versions yet — use &ldquo;Save version&rdquo; to snapshot
+          the current draft.
+        </p>
+      )}
+      {versions && versions.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {versions.map((v) => (
+            <div
+              key={v.id}
+              style={{
+                border: "1px solid var(--color-border)",
+                borderRadius: radius.md,
+                padding: 12,
+              }}
+            >
+              <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
+                {new Date(v.createdAt).toLocaleString()}
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handleRestore(v)}
+                disabled={restoringId === v.id}
+                style={{ marginTop: 8 }}
+              >
+                {restoringId === v.id ? (
+                  <Spinner size={12} />
+                ) : (
+                  "Restore this version"
+                )}
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+
+  // Mobile: the same swipe-down-to-dismiss sheet used elsewhere, rather
+  // than a Mac-style side panel sliding in from an edge that doesn't exist
+  // on a phone. ScriptEditor.tsx already wraps both this and Teleprompter
+  // in one shared <AnimatePresence>, and BottomSheet has no internal
+  // open-gating (see its own header comment) — it's built to be
+  // conditionally rendered exactly like this, so it slots in without any
+  // change to how the parent mounts/unmounts it.
+  if (isNarrow) {
+    return (
+      <BottomSheet onClose={onClose} title="Version history">
+        {listContent}
+      </BottomSheet>
+    );
+  }
+
   return (
-    // No AnimatePresence wraps this component (it's conditionally mounted
-    // with `{showVersions && <VersionHistoryPanel/>}`), so `exit` here is
-    // inert - only `initial`/`animate` ever run. Opacity is intentionally
-    // NOT part of what animates on entry: the same Framer Motion +
+    // ScriptEditor.tsx does wrap this in <AnimatePresence>, but no `exit`
+    // prop is set here - correction of a stale comment that used to claim
+    // the opposite. Opacity is intentionally NOT part of what animates on
+    // entry: the same Framer Motion +
     // Turbopack race that hit PageTransition.tsx (freshly-mounted elements
     // sometimes get stuck at `initial` instead of reaching `animate`) hit
     // this panel too, rendering it fully invisible while still "open"
@@ -119,56 +195,7 @@ export default function VersionHistoryPanel({
           </Button>
         </div>
 
-        {loadError && (
-          <p style={{ color: "#e35d5d", fontSize: 14 }}>{loadError}</p>
-        )}
-        {!loadError && versions === null && (
-          <div className="flex justify-center" style={{ marginTop: 40 }}>
-            <Spinner size={28} />
-          </div>
-        )}
-        {restoreError && (
-          <p style={{ color: "#e35d5d", fontSize: 13, marginBottom: 8 }}>
-            {restoreError}
-          </p>
-        )}
-        {versions && versions.length === 0 && (
-          <p style={{ color: "var(--color-text-muted)", fontSize: 14 }}>
-            No saved versions yet — use &ldquo;Save version&rdquo; to snapshot
-            the current draft.
-          </p>
-        )}
-        {versions && versions.length > 0 && (
-          <div className="flex flex-col gap-3">
-            {versions.map((v) => (
-              <div
-                key={v.id}
-                style={{
-                  border: "1px solid var(--color-border)",
-                  borderRadius: radius.md,
-                  padding: 12,
-                }}
-              >
-                <div style={{ fontSize: 13, color: "var(--color-text-muted)" }}>
-                  {new Date(v.createdAt).toLocaleString()}
-                </div>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleRestore(v)}
-                  disabled={restoringId === v.id}
-                  style={{ marginTop: 8 }}
-                >
-                  {restoringId === v.id ? (
-                    <Spinner size={12} />
-                  ) : (
-                    "Restore this version"
-                  )}
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
+        {listContent}
       </motion.div>
     </motion.div>
   );

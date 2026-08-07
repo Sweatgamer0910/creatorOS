@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Minus, Plus } from "lucide-react";
 import Button from "@/components/ui/button";
+import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
 import { ScriptSections } from "@/lib/scripts/wordCount";
 
 const SPEED_MIN = 0.5;
@@ -23,6 +24,7 @@ export default function Teleprompter({
 }) {
   const [speed, setSpeed] = useState(1);
   const [playing, setPlaying] = useState(true);
+  const isNarrow = useIsNarrowViewport();
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number | null>(null);
   // scrollTop is rounded to whole pixels by the browser on every read/write,
@@ -72,6 +74,19 @@ export default function Teleprompter({
     .filter(Boolean)
     .join("\n\n");
 
+  // Deliberately stays a full-screen takeover on mobile rather than
+  // becoming a BottomSheet like VersionHistoryPanel - a teleprompter needs
+  // the entire viewport for scrolling reading text (the same reason a
+  // video player goes full-screen instead of living in a sheet), so
+  // docking it to the bottom of the screen would work against the one
+  // thing this surface exists to do. What does change on mobile: the
+  // control-row buttons grow to real touch targets. `size="sm"` iconOnly
+  // buttons are 32x32 (button.tsx) - fine for a mouse, under Apple's 44pt
+  // minimum tap target for a thumb, and this is the one control surface in
+  // the app someone's expected to operate mid-recording without looking
+  // closely at it.
+  const controlSize = isNarrow ? 44 : 32;
+
   return (
     // No opacity in the entry animation - same Framer Motion + Turbopack
     // mount race documented in PageTransition.tsx and VersionHistoryPanel.tsx
@@ -93,11 +108,12 @@ export default function Teleprompter({
       <div
         className="flex items-center justify-between"
         style={{
-          padding: "16px 24px",
+          padding: isNarrow ? "12px 16px" : "16px 24px",
           borderBottom: "1px solid var(--color-border)",
+          gap: 8,
         }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="sm"
@@ -106,6 +122,7 @@ export default function Teleprompter({
               setSpeed((s) => Math.max(SPEED_MIN, +(s - SPEED_STEP).toFixed(2)))
             }
             aria-label="Slower"
+            style={{ width: controlSize, height: controlSize }}
           >
             <Minus size={14} />
           </Button>
@@ -114,7 +131,7 @@ export default function Teleprompter({
               fontFamily: "var(--font-mono)",
               fontSize: 13,
               color: "var(--color-text-muted)",
-              minWidth: 48,
+              minWidth: 40,
               textAlign: "center",
             }}
           >
@@ -128,6 +145,7 @@ export default function Teleprompter({
               setSpeed((s) => Math.min(SPEED_MAX, +(s + SPEED_STEP).toFixed(2)))
             }
             aria-label="Faster"
+            style={{ width: controlSize, height: controlSize }}
           >
             <Plus size={14} />
           </Button>
@@ -135,6 +153,7 @@ export default function Teleprompter({
             variant="secondary"
             size="sm"
             onClick={() => setPlaying((p) => !p)}
+            style={isNarrow ? { height: controlSize, padding: "0 16px" } : undefined}
           >
             {playing ? "Pause" : "Play"}
           </Button>
@@ -144,6 +163,7 @@ export default function Teleprompter({
           iconOnly
           onClick={onClose}
           aria-label="Close teleprompter"
+          style={{ width: controlSize, height: controlSize }}
         >
           <X size={18} />
         </Button>
@@ -153,7 +173,7 @@ export default function Teleprompter({
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "20vh 10vw 60vh",
+          padding: isNarrow ? "12vh 6vw 50vh" : "20vh 10vw 60vh",
           fontFamily: "var(--font-display)",
           fontSize: "clamp(22px, 3.6vw, 38px)",
           lineHeight: 1.6,
