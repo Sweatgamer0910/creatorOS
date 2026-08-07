@@ -116,7 +116,11 @@ export default function ClosingCTA() {
                   background: "rgba(255,255,255,0.03)",
                   color: "#F5F3EE",
                   fontFamily: "var(--font-body)",
-                  fontSize: 13,
+                  // Under 16px triggers iOS Safari's auto-zoom-on-focus for
+                  // text inputs (same fix as auth-form.styles.ts) - this is
+                  // the landing page's email-capture field, a mobile
+                  // visitor's very first interaction with the product.
+                  fontSize: 16,
                   minWidth: 220,
                 }}
               />

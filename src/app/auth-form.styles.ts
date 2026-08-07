@@ -28,7 +28,14 @@ export const inputStyle: CSSProperties = {
   border: "1px solid var(--color-border)",
   backgroundColor: "var(--color-surface)",
   color: "#fff",
-  fontSize: 14,
+  // iOS Safari auto-zooms the whole page on focus for any text input whose
+  // computed font-size is under 16px — a well-known mobile-only footgun
+  // that never shows up testing on desktop. These are the very first
+  // fields a mobile visitor ever taps (login/signup/forgot/reset-password,
+  // all sharing this one style), so this was the worst possible place for
+  // it: every tap into an email or password field snapped the viewport
+  // in and out of a zoomed state.
+  fontSize: 16,
   outline: "none",
   width: "100%",
 };

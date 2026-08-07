@@ -11,7 +11,10 @@ const inputStyle: React.CSSProperties = {
   borderRadius: radius.sm,
   padding: `${spacing.sm}px ${spacing.md}px`,
   outline: "none",
-  fontSize: 13,
+  // readOnly doesn't exempt it - iOS Safari still auto-zooms on focus for
+  // any text input under 16px, and this one's onFocus explicitly selects
+  // the text (the "tap to copy" affordance), so it gets focused a lot.
+  fontSize: 16,
   flex: "1 1 260px",
   minWidth: 0,
 };

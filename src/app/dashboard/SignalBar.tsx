@@ -21,10 +21,19 @@ export default function SignalBar({ score }: { score: number }) {
         const height = 10 + (i / SEGMENTS) * 22;
 
         return (
+          // Opacity intentionally left out of this entry animation - the
+          // same Framer Motion + Turbopack "freshly-mounted element can get
+          // stuck at `initial` instead of reaching `animate`" race fixed
+          // repeatedly elsewhere (PageTransition.tsx, VersionHistoryPanel.tsx,
+          // NotchNav.tsx). Here it would have been worse than usual: all 20
+          // bars share this same animation, so a stuck transition wouldn't
+          // cost one cosmetic detail, it would make the entire health-score
+          // visualization disappear. scaleY alone (from transformOrigin:
+          // "bottom") still gives the "bars grow up from the baseline" reveal.
           <motion.div
             key={i}
-            initial={{ opacity: 0, scaleY: 0 }}
-            animate={{ opacity: 1, scaleY: 1 }}
+            initial={{ scaleY: 0 }}
+            animate={{ scaleY: 1 }}
             transition={{ delay: i * 0.02, duration: 0.3 }}
             style={{
               height,

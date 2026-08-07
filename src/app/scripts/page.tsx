@@ -29,7 +29,12 @@ export default async function ScriptsPage({
       className="px-4 sm:px-10"
       style={{ paddingTop: 24, paddingBottom: 48, maxWidth: 900, margin: "0 auto" }}
     >
-      <div className="flex items-center justify-between">
+      {/* Every sibling page (ideas, analytics, coach) has flex-wrap + gap
+          on this title-row/action-button pattern already - this one didn't,
+          so on a narrow phone "Generate a script with AI" had nowhere to
+          go but crowd directly against "Your scripts" with zero breathing
+          room instead of dropping to its own line. */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <p style={{ color: "var(--color-text-muted)", fontSize: 15 }}>
             Script Studio

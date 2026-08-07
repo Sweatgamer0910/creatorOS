@@ -12,7 +12,10 @@ const inputStyle: React.CSSProperties = {
   borderRadius: radius.sm,
   padding: `${spacing.sm}px ${spacing.md}px`,
   outline: "none",
-  fontSize: 14,
+  // Under 16px triggers iOS Safari's auto-zoom-on-focus for text inputs
+  // (see auth-form.styles.ts for the same fix on login/signup) — this is
+  // the one other plain text <input> in the app, so it had the same bug.
+  fontSize: 16,
   minWidth: 220,
 };
 

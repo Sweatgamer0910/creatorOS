@@ -208,7 +208,11 @@ export default function ChannelHealthChecker({
             background: "rgba(255,255,255,0.03)",
             color: "var(--color-text)",
             fontFamily: "var(--font-body)",
-            fontSize: 14,
+            // Under 16px triggers iOS Safari's auto-zoom-on-focus for text
+            // inputs - this is the free Channel Health Check's primary
+            // input, the top-of-funnel field most mobile visitors interact
+            // with before anything else on the site.
+            fontSize: 16,
           }}
         />
         <button
@@ -490,7 +494,9 @@ export default function ChannelHealthChecker({
                       background: "rgba(255,255,255,0.03)",
                       color: "var(--color-text)",
                       fontFamily: "var(--font-body)",
-                      fontSize: 13,
+                      // Same iOS auto-zoom-on-focus fix as the handle input
+                      // above and auth-form.styles.ts.
+                      fontSize: 16,
                       minWidth: 220,
                     }}
                   />
