@@ -56,12 +56,6 @@ function formatWeekLabel(weekStartDate: string): string {
   return `Week of ${formatShortDate(weekStartDate)}`;
 }
 
-function chunk<T>(arr: T[], size: number): T[][] {
-  const out: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-  return out;
-}
-
 function summarize(group: DailyDataPoint[], label: string): ChartBucket {
   return {
     label,
