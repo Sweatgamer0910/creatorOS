@@ -30,6 +30,21 @@ const PUBLIC_PATHS = [
 // to /login instead of seeing the actual page.
 const PUBLIC_PATH_PREFIXES = ["/blog"];
 
+// API routes whose callers are never a logged-in browser, so a session
+// cookie should never be required: Inngest Cloud calls /api/inngest with
+// its own signing key, not a cookie; mail clients and logged-out humans
+// call /api/unsubscribe directly from an email; social-card crawlers fetch
+// /api/og/channel-health with no cookie at all. Verified 2026-08-09 that
+// all three were previously falling through to the session-cookie check
+// below and getting redirected to /login instead of ever reaching their
+// route handlers — silently breaking background jobs, the CAN-SPAM
+// unsubscribe flow, and shared-link preview images.
+const PUBLIC_API_PATHS = [
+  "/api/inngest",
+  "/api/unsubscribe",
+  "/api/og/channel-health",
+];
+
 // Any request for a file with an extension (.glb, .svg, .png, .woff2, ...)
 // is a static asset from public/, never a protected page or API route —
 // this app's page routes never have extensions in their paths. Checking
@@ -48,6 +63,7 @@ export function proxy(request: NextRequest) {
   if (
     PUBLIC_PATHS.includes(pathname) ||
     PUBLIC_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
+    PUBLIC_API_PATHS.includes(pathname) ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
