@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Button from "@/components/ui/button";
+import posthog from "@/lib/posthog";
 import { radius, spacing } from "@/lib/design-tokens";
 
 const inputStyle: React.CSSProperties = {
@@ -31,6 +32,7 @@ export default function InviteSection({
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(link);
+      posthog.capture("referral_link_copied");
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {

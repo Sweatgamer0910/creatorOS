@@ -43,7 +43,7 @@ export default function PrivacyPage() {
       >
         Privacy Policy
       </h1>
-      <p style={{ ...pStyle, marginTop: 8 }}>Last updated July 30, 2026.</p>
+      <p style={{ ...pStyle, marginTop: 8 }}>Last updated August 1, 2026.</p>
 
       <p style={pStyle}>
         CreatorOS (&ldquo;we&rdquo;, &ldquo;us&rdquo;) is a tool for planning,
@@ -86,8 +86,8 @@ export default function PrivacyPage() {
         >
           YouTube Terms of Service
         </a>
-        . CreatorOS&rsquo;s use and transfer of information received from
-        Google APIs adheres to the{" "}
+        . CreatorOS&rsquo;s use and transfer of information received from Google
+        APIs adheres to the{" "}
         <a
           href="https://developers.google.com/terms/api-services-user-data-policy"
           className="glow-text"
@@ -136,26 +136,30 @@ export default function PrivacyPage() {
         YouTube data is never shown to anyone but you.
       </p>
 
-      <h2 style={h2Style}>Cookies</h2>
+      <h2 style={h2Style}>Cookies and analytics</h2>
       <p style={pStyle}>
-        CreatorOS uses a single essential cookie to keep you signed in. We
-        don&rsquo;t use advertising or cross-site tracking cookies, and we
-        don&rsquo;t sell or share data for cross-context behavioral
-        advertising.
+        CreatorOS uses a single essential cookie to keep you signed in, plus
+        analytics cookies from PostHog, which we use to see aggregate feature
+        usage and, for signed-in sessions, a recording of on-screen activity
+        (clicks, scrolling, navigation) to help us find bugs and understand
+        what&rsquo;s actually useful. Session recordings mask all on-screen text
+        and images so the content you view or type is never visible in a
+        recording. We also use Vercel Analytics for basic, cookieless pageview
+        counts. We don&rsquo;t use advertising cookies, and we don&rsquo;t sell
+        or share data for cross-context behavioral advertising.
       </p>
 
       <h2 style={h2Style}>How we protect your data</h2>
       <p style={pStyle}>
-        Security procedures are in place to protect the confidentiality of
-        your data. All traffic to and from CreatorOS is encrypted in transit
-        over HTTPS/TLS. Your account information and YouTube data are stored
-        in a managed database that encrypts data at rest, and are only
-        accessible through authenticated requests scoped to your own
-        workspace — no other user or account can query or view your data.
-        YouTube access tokens are stored and used server-side only; they are
-        never exposed to the browser, to other users, or to any party outside
-        the infrastructure providers required to run the app (see{" "}
-        <em>Third parties</em> below).
+        Security procedures are in place to protect the confidentiality of your
+        data. All traffic to and from CreatorOS is encrypted in transit over
+        HTTPS/TLS. Your account information and YouTube data are stored in a
+        managed database that encrypts data at rest, and are only accessible
+        through authenticated requests scoped to your own workspace — no other
+        user or account can query or view your data. YouTube access tokens are
+        stored and used server-side only; they are never exposed to the browser,
+        to other users, or to any party outside the infrastructure providers
+        required to run the app (see <em>Third parties</em> below).
       </p>
 
       <h2 style={h2Style}>How long we keep it</h2>
@@ -178,8 +182,8 @@ export default function PrivacyPage() {
       <p style={pStyle}>
         CreatorOS is not directed to children under 13, and we don&rsquo;t
         knowingly collect personal information from anyone under 13. If you
-        believe a child under 13 has given us information, contact us below
-        and we&rsquo;ll delete it.
+        believe a child under 13 has given us information, contact us below and
+        we&rsquo;ll delete it.
       </p>
 
       <h2 style={h2Style}>Your rights</h2>
@@ -192,29 +196,31 @@ export default function PrivacyPage() {
         >
           Settings
         </Link>
-        , or by emailing us. If you&rsquo;re a California resident, you may
-        have additional rights under the CCPA, including the right to know
-        what personal information we hold about you and to request its
-        deletion — as stated above, we don&rsquo;t sell or share personal
-        information. To exercise any of these rights, contact us below; we
-        won&rsquo;t discriminate against you for doing so.
+        , or by emailing us. If you&rsquo;re a California resident, you may have
+        additional rights under the CCPA, including the right to know what
+        personal information we hold about you and to request its deletion — as
+        stated above, we don&rsquo;t sell or share personal information. To
+        exercise any of these rights, contact us below; we won&rsquo;t
+        discriminate against you for doing so.
       </p>
 
       <h2 style={h2Style}>Third parties</h2>
       <p style={pStyle}>
         We use Google OAuth (and optionally Discord) for authentication and
-        YouTube data access, and standard infrastructure providers — hosting
-        (Vercel), database (Neon), rate-limiting/session storage (Upstash),
-        transactional and marketing email (Resend), and error monitoring
-        (Sentry) — to run the app. None of these providers use your data for
-        anything beyond operating CreatorOS on our behalf.
+        YouTube data access, and standard infrastructure providers &mdash;
+        hosting and pageview analytics (Vercel), database (Neon),
+        rate-limiting/session storage (Upstash), transactional and marketing
+        email (Resend), product analytics and session recording (PostHog), and
+        error monitoring (Sentry) &mdash; to run the app. None of these
+        providers use your data for anything beyond operating CreatorOS on our
+        behalf.
       </p>
 
       <h2 style={h2Style}>Changes to this policy</h2>
       <p style={pStyle}>
-        We may update this policy as the app changes. If a change is
-        material, we&rsquo;ll make reasonable efforts to let existing users
-        know (e.g. email or an in-app notice) before it takes effect.
+        We may update this policy as the app changes. If a change is material,
+        we&rsquo;ll make reasonable efforts to let existing users know (e.g.
+        email or an in-app notice) before it takes effect.
       </p>
 
       <h2 style={h2Style}>Contact</h2>

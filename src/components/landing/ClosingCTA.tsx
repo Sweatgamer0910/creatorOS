@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { joinWaitlist } from "@/lib/waitlist/actions";
 import ScrollReveal from "./ScrollReveal";
+import posthog from "@/lib/posthog";
 
 // The app is live and self-serve (Google/Discord sign-in, one click), so
 // the primary path here is a direct link to /signup — same button style
@@ -28,6 +29,7 @@ export default function ClosingCTA() {
     if (result.error) {
       setError(result.error);
     } else {
+      posthog.capture("waitlist_joined");
       setSubmitted(true);
     }
   }
@@ -43,7 +45,13 @@ export default function ClosingCTA() {
         alignItems: "center",
       }}
     >
-      <ScrollReveal style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <ScrollReveal
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <h2
           style={{
             fontFamily: "var(--font-display)",
@@ -58,8 +66,8 @@ export default function ClosingCTA() {
           Your channel deserves an operating system, not a pile of tabs
         </h2>
         <p style={{ color: "#9AA0AC", fontSize: 16, marginBottom: 32 }}>
-          Free to start, no credit card — connect your channel and see your
-          real Health Score in minutes.
+          Free to start, no credit card — connect your channel and see your real
+          Health Score in minutes.
         </p>
 
         <Link
@@ -81,7 +89,13 @@ export default function ClosingCTA() {
         </Link>
       </ScrollReveal>
 
-      <div style={{ marginTop: 56, paddingTop: 32, borderTop: "1px solid rgba(245,243,238,0.08)" }}>
+      <div
+        style={{
+          marginTop: 56,
+          paddingTop: 32,
+          borderTop: "1px solid rgba(245,243,238,0.08)",
+        }}
+      >
         {submitted ? (
           <p style={{ color: "#9AA0AC", fontSize: 13 }}>
             You&apos;re on the list — we&apos;ll keep you posted.

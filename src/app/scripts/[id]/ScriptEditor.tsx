@@ -25,6 +25,7 @@ import Button from "@/components/ui/button";
 import { motion as motionTokens, radius, spacing } from "@/lib/design-tokens";
 import Teleprompter from "./Teleprompter";
 import VersionHistoryPanel from "./VersionHistoryPanel";
+import posthog from "@/lib/posthog";
 
 interface Script extends ScriptSections {
   id: string;
@@ -137,6 +138,10 @@ export default function ScriptEditor({
     startTransition(async () => {
       try {
         await updateScript(script.id, { [completeFieldFor(key)]: next });
+        posthog.capture("script_section_completed", {
+          section: key,
+          is_complete: next,
+        });
       } catch (e) {
         console.error("[ScriptEditor] Failed to update section status:", e);
         setComplete((prev) => ({ ...prev, [key]: !next }));
@@ -165,6 +170,7 @@ export default function ScriptEditor({
     startSavingVersion(async () => {
       try {
         await createScriptVersion(script.id);
+        posthog.capture("script_version_saved");
         setVersionSaved(true);
         setTimeout(() => setVersionSaved(false), 2000);
       } catch (e) {

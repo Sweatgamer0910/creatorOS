@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { deleteAccount } from "@/lib/settings/actions";
 import { signOut } from "@/lib/auth-client";
+import posthog from "@/lib/posthog";
 import Button from "@/components/ui/button";
 
 export default function DeleteAccountSection() {
@@ -17,6 +18,7 @@ export default function DeleteAccountSection() {
     startTransition(async () => {
       try {
         await deleteAccount();
+        posthog.reset();
         await signOut();
         router.push("/");
       } catch (err) {

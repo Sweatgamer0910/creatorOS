@@ -29,6 +29,7 @@ import {
 } from "@/lib/design-tokens";
 import { useIsNarrowViewport } from "@/hooks/useIsNarrowViewport";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import posthog from "@/lib/posthog";
 
 interface ContentItem {
   id: string;
@@ -97,6 +98,7 @@ function ItemCard({
     startDelete(async () => {
       try {
         await deleteContentItem(item.id);
+        posthog.capture("pipeline_item_deleted");
       } catch (e) {
         console.error("[PipelineBoard] Failed to delete item:", e);
         reportCardError("Couldn't delete — try again.");
@@ -323,11 +325,15 @@ function ItemCard({
             }}
           >
             <span style={{ color: "var(--color-text-muted)" }}>
-              Move to <strong style={{ color: "var(--color-text)", fontWeight: 500 }}>
+              Move to{" "}
+              <strong style={{ color: "var(--color-text)", fontWeight: 500 }}>
                 {PIPELINE_STAGE_LABELS[item.status as PipelineStatus]}
               </strong>
             </span>
-            <ChevronDown size={14} style={{ color: "var(--color-text-muted)", flexShrink: 0 }} />
+            <ChevronDown
+              size={14}
+              style={{ color: "var(--color-text-muted)", flexShrink: 0 }}
+            />
           </button>
         )}
 
@@ -426,6 +432,10 @@ export default function PipelineBoard({
     startTransition(async () => {
       try {
         await updateContentItemStatus(id, status);
+        posthog.capture("pipeline_item_moved", {
+          from_status: previousStatus,
+          to_status: status,
+        });
       } catch {
         // Without this, a failed save left the card visually in the new
         // column even though nothing persisted — silently out of sync with
@@ -524,9 +534,7 @@ export default function PipelineBoard({
                 <motion.div
                   key={item.id}
                   layout={!reducedMotion}
-                  exit={
-                    reducedMotion ? undefined : { opacity: 0, scale: 0.96 }
-                  }
+                  exit={reducedMotion ? undefined : { opacity: 0, scale: 0.96 }}
                   transition={{
                     duration: motionTokens.base,
                     ease: easing.premiumOut,

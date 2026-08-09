@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signUp } from "@/lib/auth-client";
+import posthog from "@/lib/posthog";
 import Button from "@/components/ui/button";
 import AuthShell from "@/components/auth/AuthShell";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
@@ -46,6 +47,7 @@ export default function SignupForm() {
       setError(error.message ?? "Something went wrong. Try again.");
       setLoading(false);
     } else {
+      posthog.capture("signup_completed", { method: "email_password" });
       setSubmittedEmail(email);
       setLoading(false);
     }

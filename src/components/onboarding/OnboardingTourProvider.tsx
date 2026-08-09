@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
+import posthog from "@/lib/posthog";
 import { completeOnboarding } from "@/lib/onboarding/actions";
 import { TOUR_STEPS } from "@/lib/onboarding/steps";
 import {
@@ -69,6 +70,15 @@ export default function OnboardingTourProvider({
   }, [pathname]);
 
   const excluded = EXCLUDED_PATHS.includes(pathname);
+
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    posthog.identify(session.user.id, {
+      email: session.user.email,
+      name: session.user.name,
+    });
+  }, [session?.user?.id, session?.user?.email, session?.user?.name]);
 
   const start = useCallback(() => {
     setStepIndex(0);

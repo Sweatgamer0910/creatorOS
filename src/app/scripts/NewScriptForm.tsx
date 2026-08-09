@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createScript } from "@/lib/scripts/actions";
+import posthog from "@/lib/posthog";
 import Button from "@/components/ui/button";
 import Card from "@/components/ui/Card";
 import { radius, spacing } from "@/lib/design-tokens";
@@ -66,6 +67,7 @@ export default function NewScriptForm({
         createScript(title, ideaId || undefined),
         500,
       );
+      posthog.capture("script_created", { has_linked_idea: Boolean(ideaId) });
       router.push(`/scripts/${script.id}`);
     });
   }
